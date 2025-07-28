@@ -728,6 +728,39 @@ opacity: 1; /* 활성 챕터만 보이게 */
         transform: scale(1.0);
     }
 }
+
+/* style 태그 안에 추가 */
+/* ===== AI 진단 ====== */
+#diagnosis-result-card {
+    margin-top: 30px;
+    padding: 25px;
+    border: 1px solid var(--border-color);
+    background-color: #fdfdfd;
+    border-radius: 8px;
+    text-align: left;
+    position: relative;
+}
+#diagnosis-result-card h5 {
+    margin-top: 0;
+    margin-bottom: 15px;
+    font-size: 1.2rem;
+}
+#diagnosis-result-card p {
+    color: #555;
+    line-height: 1.8;
+}
+#close-result-btn {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: none;
+    border: none;
+    font-size: 1.8rem;
+    color: #aaa;
+    cursor: pointer;
+    line-height: 1;
+}
+/* .hidden 클래스는 이미 있어서 재사용합니다. */
  </style>
 <body>
 
@@ -877,15 +910,20 @@ opacity: 1; /* 활성 챕터만 보이게 */
     </main>
 <footer id="main-footer-content">
     <div class="footer-container">
-       <div class="footer-subscribe">
+<div class="footer-subscribe">
     <h4>식물이 아픈가요?</h4>
     <p>사진 한 장으로 식물의 상태를 진단받고, 식집사 AI가 제안하는 해결책을 확인해보세요.</p>
     
     <button id="ai-diagnosis-btn" class="cta-button" style="margin-top: 20px;">
         사진 업로드하고 진단받기
     </button>
-
     <input type="file" id="image-upload-input" accept="image/*" style="display: none;">
+
+    <div id="diagnosis-result-card" class="hidden">
+        <h5>AI 진단 결과</h5>
+        <p id="diagnosis-text"></p>
+        <button id="close-result-btn">&times;</button>
+    </div>
 </div>
         <div class="footer-main">
             <div class="footer-about">
@@ -1429,13 +1467,25 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 const data = await response.json();
 
-                if (response.ok) {
-                    // 3. 성공 시, 진단 결과를 알림창으로 보여줍니다.
-                    alert(`[AI 진단 결과]\n\n${data.diagnosis}`);
-                } else {
-                    // 서버에서 에러가 발생한 경우
-                    throw new Error(data.error || '진단에 실패했습니다.');
-                }
+            if (response.ok) {
+                // ----- 여기부터 수정 -----
+                const resultCard = document.getElementById('diagnosis-result-card');
+                const resultText = document.getElementById('diagnosis-text');
+                const closeBtn = document.getElementById('close-result-btn');
+
+                // 제미나이 응답의 줄바꿈(\n)을 HTML의 <br>로 변경해줍니다.
+                resultText.innerHTML = data.diagnosis.replace(/\n/g, '<br>');
+                resultCard.classList.remove('hidden');
+
+                closeBtn.onclick = () => {
+                    resultCard.classList.add('hidden');
+                };
+                // ----- 여기까지 수정 (기존 alert() 줄은 삭제) -----
+
+            } else {
+                // 서버에서 에러가 발생한 경우
+                throw new Error(data.error || '진단에 실패했습니다.');
+            }
 
             } catch (error) {
                 console.error('AI 진단 오류:', error);
