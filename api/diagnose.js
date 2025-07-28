@@ -10,10 +10,11 @@ export default async function handler(request, response) {
   // 예: { "image": "base64로 인코딩된 이미지 데이터" }
   const { image, mimeType } = request.body;
 
-  try {
-    const model = genAI.getGenerativeModel({ model: "gemini-pro-vision" });
+try {
+  // 아래 모델 이름을 최신 버전으로 변경합니다.
+  const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" }); 
 
-    const prompt = "이 식물 사진을 보고 상태를 진단해주세요. 아픈 곳이 있다면 원인과 해결책을 알려주세요.";
+  const prompt = "이 식물 사진을 보고 상태를 진단해주세요. 아픈 곳이 있다면 원인과 해결책을 알려주세요.";
     
     const imagePart = {
       inlineData: {
