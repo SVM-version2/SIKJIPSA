@@ -760,7 +760,20 @@ opacity: 1; /* 활성 챕터만 보이게 */
     cursor: pointer;
     line-height: 1;
 }
-/* .hidden 클래스는 이미 있어서 재사용합니다. */
+/* 잎사귀 스캐닝 애니메이션 스타일 */
+#ai-diagnosis-btn.is-loading .icon-wrapper {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+#ai-diagnosis-btn.is-loading .scanner {
+    animation: scan 1.5s ease-in-out infinite;
+}
+@keyframes scan {
+    0% { transform: translateX(-4px) rotate(-15deg); }
+    50% { transform: translateX(4px) rotate(15deg); }
+    100% { transform: translateX(-4px) rotate(-15deg); }
+}
  </style>
 <body>
 
@@ -1441,8 +1454,18 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!file) return;
 
         // 사용자에게 로딩 중임을 알립니다.
-        diagnosisBtn.disabled = true;
-        diagnosisBtn.textContent = '진단 중입니다...';
+    diagnosisBtn.disabled = true;
+    diagnosisBtn.classList.add('is-loading');
+    
+    // SVG 아이콘과 텍스트
+    const loadingSVG = `
+        <div class="icon-wrapper">
+            <svg class="scanner" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 22s5-3.5 5-10-5-10-5-10M12 22s5-3.5 5-10-5-10-5-10M22 22s-5-3.5-5-10 5-10 5-10"></path></svg>
+            <span style="margin-left: 4px;">진단 중...</span>
+        </div>
+    `;
+    diagnosisBtn.innerHTML = loadingSVG;
 
         // 1. 이미지 파일을 Base64로 변환합니다.
         const reader = new FileReader();
