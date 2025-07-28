@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>네비게이션 컴포넌트</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="navigation.css">
+</head>
+<body>
+
+    <header id="main-header">
+        <a href="index.html" class="logo">식집사</a>
+        <nav>
+            <a href="index.html">홈</a>
+            <a href="story.html">초록 이야기</a>
+            <a href="myPlant.html">나의 식물</a>
+            <a href="findPlant.html">식물 찾기</a>
+            <a href="#" class="cta-button">Login</a>
+        </nav>
+    </header>
+    <div class="content-placeholder">
+        <h1>스크롤을 내려보세요</h1>
+        <p>헤더의 배경이 투명에서 흰색으로 바뀝니다.</p>
+    </div>
+
+
+    <div id="modal-wrapper" class="modal-wrapper">
+        <div class="modal">
+            <div class="modal-left">
+                </div>
+            <div class="modal-right">
+                <button class="close-button">&times;</button>
+                <div id="login-form" class="form-container">
+                    <div class="form-header">
+                        <a href="index.html" class="logo">식집사</a>
+                        <h2>Welcome Back</h2>
+                    </div>
+                    <form>
+                        <div class="input-group">
+                            <label for="login-email">Email</label>
+                            <input type="email" id="login-email" required>
+                        </div>
+                        <div class="input-group">
+                            <label for="login-password">Password</label>
+                            <input type="password" id="login-password" required>
+                        </div>
+                        <button type="submit" class="cta-button">Login</button>
+                    </form>
+                    <p class="form-switcher">
+                        Don't have an account? <a href="#" id="show-signup">Sign Up</a>
+                    </p>
+                </div>
+                <div id="signup-form" class="form-container" style="display: none;">
+                    <div class="form-header">
+                        <a href="index.html" class="logo">식집사</a>
+                        <h2>Create Account</h2>
+                    </div>
+                    <form>
+                        <div class="input-group">
+                            <label for="signup-name">Name</label>
+                            <input type="text" id="signup-name" required>
+                        </div>
+                        <div class="input-group">
+                            <label for="signup-email">Email</label>
+                            <input type="email" id="signup-email" required>
+                        </div>
+                        <div class="input-group">
+                            <label for="signup-password">Password</label>
+                            <input type="password" id="signup-password" required>
+                        </div>
+                        <button type="submit" class="cta-button">Create Account</button>
+                    </form>
+                    <p class="form-switcher">
+                        Already have an account? <a href="#" id="show-login">Login</a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <script type="module" src="navigation.js"></script>
+</body>
+</html>

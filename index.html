@@ -3,392 +3,923 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>식집사 메인</title>
+    <title>식집사 - 홈</title>
 
-    <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
-
-    <!-- CSS -->
+    
     <link rel="stylesheet" href="navigation.css">
-    <style>
-      /* === 메인 페이지 Hero 섹션 === */
-.main-hero {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 80px 8vw 60px 8vw;
-    background: var(--primary-green);
-    color: white;
-    min-height: 420px;
-    gap: 3vw;
-    margin-top: 100px;
-}
-.hero-content {
-    max-width: 700px;
-}
-.hero-title-main {
-    font-family: var(--font-serif);
-    font-size: 4.5rem;
-    font-weight: 600;
-    color: white;
-}
-.hero-title-accent {
-    font-family: var(--font-serif);
-    font-size: 5rem;
-    font-weight: 600;
-    color: var(--accent-gold);
-}
-.hero-desc {
-    font-size: 1.5rem;
-    margin: 1.2rem 0 2rem 0;
-    color: #f5f5f5;
-}
-.hero-img {
-    width: 320px;
-    border-radius: 1.5rem;
-    box-shadow: 0 8px 32px rgba(107,123,97,0.18);
-    background: var(--bg-cream);
-}
-.hero-lottie-bg {
-  width: 340px;
-  height: 340px;
-  border-radius: 1.5rem;
-  box-shadow: 0 8px 32px rgba(107,123,97,0.18);
-  background: var(--bg-cream);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  overflow: hidden;
+ <style>
+    /* === 기본 & 전역 스타일 === */
+:root {
+    --primary-color: #2c5d4f; /* 깊은 숲 녹색 */
+    --secondary-color: #f4f2ed; /* 따뜻한 오프화이트 */
+    --accent-color: #c7a17a; /* 부드러운 골드/브라스 */
+    --text-color: #333333;
+    --light-text-color: #fdfdfd;
+    --border-color: #e0e0e0;
+    --font-heading: 'Playfair Display', serif;
+    --font-body: 'Lato', sans-serif;
 }
 
-/* === 메인 섹션 공통 === */
-.main-section {
-    padding: 88px 0 72px 0;
-    background: var(--primary-green);
-    color: white;
-}
-.bg-cream {
-    background: var(--bg-cream);
-    color: var(--text-dark);
-}
-.section-title {
-    text-align: center;
-    font-family: var(--font-serif);
-    font-size: 2rem;
-    margin-bottom: 3.5rem;
-    color: inherit;
+body {
+    font-family: var(--font-body);
+    color: var(--text-color);
+    background-color: var(--secondary-color); 
+    line-height: 1.7;
+    margin: 0;
 }
 
-/* === 추천 식물 카드 === */
-.recommend-swiper {
-    max-width: 900px;
+h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-heading);
+    color: var(--primary-color);
+    font-weight: 600;
+}
+
+a {
+    color: var(--accent-color);
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+a:hover {
+    color: var(--primary-color);
+}
+
+
+
+/* 스크롤 애니메이션을 위한 기본 상태 */
+.content-section {
+    padding: 80px 20px;
+    opacity: 0; /* 처음엔 투명하게 */
+    transform: translateY(40px); /* 살짝 아래에 위치 */
+    transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+}
+/* 화면에 나타났을 때 적용될 스타일 */
+.content-section.is-visible {
+    opacity: 1; /* 선명하게 */
+    transform: translateY(0); /* 제자리로 */
+}
+
+.section-container {
+    max-width: 1200px;
     margin: 0 auto;
-    margin-top: 2.5rem;
 }
-.plant-card {
-    background: #fff;
-    border-radius: 1.2rem;
-    box-shadow: 0 2px 12px rgba(107,123,97,0.08);
-    padding: 2.2rem 1.5rem 1.5rem 1.5rem;
+
+.section-title {
+    font-size: 2.8rem;
     text-align: center;
-    color: var(--text-dark);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    min-width: 220px;
-    min-height: 320px;
-    transition: transform 0.2s, box-shadow 0.2s;
-    margin: 0 0.7rem;
+    margin-bottom: 60px;
+    letter-spacing: 1px; /* 자간 추가 */
 }
-.plant-card:hover {
-    transform: translateY(-6px) scale(1.03);
-    box-shadow: 0 8px 24px rgba(176,146,106,0.13);
-}
-.plant-img {
-    width: 100px;
-    height: 100px;
-    object-fit: cover;
-    border-radius: 50%;
-    margin-bottom: 1.2rem;
-    border: 3px solid var(--primary-green);
-    background: var(--bg-cream);
-}
-.plant-desc {
-    font-size: 1rem;
-    color: var(--text-dark);
-    margin-top: 0.7rem;
-    margin-bottom: 0.2rem;
-    line-height: 1.6;
-}
-.plant-tip {
-    display: inline-block;
-    margin-top: 0.3rem;
-    color: var(--primary-green);
-    font-weight: 700;
-    background: #f5f5e6;
-    border-radius: 0.7em;
-    padding: 0.1em 0.7em;
-    font-size: 0.97em;
-}
-.section-desc {
+.section-subtitle {
     text-align: center;
     font-size: 1.1rem;
-    color: var(--text-dark);
-    margin-bottom: 3.2rem;
-    margin-top: 0;
-    line-height: 1.7;
-}
-.story-section {
-    background: linear-gradient(120deg, #f9fbe7 80%, #fff 100%);
-    color: var(--text-dark);
-    padding-top: 64px;
-    padding-bottom: 64px;
-    border-top: 1px solid #ece7d8;
-    border-bottom: 1px solid #ece7d8;
-    margin-bottom: 32px;
-}
-.story-section .section-title {
-    color: var(--primary-green);
-    font-size: 1.7rem;
-    margin-bottom: 1.2rem;
-}
-.story-section .section-desc {
-    color: var(--text-dark);
-    font-size: 1.08rem;
-    margin-bottom: 0;
+    color: #777;
+    margin-top: -40px;
+    margin-bottom: 40px;
 }
 
-/* === 후기 카드 === */
-.reviews-swiper {
-    max-width: 700px;
-    margin: 0 auto;
-    margin-top: 2.5rem;
-}
-.review-card {
-    background: var(--bg-cream);
-    border-radius: 1.2rem;
-    box-shadow: 0 2px 8px rgba(176,146,106,0.08);
-    padding: 2rem 1.5rem;
-    color: var(--text-dark);
-    min-height: 180px;
+
+/* === 1. 새로운 히어로 타이핑 섹션 === */
+/* === 1. 새로운 히어로 타이핑 섹션 === */
+#hero {
+    height: 100vh;
     display: flex;
-    flex-direction: column;
-    justify-content: center;
     align-items: center;
-    margin: 0 0.7rem;
-}
-.review-author {
-    font-weight: bold;
-    color: var(--primary-green);
-    margin-top: 1.2rem;
-}
-
-/* === 주요 기능 카드 === */
-.features-list {
-    display: flex;
-    flex-wrap: wrap;
     justify-content: center;
-    gap: 3.2rem;
-}
-.feature-card {
-    flex: 1 1 200px;
-    max-width: 220px;
-    background: #fff;
-    border-radius: 1.2rem;
-    padding: 2rem 1.2rem;
     text-align: center;
-    box-shadow: 0 2px 8px rgba(176,146,106,0.08);
-    color: var(--text-dark);
-    min-height: 220px;
+    color: white;
+    /* background-color 대신 그라디언트로 변경 */
+    background-image: linear-gradient(135deg, #2c5d4f 0%, #182823 100%);
+    position: relative;
+    opacity: 1;
+    transform: none;
+}
+
+/* 스토리 컨테이너 스타일은 기존 typing-story의 것을 거의 그대로 사용 */
+.story-container {
+    max-width: 800px;
+    position: relative;
+    padding: 40px 60px;
+}
+
+.story-container::before,
+.story-container::after {
+    content: '';
+    position: absolute;
+    width: 40px;
+    height: 40px;
+    border-color: var(--accent-color);
+    border-style: solid;
+    opacity: 0.5;
+}
+.story-container::before {
+    top: 0;
+    left: 0;
+    border-width: 2px 0 0 2px;
+}
+.story-container::after {
+    bottom: 0;
+    right: 0;
+    border-width: 0 2px 2px 0;
+}
+
+.story-prompt {
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 0.9rem;
+    color: var(--light-text-color);
+    opacity: 0.6;
+    margin-bottom: 40px;
+    letter-spacing: 2px;
+}
+
+.story-text {
+    font-family: var(--font-heading);
+    font-size: 3rem; /* 히어로에 맞게 폰트 크기 확대 */
+    line-height: 1.6;
+    color: var(--light-text-color);
+    min-height: 90px;
+    font-weight: 400;
+    display: inline; 
+}
+
+.cursor {
+    display: inline-block;
+    vertical-align: middle;
+    width: 14px; /* 폰트 크기에 맞춰 너비 조정 */
+    height: 2.8rem; /* 폰트 크기에 맞춰 높이 조정 */
+    background-color: var(--accent-color);
+    margin-left: 8px;
+    animation: blink 1s step-end infinite;
+}
+
+@keyframes blink {
+    from, to { background-color: transparent; }
+    50% { background-color: var(--accent-color); }
+}
+
+/* 반응형 */
+@media (max-width: 768px) {
+    .story-text {
+        font-size: 2rem;
+        min-height: 70px;
+    }
+    .cursor {
+        height: 1.8rem;
+    }
+}
+
+/* === 2. 새로운 공간 큐레이션 섹션 === */
+#space-curation {
+    background-color: #fff;
+}
+
+.curation-container {
+    max-width: 1000px;
+    margin: 60px auto 0 auto;
+}
+
+.curation-tabs {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    margin-bottom: 40px;
+}
+
+.tab-btn {
+    font-family: var(--font-body);
+    font-size: 1.1rem;
+    font-weight: 700;
+    padding: 10px 25px;
+    border: 2px solid transparent;
+    background: transparent;
+    color: #aaa;
+    border-radius: 50px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.tab-btn:hover {
+    color: var(--text-color);
+}
+
+.tab-btn.active {
+    color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+.curation-content {
+    position: relative;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.08);
+}
+
+.content-panel {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    background-color: var(--secondary-color);
+    opacity: 0;
+    position: absolute;
+    top: 0;
+    left: 0;
+    transition: opacity 0.6s ease-in-out;
+    visibility: hidden;
+}
+
+.content-panel.active {
+    opacity: 1;
+    position: relative;
+    visibility: visible;
+}
+
+.content-image img {
+    width: 100%;
+    height: 450px;
+    object-fit: cover;
+    display: block;
+}
+
+.content-text {
+    padding: 60px;
     display: flex;
     flex-direction: column;
+    justify-content: center;
+}
+
+.content-text h3 {
+    font-size: 2rem;
+    margin-top: 0;
+}
+
+.content-text p {
+    font-size: 1.05rem;
+    color: #555;
+}
+
+
+/* === 3. 새로운 'A Green Chapter' 섹션 === */
+#green-chapter {
+    padding: 0;
+    /* content-section의 기본 스타일을 상쇄하기 위해 직접 지정 */
+    opacity: 1;
+    transform: none;
+}
+
+.chapter-sticky-wrapper {
+    height: 350vh; 
+    position: relative;
+}
+
+.chapter-container {
+    height: 80vh;
+    position: sticky;
+     top: 10vh; 
+    display: grid;
+    grid-template-columns: 1fr 1fr;
     align-items: center;
-    transition: transform 0.2s, box-shadow 0.2s;
-    margin: 0 0.7rem;
+    overflow: hidden;
+    background-color: var(--secondary-color);
 }
-.feature-card:hover {
-    transform: translateY(-4px) scale(1.04);
-    box-shadow: 0 8px 24px rgba(176,146,106,0.13);
+
+.chapter-visual {
+    position: relative;
+    width: 100%;
+    height: 100%;
 }
-.feature-icon {
+
+.visual-panel {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    opacity: 0;
+    transition: opacity 0.8s ease-in-out;
+    transform: scale(1.05);
+}
+
+.visual-panel.is-active {
+    opacity: 1;
+    transform: scale(1);
+    transition: opacity 0.8s ease-in-out, transform 5s ease-out;
+}
+
+.visual-panel img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* 이미지가 컨테이너를 꽉 채우되, 비율을 유지하며 잘라냅니다. */
+    object-position: center; /* 이미지가 중앙을 기준으로 표시되도록 합니다. */
+}
+
+.chapter-story {
+padding: 0 10%;
+    /* 텍스트를 수직으로 가운데 정렬하기 위해 flex 사용 */
+display: flex;
+align-items: center; 
+position: relative; /* 👈 자식 요소의 위치 기준으로 설정 */
+    height: 100%;     /* 👈 부모 높이에 맞게 설정 */
+}
+
+.story-chapter {
+    /* 기존 스타일에서 아래 속성들로 변경 및 추가 */
+position: absolute; /* 👈 챕터들을 한 공간에 겹치도록 설정 */
+opacity: 0;       /* 👈 기본 상태는 투명하게 */
+transition: opacity 0.5s ease-in-out;
+    /* 아래는 기존 스타일 유지 */
+margin-bottom: 0; /* 더 이상 여백 불필요 */
+}
+
+.story-chapter.is-active {
+opacity: 1; /* 활성 챕터만 보이게 */
+}
+
+.chapter-number {
+    font-family: var(--font-body);
+    font-weight: 700;
+    color: var(--accent-color);
+    display: block;
+    margin-bottom: 10px;
+}
+
+.story-chapter h2 {
     font-size: 2.2rem;
-    color: var(--primary-green);
+    margin-bottom: 20px;
+}
+
+.story-chapter p {
+    color: #555;
+    font-size: 1.1rem;
+    line-height: 1.8;
+}
+
+
+
+/* === 4. 새로운 동적 경험 섹션 === */
+#sikjipsa-experience {
+    padding-left: 0;
+    padding-right: 0;
+    padding-bottom: 120px;
+}
+
+.experience-wrapper {
+    max-width: 1400px;
+    height: 600px;
+    margin: 60px auto 0 auto;
+    position: relative;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.experience-bg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-size: cover;
+    background-position: center;
+    opacity: 0;
+    transition: opacity 0.7s ease-in-out;
+    transform: scale(1.05); /* 약간 확대된 상태로 시작 */
+}
+
+.experience-bg.active {
+    opacity: 1;
+    transform: scale(1); /* 활성화되면 원래 크기로 */
+    transition: opacity 0.7s ease-in-out, transform 10s ease-out; /* 천천히 줌아웃되는 효과 */
+}
+
+.experience-cards {
+    position: relative;
+    z-index: 2;
+    height: 100%;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+    padding: 40px;
+    background: linear-gradient(90deg, rgba(0,0,0,0.6) 0%, rgba(0,0,0,0.3) 50%, rgba(0,0,0,0) 100%);
+}
+
+.experience-card {
+    color: white;
+    padding: 30px;
+    border-radius: 8px;
+    border-top: 1px solid rgba(255, 255, 255, 0.3);
+    border-left: 1px solid rgba(255, 255, 255, 0.2);
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(5px);
+    cursor: pointer;
+    transition: background 0.3s ease, transform 0.3s ease;
+    display: flex;
+    flex-direction: column;
+}
+
+.experience-card:hover {
+    background: rgba(255, 255, 255, 0.15);
+    transform: translateY(-10px);
+}
+
+.experience-card .card-number {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: var(--accent-color);
+}
+
+.experience-card h3 {
+    color: white;
+    font-size: 1.8rem;
+    margin: 15px 0;
+}
+
+.experience-card p {
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 1rem;
+    margin-top: auto;
+}
+
+
+
+
+/* === 푸터 === */
+/* === 새로운 푸터 디자인 === */
+#main-footer-content {
+    background-color: var(--secondary-color);
+    color: var(--text-color);
+    padding: 80px 20px 0;
+    border-top: 1px solid var(--border-color);
+}
+
+.footer-container {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.footer-subscribe {
+    background-color: #fff;
+    padding: 40px;
+    border-radius: 8px;
+    text-align: center;
+    margin-bottom: 80px;
+    border: 1px solid var(--border-color);
+}
+
+.footer-subscribe h4 {
+    font-size: 1.8rem;
+    margin-top: 0;
+    margin-bottom: 10px;
+}
+
+.subscribe-form {
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
+    gap: 10px;
+}
+
+.subscribe-form input {
+    width: 300px;
+    padding: 12px;
+    border: 1px solid var(--border-color);
+    border-radius: 50px;
+    font-size: 1rem;
+}
+
+.footer-main {
+    display: grid;
+    grid-template-columns: 1.5fr 1fr;
+    gap: 60px;
+    padding-bottom: 60px;
+}
+
+.footer-about .logo {
+    font-size: 1.8rem;
+    color: var(--primary-color);
+    margin-bottom: 1rem;
+    display: inline-block;
+}
+
+.footer-about p {
+    color: #555;
+    line-height: 1.8;
+    max-width: 400px;
+}
+
+.footer-social {
+    margin-top: 20px;
+}
+
+.footer-social a {
+    margin-right: 20px;
+    font-weight: 700;
+}
+
+.footer-links-group {
+    display: flex;
+    gap: 60px;
+}
+
+.footer-links h4 {
+    font-size: 1.2rem;
+    color: var(--text-color);
+    margin-bottom: 1.5rem;
+}
+
+.footer-links ul {
+    list-style: none;
+    padding: 0; margin: 0;
+}
+
+.footer-links li {
     margin-bottom: 1rem;
 }
 
-/* === CTA 배너 === */
-.cta-banner {
-    padding: 48px 0 44px 0;
-    background: linear-gradient(90deg, var(--accent-gold) 60%, var(--bg-cream) 100%);
-    text-align: center;
-    color: var(--text-dark);
-}
-.cta-banner h2 {
-    font-size: 2rem;
-    margin-bottom: 1.2rem;
-    font-family: var(--font-serif);
-    font-weight: 600;
+.footer-links a {
+    color: #555;
 }
 
-/* === 반응형 === */
-@media (max-width: 900px) {
-    .main-hero {
-        flex-direction: column;
-        padding: 48px 4vw 32px 4vw;
-        min-height: 320px;
+.footer-bottom {
+    border-top: 1px solid var(--border-color);
+    padding: 25px 0;
+    text-align: center;
+    font-size: 0.9rem;
+    color: #888;
+}
+
+
+/* === 챗봇 스타일 === */
+#chatbot-container {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    z-index: 1000;
+}
+
+#chatbot-toggle-btn {
+    width: 60px;
+    height: 60px;
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.3s ease;
+}
+
+#chatbot-toggle-btn:hover {
+    transform: scale(1.1);
+}
+
+#chatbot-toggle-btn svg {
+    width: 30px;
+    height: 30px;
+}
+
+#chat-window {
+    width: 350px;
+    height: 500px;
+    background-color: #fff;
+    border-radius: 15px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    position: absolute;
+    bottom: 80px;
+    right: 0;
+    transition: opacity 0.3s ease, transform 0.3s ease;
+    transform-origin: bottom right;
+}
+
+#chat-window.hidden {
+    opacity: 0;
+    transform: scale(0.5);
+    visibility: hidden;
+}
+
+.chat-header {
+    background-color: var(--primary-color);
+    color: white;
+    padding: 20px;
+    border-top-left-radius: 15px;
+    border-top-right-radius: 15px;
+}
+.chat-header h3 {
+    margin: 0;
+    color: white;
+    font-size: 1.2rem;
+}
+.chat-header p {
+    margin: 5px 0 0;
+    font-size: 0.9rem;
+    opacity: 0.8;
+}
+
+#chat-messages {
+    flex-grow: 1;
+    padding: 20px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.message {
+    padding: 10px 15px;
+    border-radius: 20px;
+    max-width: 80%;
+    line-height: 1.5;
+    font-size: 0.95rem;
+}
+
+.bot-message {
+    background-color: var(--secondary-color);
+    color: var(--text-color);
+    align-self: flex-start;
+    border-bottom-left-radius: 5px;
+}
+
+.user-message {
+    background-color: var(--accent-color);
+    color: white;
+    align-self: flex-end;
+    border-bottom-right-radius: 5px;
+}
+
+#chat-suggestions {
+    padding: 0 20px 10px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.suggestion-btn {
+    background: transparent;
+    border: 1px solid var(--accent-color);
+    color: var(--accent-color);
+    padding: 8px 12px;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+.suggestion-btn:hover {
+    background-color: var(--accent-color);
+    color: white;
+}
+
+.chat-input-container {
+    display: flex;
+    padding: 15px 20px;
+    border-top: 1px solid var(--border-color);
+}
+
+#chat-input {
+    flex-grow: 1;
+    border: none;
+    outline: none;
+    font-size: 1rem;
+    background: transparent;
+}
+
+#chat-send-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--primary-color);
+    padding: 5px;
+}
+
+.hidden {
+    display: none;
+}
+/* 로딩 애니메이션을 위한 스타일 추가 */
+.loading-indicator {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.loading-indicator span {
+    width: 8px;
+    height: 8px;
+    background-color: #bdc3c7;
+    border-radius: 50%;
+    animation: bounce 1.2s infinite ease-in-out;
+}
+
+.loading-indicator span:nth-of-type(2) {
+    animation-delay: -0.2s;
+}
+
+.loading-indicator span:nth-of-type(3) {
+    animation-delay: -0.4s;
+}
+
+@keyframes bounce {
+    0%, 80%, 100% {
+        transform: scale(0);
     }
-    .hero-img {
-        width: 220px;
-        margin-top: 2rem;
-    }
-    .features-list {
-        gap: 1.2rem;
+    40% {
+        transform: scale(1.0);
     }
 }
-@media (max-width: 600px) {
-    .main-hero {
-        padding: 32px 2vw 20px 2vw;
-    }
-    .hero-title-main, .hero-title-accent {
-        font-size: 1.5rem;
-    }
-    .section-title {
-        font-size: 1.2rem;
-    }
-    .plant-card, .feature-card, .review-card {
-        min-width: 160px;
-        padding: 1.2rem 0.5rem;
-    }
-    .plant-img {
-        width: 70px;
-        height: 70px;
-    }
-    .cta-banner h2 {
-        font-size: 1.2rem;
-    }
-}
-    </style>
-</head>
+ </style>
 <body>
-    <!-- 헤더(기존 유지) -->
+
     <header id="main-header">
         <a href="index.html" class="logo">식집사</a>
         <nav>
             <a href="index.html">홈</a>
             <a href="story.html">초록 이야기</a>
-            <a href="myPlant.html">내 식물</a>
+            <a href="myPlant.html">나의 식물</a>
             <a href="findPlant.html">식물 찾기</a>
-            <a href="#" class="cta-button" id="open-modal">Login</a>
+            <a href="#" class="cta-button">Login</a>
         </nav>
     </header>
 
-    <!-- Hero Section -->
-    <section id="hero" class="main-hero">
-      <div class="hero-content" data-aos="fade-up">
-        <h1><span class="hero-title-main">Green Starts</span> <span class="hero-title-accent">Here</span></h1>
-        <p class="hero-desc">식물을 처음 키우는 당신을 위한 따뜻한 첫걸음.<br>AI와 함께라면 누구나 식집사가 될 수 있어요.</p>
-        <a href="#recommend" class="cta-button">아래로 내려 초보자 추천 식물 만나기</a>
-      </div>
-      <div class="hero-lottie-bg">
-        <lottie-player
-          src="Hanging Plant.json"
-          background="transparent"
-          speed="1"
-          style="width: 340px; height: 340px;"
-          loop
-          autoplay
-        ></lottie-player>
-      </div>
+<main>
+    <section id="hero">
+        <div class="story-container">
+            <p class="story-prompt">A SIKJIPSA'S LOG</p>
+            <p id="story-text" class="story-text"></p>
+            <span id="story-cursor" class="cursor"></span>
+        </div>
     </section>
 
-    <!-- 초보자 추천 식물 (Swiper) -->
-    <section id="recommend" class="main-section bg-cream">
-      <h2 data-aos="fade-up" class="section-title">초보자 추천 식물</h2>
-      <p class="section-desc">처음 식물을 키우는 분들을 위해, 관리가 쉽고 집안 분위기를 살려주는 식물들을 소개합니다.</p>
-      <div class="swiper-container recommend-swiper">
-        <div class="swiper-wrapper">
-          <div class="swiper-slide plant-card">
-            <img src="https://images.unsplash.com/photo-1465101046530-73398c7f28ca?auto=format&fit=crop&w=200&q=80" alt="몬스테라" class="plant-img"/>
-            <h3>몬스테라</h3>
-            <p class="plant-desc">넓은 잎과 독특한 무늬로 집안을 싱그럽게! <br><span class="plant-tip">햇빛과 물만 잘 챙기면 누구나 성공!</span></p>
-          </div>
-          <div class="swiper-slide plant-card">
-            <img src="https://images.unsplash.com/photo-1501004318641-b39e6451bec6?auto=format&fit=crop&w=200&q=80" alt="스투키" class="plant-img"/>
-            <h3>스투키</h3>
-            <p class="plant-desc">거의 물을 주지 않아도 잘 자라는 <br><span class="plant-tip">극강의 생명력!</span></p>
-          </div>
-          <div class="swiper-slide plant-card">
-            <img src="https://images.unsplash.com/photo-1519125323398-675f0ddb6308?auto=format&fit=crop&w=200&q=80" alt="스파티필름" class="plant-img"/>
-            <h3>스파티필름</h3>
-            <p class="plant-desc">공기정화에 탁월한 실내 식물<br><span class="plant-tip">초보자도 쉽게 키울 수 있어요.</span></p>
-          </div>
-        </div>
-      </div>
-    </section>
+<section id="space-curation" class="content-section">
+    <div class="section-container">
+        <h2 class="section-title anim">공간을 위한 큐레이션</h2>
+        <p class="section-subtitle anim">당신의 공간에 가장 어울리는 초록을 만나보세요.</p>
 
-    <!-- 스토리 내러티브: 식집사들의 경험을 담다 -->
-    <section class="main-section story-section">
-      <h2 data-aos="fade-up" class="section-title">처음 식물을 들인 날,</h2>
-      <p class="section-desc">누구나 한 번쯤은 물주기를 잊거나, 잎이 시드는 경험을 하죠.<br>식집사에서는 그런 걱정 없이, AI가 내 식물의 상태를 함께 살펴줍니다.</p>
-    </section>
+        <div class="curation-container">
+            <div class="curation-tabs anim">
+                <button class="tab-btn active" data-space="livingroom">Living Room</button>
+                <button class="tab-btn" data-space="bedroom">Bedroom</button>
+                <button class="tab-btn" data-space="desk">Desk</button>
+            </div>
 
-    <!-- 사용자 후기 (Carousel) -->
-    <section id="reviews" class="main-section">
-      <h2 data-aos="fade-up" class="section-title">식집사와 함께한 이야기</h2>
-      <p class="section-desc">실제 초보 식집사들의 따뜻한 변화, 그 경험을 들어보세요.</p>
-      <div class="swiper-container reviews-swiper">
-        <div class="swiper-wrapper">
-          <div class="swiper-slide review-card">
-            <p>"식집사 덕분에 식물 키우기가 정말 쉬워졌어요! AI 피드백이 신기해요."</p>
-            <span class="review-author">- 초보 식집사 김OO</span>
-          </div>
-          <div class="swiper-slide review-card">
-            <p>"물주기 달력 기능이 너무 편리해요. 매일 확인하게 됩니다."</p>
-            <span class="review-author">- 직장인 박OO</span>
-          </div>
-          <div class="swiper-slide review-card">
-            <p>"식물 추천 테스트가 재미있고 결과도 만족스러워요!"</p>
-            <span class="review-author">- 대학생 이OO</span>
-          </div>
+            <div class="curation-content anim">
+                <div class="content-panel active" id="livingroom">
+                    <div class="content-image">
+                        <img src="https://images.unsplash.com/photo-1497215728101-856f4ea42174?q=80&w=1740" alt="넓은 거실에 어울리는 식물">
+                    </div>
+                    <div class="content-text">
+                        <h3>가족의 시간을 품는, 아레카야자</h3>
+                        <p>넓은 공간을 풍성하게 채워주는 아레카야자는 가족이 함께하는 거실에 생명력과 편안함을 더합니다. 공기 정화 능력은 물론, 이국적인 분위기까지 연출해주는 최고의 선택입니다.</p>
+                    </div>
+                </div>
+                <div class="content-panel" id="bedroom">
+                    <div class="content-image">
+                        <img src="인덱스/침실산세베리아.jpg" alt="침실에 어울리는 식물">
+                    </div>
+                    <div class="content-text">
+                        <h3>밤의 위로가 되는, 산세비에리아</h3>
+                        <p>산세비에리아는 밤 동안 산소를 내뿜어 숙면을 돕습니다. 빛이 부족한 환경에서도 잘 자라, 하루의 끝을 마무리하는 가장 고요한 공간인 침실에 완벽한 위로를 선사합니다.</p>
+                    </div>
+                </div>
+                <div class="content-panel" id="desk">
+                    <div class="content-image">
+                         <img src="인덱스/책상스킨답서스.jpg" alt="책상에 어울리는 작은 식물">
+                    </div>
+                    <div class="content-text">
+                        <h3>집중력을 깨우는, 스킨답서스</h3>
+                        <p>작은 공간에서도 잘 자라는 스킨답서스는 당신의 책상 위 작은 숲이 되어줍니다. 지친 눈에 휴식을 주고, 맑은 공기로 집중력을 높여주어 창의적인 순간들을 함께합니다.</p>
+                    </div>
+                </div>
+            </div>
         </div>
-      </div>
-    </section>
+    </div>
+</section>
 
-    <!-- 주요 기능 소개 -->
-    <section id="features" class="main-section bg-cream">
-      <h2 data-aos="fade-up" class="section-title">식집사만의 특별한 기능</h2>
-      <p class="section-desc">처음 시작하는 식집사도, 오래된 식집사도 모두를 위한 맞춤형 서비스</p>
-      <div class="features-list">
-        <div class="feature-card">
-          <i class="fa-solid fa-seedling feature-icon"></i>
-          <h3>AI 식물 피드백</h3>
-          <p>모든 식물에 대한 맞춤형 관리법 제공</p>
-        </div>
-        <div class="feature-card">
-          <i class="fa-solid fa-calendar-check feature-icon"></i>
-          <h3>물주기 달력</h3>
-          <p>내 식물별 물주기 체크 및 알림</p>
-        </div>
-        <div class="feature-card">
-          <i class="fa-solid fa-comments feature-icon"></i>
-          <h3>커뮤니티</h3>
-          <p>식집사들과 소통하는 Plantgram</p>
-        </div>
-        <div class="feature-card">
-          <i class="fa-solid fa-robot feature-icon"></i>
-          <h3>챗봇</h3>
-          <p>궁금한 점을 바로 물어보는 AI 챗봇</p>
-        </div>
-      </div>
-    </section>
+ 
+<section id="green-chapter">
+    <div class="chapter-sticky-wrapper">
+        <div class="chapter-container">
+            <div class="chapter-visual">
+                <div class="visual-panel is-active" data-chapter="1">
+                   <img src="인덱스/식물배달.jpg" alt="정성스럽게 포장된 박스">
 
-    <!-- CTA 배너 -->
-    <section id="cta-banner" class="cta-banner" data-aos="fade-up">
-      <h2>이제, 당신의 식집사 이야기를 시작해보세요!</h2>
-      <a href="#" class="cta-button">회원가입</a>
-    </section>
+                </div>
+                <div class="visual-panel" data-chapter="2">
+                   <img src="인덱스/상자속식물.jpg" alt="박스에서 모습을 드러낸 식물">
+
+                </div>
+                <div class="visual-panel" data-chapter="3">
+                   <img src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?q=80&w=1887" alt="창가 햇살 아래 놓인 식물">
+
+                </div>
+
+            </div>
+
+            <div class="chapter-story">
+                <div class="story-chapter is-active" data-chapter="1">
+                    <span class="chapter-number">Chapter 1.</span>
+                    <h2>The Arrival</h2>
+                    <p>단순한 배송이 아닌, 새로운 가족을 맞이하는 설레는 순간입니다. 모든 과정은 식물의 안전과 당신의 기대를 위해 세심하게 설계되었습니다.</p>
+                </div>
+                <div class="story-chapter" data-chapter="2">
+                    <span class="chapter-number">Chapter 2.</span>
+                    <h2>The Unfurling</h2>
+                    <p>상자 속 작은 숲이 마침내 모습을 드러냅니다. 농장에서 막 도착한 듯한 싱그러움, 건강한 잎사귀 하나하나가 식집사의 약속입니다.</p>
+                </div>
+                <div class="story-chapter" data-chapter="3">
+                    <span class="chapter-number">Chapter 3.</span>
+                    <h2>The Light</h2>
+                    <p>당신의 공간 속 가장 좋은 자리를 찾아주세요. 빛과 바람, 공기는 식물에게 최고의 선물이자 당신에게는 살아있는 예술 작품이 됩니다.</p>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<section id="sikjipsa-experience" class="content-section">
+    <div class="section-container">
+        <h2 class="section-title anim">당신의 초록빛 성장 파트너</h2>
+        <p class="section-subtitle anim">식물 키우기, 더 이상 어렵지 않아요. 식집사가 성공적인 반려식물 라이프를 함께합니다.</p>
+    </div>
+    
+    <div class="experience-wrapper">
+        <div class="experience-bg active" id="bg-1" style="background-image: url('https://images.unsplash.com/photo-1521334884684-d80222895322?q=80&w=1887');"></div>
+        <div class="experience-bg" id="bg-2" style="background-image: url('https://images.unsplash.com/photo-1616460884665-5c4967129def?q=80&w=1887');"></div>
+        <div class="experience-bg" id="bg-3" style="background-image: url('https://images.unsplash.com/photo-1525498128493-380d1990a112?q=80&w=1887');"></div>
+        
+        <div class="experience-cards">
+            <div class="experience-card" data-bg="bg-1">
+                <span class="card-number">01</span>
+                <h3>AI 식물 진단</h3>
+                <p>시들거나 아파 보이는 식물, 사진만 찍어 올리면 AI가 상태를 분석하고 해결책을 제시합니다.</p>
+            </div>
+            
+            <div class="experience-card" data-bg="bg-2">
+                <span class="card-number">02</span>
+                <h3>맞춤 성장 가이드</h3>
+                <p>나의 식물을 등록하면 물주기, 분갈이 시기 등 최적의 성장 스케줄 알림을 보내드려요.</p>
+            </div>
+            
+            <div class="experience-card" data-bg="bg-3">
+                <span class="card-number">03</span>
+                <h3>식집사 커뮤니티</h3>
+                <p>나의 식물 성장일지를 공유하고 다른 집사들의 꿀팁을 얻어보세요. 함께 키우는 즐거움이 커집니다.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+
+    </main>
+<footer id="main-footer-content">
+    <div class="footer-container">
+        <div class="footer-subscribe">
+            <h4>뉴스레터 구독</h4>
+            <p>식집사의 새로운 소식과 유용한 식물 관리 팁을 받아보세요.</p>
+            <form class="subscribe-form">
+                <input type="email" placeholder="이메일 주소를 입력하세요">
+                <button type="submit" class="cta-button">구독하기</button>
+            </form>
+        </div>
+        <div class="footer-main">
+            <div class="footer-about">
+                <a href="index.html" class="logo">식집사</a>
+                <p>식물과 함께하는 모든 순간이 더 행복하고 의미 있도록, 식집사가 당신의 초록빛 여정에 함께합니다.</p>
+                 <div class="footer-social">
+                    <a href="#">Instagram</a>
+                    <a href="#">Facebook</a>
+                    <a href="#">YouTube</a>
+                </div>
+            </div>
+            <div class="footer-links-group">
+                <div class="footer-links">
+                    <h4>About</h4>
+                    <ul>
+                        <li><a href="story.html">초록 이야기</a></li>
+                        <li><a href="#">팀 소개</a></li>
+                        <li><a href="#">채용</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>Support</h4>
+                    <ul>
+                        <li><a href="#">고객 지원</a></li>
+                        <li><a href="#">자주 묻는 질문</a></li>
+                        <li><a href="#">연락하기</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="footer-bottom">
+        <p>&copy; 2025 Sikjipsa. All Rights Reserved.</p>
+    </div>
+</footer>
+
 
     <!-- 기존 로그인/회원가입 모달, JS 등 유지 -->
     <div id="modal-wrapper" class="modal-wrapper">
@@ -447,39 +978,410 @@
         </div>
     </div>
 
-    <!-- 라이브러리 CDN 추가 -->
-    <link rel="stylesheet" href="https://unpkg.com/aos@2.3.1/dist/aos.css"/>
-    <link rel="stylesheet" href="https://unpkg.com/swiper/swiper-bundle.min.css"/>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
-    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
-    <script src="https://unpkg.com/swiper/swiper-bundle.min.js"></script>
-    <script>
-      AOS.init();
-      new Swiper('.swiper-container', {
-        slidesPerView: 1,
-        spaceBetween: 30,
-        pagination: {
-          el: '.swiper-pagination',
-          clickable: true,
-        },
-        breakpoints: {
-          600: { slidesPerView: 2 },
-          900: { slidesPerView: 3 }
-        }
-      });
-      new Swiper('.reviews-swiper', {
-        slidesPerView: 1,
-        spaceBetween: 30,
-        pagination: {
-          el: '.reviews-swiper .swiper-pagination',
-          clickable: true,
-        },
-        autoplay: { delay: 4000 },
-        loop: true
-      });
-    </script>
+
+<div id="chatbot-container">
+    <div id="chat-window" class="hidden">
+        <div class="chat-header">
+            <h3>식집사 챗봇</h3>
+            <p>무엇을 도와드릴까요?</p>
+        </div>
+        <div id="chat-messages">
+            </div>
+        <div id="chat-suggestions">
+            </div>
+        <div class="chat-input-container">
+            <input type="text" id="chat-input" placeholder="질문을 입력하세요...">
+            <button id="chat-send-btn">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="24" height="24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"></path></svg>
+            </button>
+        </div>
+    </div>
+    <button id="chatbot-toggle-btn">
+        <svg id="chat-open-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="24" height="24"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"></path></svg>
+        <svg id="chat-close-icon" class="hidden" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="24" height="24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"></path></svg>
+    </button>
+</div>
+</body>
+
     <script type="module" src="navigation.js"></script>
-    <!-- Lottie Player CDN 추가 -->
-    <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
+
+    <script>
+        // 스크롤 애니메이션 로직
+const sections = document.querySelectorAll('.content-section');
+
+const observer = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+        if (entry.isIntersecting) {
+            entry.target.classList.add('is-visible');
+            observer.unobserve(entry.target); // 한 번 실행 후 관찰 중지
+        }
+    });
+}, {
+    threshold: 0.1 // 섹션이 10% 보일 때 애니메이션 시작
+});
+
+sections.forEach(section => {
+    observer.observe(section);
+});
+
+
+//동적
+// === 동적 경험 섹션 로직 ===
+const experienceCards = document.querySelectorAll('.experience-card');
+const experienceBgs = document.querySelectorAll('.experience-bg');
+
+experienceCards.forEach(card => {
+    card.addEventListener('mouseover', () => {
+        // 모든 배경에서 active 클래스 제거
+        experienceBgs.forEach(bg => bg.classList.remove('active'));
+
+        // 현재 카드에 해당하는 배경 찾기
+        const bgId = card.dataset.bg;
+        const activeBg = document.getElementById(bgId);
+        
+        // 해당 배경에 active 클래스 추가
+        if (activeBg) {
+            activeBg.classList.add('active');
+        }
+    });
+});
+
+
+// === 히어로 타이핑 로직 ===
+document.addEventListener('DOMContentLoaded', () => {
+    // 이제 히어로 섹션에 있으므로 storySection을 찾을 필요가 없습니다.
+    const storyContent = "작은 화분 하나가 공간에 들어왔을 뿐인데,<br>시간의 속도가 달라지기 시작했다.";
+    const storyElement = document.getElementById('story-text');
+    const cursorElement = document.getElementById('story-cursor');
+    if (!storyElement || !cursorElement) return;
+
+    const typingSpeed = 100;
+    let charIndex = 0;
+
+    storyElement.appendChild(cursorElement);
+
+    function type() {
+        if (charIndex < storyContent.length) {
+            const textToShow = storyContent.substring(0, charIndex);
+            storyElement.innerHTML = textToShow + cursorElement.outerHTML;
+            
+            if (storyContent.substring(charIndex, charIndex + 4) === '<br>') {
+                charIndex += 4;
+            } else {
+                charIndex++;
+            }
+            setTimeout(type, typingSpeed);
+        } else {
+            storyElement.innerHTML = storyContent;
+            storyElement.appendChild(cursorElement);
+        }
+    }
+
+    // 페이지가 로드되면 바로 타이핑 시작
+    type();
+});
+
+
+// === 공간 큐레이션 탭 로직 ===
+const tabButtons = document.querySelectorAll('.tab-btn');
+const contentPanels = document.querySelectorAll('.content-panel');
+
+tabButtons.forEach(button => {
+    button.addEventListener('click', () => {
+        // 모든 버튼과 패널에서 active 클래스 제거
+        tabButtons.forEach(btn => btn.classList.remove('active'));
+        contentPanels.forEach(panel => panel.classList.remove('active'));
+
+        // 클릭된 버튼에 active 클래스 추가
+        button.classList.add('active');
+
+        // 해당 콘텐츠 패널을 찾아 active 클래스 추가
+        const targetPanelId = button.dataset.space;
+        const targetPanel = document.getElementById(targetPanelId);
+        if (targetPanel) {
+            targetPanel.classList.add('active');
+        }
+    });
+});
+
+
+// === 'A Green Chapter' 스크롤 로직 ===
+function handleChapterScroll() {
+    const chapterWrapper = document.querySelector('.chapter-sticky-wrapper');
+    if (!chapterWrapper) return;
+
+    const { top, height } = chapterWrapper.getBoundingClientRect();
+    const scrollableHeight = height - window.innerHeight;
+    
+    // 현재 스크롤 진행률 (0 ~ 1)
+    // -top 값으로 컨테이너 상단이 뷰포트 상단을 얼마나 지났는지 계산
+    const progress = Math.max(0, Math.min(1, -top / scrollableHeight));
+    
+    const totalChapters = 3;
+    // 진행률에 따라 현재 활성화되어야 할 챕터를 계산 (1, 2, 3, 4)
+    const activeChapter = Math.min(totalChapters, Math.floor(progress * totalChapters) + 1);
+
+    // 텍스트 활성화
+    document.querySelectorAll('.story-chapter').forEach(chapter => {
+        const chapterNum = parseInt(chapter.dataset.chapter);
+        chapter.classList.toggle('is-active', chapterNum === activeChapter);
+    });
+
+    // 이미지 활성화
+    document.querySelectorAll('.visual-panel').forEach(panel => {
+        const chapterNum = parseInt(panel.dataset.chapter);
+        panel.classList.toggle('is-active', chapterNum === activeChapter);
+    });
+}
+
+window.addEventListener('scroll', handleChapterScroll);
+
+
+// === 챗봇 로직 시작 (V3: 2단계 질문 추가) ===
+document.addEventListener('DOMContentLoaded', () => {
+    const chatbotContainer = document.getElementById('chatbot-container');
+    if (!chatbotContainer) return;
+
+    // 챗봇 UI 요소 가져오기
+    const toggleBtn = document.getElementById('chatbot-toggle-btn');
+    const chatWindow = document.getElementById('chat-window');
+    const openIcon = document.getElementById('chat-open-icon');
+    const closeIcon = document.getElementById('chat-close-icon');
+    const messagesContainer = document.getElementById('chat-messages');
+    const suggestionsContainer = document.getElementById('chat-suggestions');
+    const inputField = document.getElementById('chat-input');
+    const sendBtn = document.getElementById('chat-send-btn');
+
+    // 대화 흐름을 정의하는 데이터 구조 (수정)
+const chatTree = {
+  // entry point
+  "initial": {
+    questions: ["q1", "q2", "q3", "q4"],
+    isEntryPoint: true
+  },
+  // 1. 잎 색/건강 관련
+  "q1": {
+    question: "잎이 노랗거나 갈색으로 변해요.",
+    answer: "과습, 영양 부족, 햇빛 부족 등이 원인일 수 있어요. 어떤 상황이 더 궁금한가요?",
+    follow_up: ["q1_1", "q1_2", "q1_3", "initial"]
+  },
+    "q1_1": {
+      question: "과습이면 어떻게 해야 하나요?",
+      answer: "흙이 항상 축축한지 확인하세요. 흙 겉이 마를 때까지 기다렸다가 물을 주세요.",
+      follow_up: ["q1_1_1", "q1_1_2", "initial"]
+    },
+      "q1_1_1": {
+        question: "화분 받침에 물이 고여있으면?",
+        answer: "받침에 고인 물은 버리고, 화분 바닥이 젖어있다면 환기를 시켜주세요.",
+        follow_up: ["initial"]
+      },
+      "q1_1_2": {
+        question: "과습 예방 방법은?",
+        answer: "배수가 잘 되는 흙, 배수구 있는 화분을 쓰고, 과하게 자주 물 주지 않는 것이 중요해요.",
+        follow_up: ["initial"]
+      },
+    "q1_2": {
+      question: "영양 부족일 때 증상은?",
+      answer: "새 잎이 작고 옅으며, 성장이 멈출 수 있습니다. 봄~여름에 비료를 주면 좋아요.",
+      follow_up: ["initial"]
+    },
+    "q1_3": {
+      question: "햇빛이 부족할 때 증상?",
+      answer: "잎이 길게 늘어지고 색이 옅어집니다. 좀 더 밝은 곳으로 옮겨주세요.",
+      follow_up: ["initial"]
+    },
+
+  // 2. 분갈이 관련
+  "q2": {
+    question: "분갈이는 언제/어떻게 하나요?",
+    answer: "1~2년에 한 번, 봄에 하는 것이 가장 좋아요. 궁금한 내용을 선택하세요.",
+    follow_up: ["q2_1", "q2_2", "q2_3", "initial"]
+  },
+    "q2_1": {
+      question: "분갈이 흙 추천해줘.",
+      answer: "관엽식물 기준, 분갈이용토와 펄라이트를 8:2로 섞으면 배수가 잘 돼요.",
+      follow_up: ["initial"]
+    },
+    "q2_2": {
+      question: "분갈이 후 주의사항은?",
+      answer: "물 주기는 2~3일 뒤에 하고, 직사광선은 피해주세요.",
+      follow_up: ["initial"]
+    },
+    "q2_3": {
+      question: "분갈이 신호는?",
+      answer: "뿌리가 화분 밖으로 나왔거나, 흙이 너무 쉽게 마르면 분갈이 시기예요.",
+      follow_up: ["initial"]
+    },
+
+  // 3. 해충/질병 관련
+  "q3": {
+    question: "벌레(해충)가 생겼어요.",
+    answer: "흙 표면과 잎 뒷면까지 꼼꼼히 관찰하세요. 어떤 유형이 궁금한가요?",
+    follow_up: ["q3_1", "q3_2", "q3_3", "initial"]
+  },
+    "q3_1": {
+      question: "흰색 작은 벌레가 있어요.",
+      answer: "깍지벌레/응애일 수 있습니다. 물로 세척하고 심할 땐 살충제를 쓰세요.",
+      follow_up: ["initial"]
+    },
+    "q3_2": {
+      question: "날아다니는 작은 벌레(버섯파리)",
+      answer: "흙이 자주 젖어 있으면 생겨요. 흙을 말리고, 노란 끈끈이 트랩을 써보세요.",
+      follow_up: ["initial"]
+    },
+    "q3_3": {
+      question: "해충 예방/관리법",
+      answer: "잎을 자주 닦아주고, 환기를 자주 시켜주세요.",
+      follow_up: ["initial"]
+    },
+
+  // 4. 물주기/습도/기타
+  "q4": {
+    question: "물을 얼마나, 어떻게 주면 좋을까요?",
+    answer: "식물/환경마다 다르지만, 겉흙이 마르면 듬뿍 주는 게 기본입니다. 추가로 궁금한 점은?",
+    follow_up: ["q4_1", "q4_2", "initial"]
+  },
+    "q4_1": {
+      question: "여름/겨울 물주기 차이?",
+      answer: "여름엔 빠르게 마르니 자주, 겨울엔 흙이 마른 뒤 더 기다렸다가 주세요.",
+      follow_up: ["initial"]
+    },
+    "q4_2": {
+      question: "습도 관리 어떻게?",
+      answer: "실내 습도가 낮으면 분무, 화분 주변에 물받침을 두는 방법도 있습니다.",
+      follow_up: ["initial"]
+    }
+};
+
+
+    // 질문 버튼을 생성하는 함수 (수정)
+    function createSuggestionButtons(keyArray) {
+        suggestionsContainer.innerHTML = '';
+        keyArray.forEach(key => {
+            // 'initial' 키는 '처음으로' 버튼을 생성
+            const node = (key === 'initial') 
+                ? { key: 'initial', question: '처음으로 돌아가기' } 
+                : { key: key, question: chatTree[key].question };
+            
+            const btn = document.createElement('button');
+            btn.classList.add('suggestion-btn');
+            btn.textContent = node.question;
+            btn.dataset.key = node.key; // 버튼에 질문 키 저장
+            btn.addEventListener('click', handleSuggestionClick);
+            suggestionsContainer.appendChild(btn);
+        });
+        suggestionsContainer.style.display = 'flex';
+    }
+    
+    // 추천 질문 버튼 클릭 처리 (수정)
+    function handleSuggestionClick(e) {
+        const key = e.target.dataset.key;
+
+        if (key === 'initial') {
+            createSuggestionButtons(chatTree.initial.questions);
+            return;
+        }
+        
+        const questionText = chatTree[key].question;
+        addMessage(questionText, 'user');
+        suggestionsContainer.innerHTML = ''; // 버튼 잠시 숨김
+        
+        processBotResponse(key);
+    }
+
+    // 봇 응답 처리 로직 (분리/수정)
+    function processBotResponse(key) {
+        showLoadingIndicator();
+        
+        const node = chatTree[key];
+        const thinkingTime = Math.random() * 500 + 800;
+
+        setTimeout(() => {
+            hideLoadingIndicator();
+            if (node && node.answer) {
+                addMessage(node.answer, 'bot');
+            }
+            if (node && node.follow_up) {
+                createSuggestionButtons(node.follow_up);
+            }
+        }, thinkingTime);
+    }
+
+    // 사용자 입력(타이핑) 처리 (수정)
+    function handleUserMessage(messageText) {
+        if (!messageText.trim()) return;
+
+        addMessage(messageText, 'user');
+        inputField.value = '';
+        suggestionsContainer.style.display = 'none';
+
+        // 입력된 텍스트와 가장 유사한 질문 키 찾기 (간단한 방식)
+        let bestMatchKey = null;
+        for (const key in chatTree) {
+            if (chatTree[key].question && messageText.includes(chatTree[key].question.substring(0, 4))) {
+                bestMatchKey = key;
+                break;
+            }
+        }
+        
+        if (bestMatchKey) {
+            processBotResponse(bestMatchKey);
+        } else {
+            showLoadingIndicator();
+            setTimeout(() => {
+                hideLoadingIndicator();
+                addMessage("죄송해요, 아직 학습하지 않은 질문이에요. '초록 이야기'에 질문을 남겨보시겠어요?", 'bot');
+                createSuggestionButtons(chatTree.initial.questions);
+            }, 1000);
+        }
+    }
+    
+    // (이하 함수들은 이전과 동일: addMessage, showLoadingIndicator, hideLoadingIndicator, 챗봇 창 토글, 이벤트 리스너)
+
+    function addMessage(text, sender) {
+        const messageElement = document.createElement('div');
+        messageElement.classList.add('message', sender === 'user' ? 'user-message' : 'bot-message');
+        messageElement.textContent = text;
+        messagesContainer.appendChild(messageElement);
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    }
+
+    function showLoadingIndicator() {
+        const loadingElement = document.createElement('div');
+        loadingElement.id = 'loading-indicator';
+        loadingElement.classList.add('message', 'bot-message', 'loading-indicator');
+        loadingElement.innerHTML = `<span></span><span></span><span></span>`;
+        messagesContainer.appendChild(loadingElement);
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    }
+
+    function hideLoadingIndicator() {
+        const loadingElement = document.getElementById('loading-indicator');
+        if (loadingElement) {
+            loadingElement.remove();
+        }
+    }
+
+    toggleBtn.addEventListener('click', () => {
+        const isHidden = chatWindow.classList.toggle('hidden');
+        openIcon.classList.toggle('hidden', !isHidden);
+        closeIcon.classList.toggle('hidden', isHidden);
+
+        if (!isHidden && messagesContainer.children.length === 0) {
+             addMessage("안녕하세요! 식물에 대해 궁금한 점이 있다면 무엇이든 물어보세요.", 'bot');
+             createSuggestionButtons(chatTree.initial.questions);
+        }
+    });
+
+    sendBtn.addEventListener('click', () => handleUserMessage(inputField.value));
+
+    inputField.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+            handleUserMessage(inputField.value);
+        }
+    });
+});
+// === 챗봇 로직 끝 ===
+    </script>
 </body>
 </html>
