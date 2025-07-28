@@ -31,7 +31,12 @@ export default async function handler(request, response) {
     response.status(200).json({ diagnosis: text });
 
   } catch (error) {
-    console.error(error);
-    response.status(500).json({ error: "진단 중 오류가 발생했습니다." });
+    // ----- 여기를 수정합니다! -----
+
+    // Gemini에서 받은 실제 에러 메시지를 확인하기 위해 로그를 찍습니다.
+    console.error("Gemini API Error:", error); 
+
+    // 프론트엔드로도 더 자세한 에러를 보내줍니다.
+    response.status(500).json({ error: `서버에서 오류가 발생했습니다: ${error.message}` });
   }
 }
