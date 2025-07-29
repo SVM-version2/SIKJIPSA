@@ -743,6 +743,9 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!file) return;
 
         optionButtonsContainer.innerHTML = '';
+
+        addMessage("사진을 분석하고 있어. 잠시만 기다려줘! 🌱", 'plant');
+        
         const indicator = showTypingIndicator();
 
         const reader = new FileReader();
@@ -829,7 +832,7 @@ document.addEventListener('DOMContentLoaded', () => {
         showRestartButton();
     }
 
-    
+
     function openPlantDetailModal(plant) {
         plantModalImg.src = plant.image;
         plantModalImg.alt = plant.name;
