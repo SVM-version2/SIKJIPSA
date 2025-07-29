@@ -162,17 +162,6 @@ a:hover {
     50% { background-color: var(--accent-color); }
 }
 
-/* 반응형 */
-@media (max-width: 768px) {
-    .story-text {
-        font-size: 2rem;
-        min-height: 70px;
-    }
-    .cursor {
-        height: 1.8rem;
-    }
-}
-
 /* === 2. 새로운 공간 큐레이션 섹션 === */
 #space-curation {
     background-color: #fff;
@@ -439,8 +428,6 @@ opacity: 1; /* 활성 챕터만 보이게 */
     font-size: 1rem;
     margin-top: auto;
 }
-
-
 
 
 /* === 푸터 === */
@@ -776,6 +763,168 @@ opacity: 1; /* 활성 챕터만 보이게 */
     50% { transform: translateX(4px) rotate(15deg); }
     100% { transform: translateX(-4px) rotate(-15deg); }
 }
+
+/* =================================== */
+/* === 반응형 스타일 (768px 이하) === */
+/* =================================== */
+@media (max-width: 768px) {
+
+    /* --- 전역 및 타이포그래피 --- */
+    .section-title {
+        font-size: 2.2rem; /* 섹션 제목 크기 조정 */
+    }
+
+    .section-subtitle {
+        font-size: 1rem;
+        margin-top: -30px;
+        margin-bottom: 30px;
+    }
+    
+    .content-section {
+        padding: 60px 20px; /* 섹션 전체 여백 조정 */
+    }
+
+    /* --- 1. 히어로 섹션 --- */
+    .story-text {
+        font-size: 2rem; /* 이미 적용되어 있지만, 명확성을 위해 포함 */
+        min-height: 70px;
+    }
+    .cursor {
+        height: 1.8rem;
+    }
+    .story-container {
+        padding: 20px;
+    }
+
+
+    /* --- 2. 공간 큐레이션 섹션 --- */
+    .content-panel {
+        grid-template-columns: 1fr; /* 1단 레이아웃으로 변경 */
+    }
+    .content-text {
+        padding: 40px 30px; /* 모바일용 패딩 조정 */
+    }
+    .content-image img {
+        height: 300px; /* 이미지 높이 조정 */
+    }
+    .curation-tabs {
+        gap: 10px; /* 탭 간격 조정 */
+    }
+    .tab-btn {
+        font-size: 1rem;
+        padding: 8px 18px;
+    }
+
+
+ /* --- 3. Green Chapter 섹션 (수정안) --- */
+
+/* 스크롤 애니메이션을 위한 컨테이너 비활성화 */
+.chapter-sticky-wrapper {
+    height: auto;
+}
+.chapter-container {
+    position: static; /* sticky 해제 */
+    display: block;   /* grid 대신 block으로 변경 */
+    height: auto;
+}
+
+/* 이미지와 텍스트 컨테이너 기본 스타일 초기화 */
+.chapter-visual, 
+.chapter-story {
+    height: auto;
+    position: static;
+    padding: 0;
+}
+
+/* 내부 패널(이미지/텍스트)을 순서대로 보이도록 처리 */
+.visual-panel, 
+.story-chapter {
+    position: static; /* absolute 위치 해제 */
+    opacity: 1 !important; /* JS가 투명도를 바꿔도 보이도록 강제 */
+    transform: none !important; /* JS가 스케일을 바꿔도 크기 유지 */
+    display: block; /* 모든 요소를 보이게 함 */
+}
+
+.chapter-visual {
+    padding: 0 20px; /* 모바일 좌우 여백 */
+}
+.visual-panel {
+    height: 300px; /* 이미지 높이 통일 */
+    margin-bottom: 20px;
+}
+.story-chapter {
+    padding: 0 30px; /* 텍스트 좌우 여백 */
+    margin-bottom: 50px; /* 챕터 간 여백 */
+}
+.story-chapter:last-child {
+    margin-bottom: 0;
+}
+
+    /* --- 4. 동적 경험 섹션 --- */
+    .experience-wrapper {
+        height: auto; /* 콘텐츠에 맞게 높이 자동 조정 */
+    }
+    .experience-cards {
+        grid-template-columns: 1fr; /* 카드를 세로로 쌓음 */
+        padding: 20px;
+        background: rgba(0,0,0,0.6); /* 배경 어둡게 처리 */
+        gap: 15px;
+    }
+    .experience-card:hover {
+        transform: translateY(-5px); /* 호버 효과 약하게 조정 */
+    }
+    
+
+    /* --- 5. 푸터 --- */
+    .footer-main {
+        grid-template-columns: 1fr; /* 1단으로 변경 */
+        gap: 40px;
+        text-align: center; /* 모바일에서 가운데 정렬 */
+    }
+    .footer-about p {
+        max-width: 100%;
+    }
+    .footer-links-group {
+        gap: 40px;
+        justify-content: center;
+        text-align: center;
+    }
+    .subscribe-form {
+        flex-direction: column; /* 구독 폼 세로 정렬 */
+        align-items: center;
+    }
+    .subscribe-form input {
+        width: 90%;
+    }
+
+
+    /* --- 6. 로그인/회원가입 모달 --- */
+    .modal {
+        flex-direction: column;
+        width: 90%;
+        max-width: 400px;
+        height: auto;
+        max-height: 90vh;
+    }
+    .modal-left {
+        display: none; /* 모바일에선 이미지 숨김 */
+    }
+    .modal-right {
+        padding: 40px 25px;
+    }
+    
+
+    /* --- 7. 챗봇 --- */
+    #chatbot-container {
+        bottom: 20px;
+        right: 20px;
+    }
+    #chat-window {
+        width: calc(100vw - 40px); /* 화면 너비에 맞게 조정 */
+        height: 60vh;
+        bottom: 75px;
+    }
+}
  </style>
 <body>
 
@@ -823,7 +972,7 @@ opacity: 1; /* 활성 챕터만 보이게 */
                 </div>
                 <div class="content-panel" id="bedroom">
                     <div class="content-image">
-                        <img src="인덱스/침실산세베리아.jpg" alt="침실에 어울리는 식물">
+                        <img src="인덱스/침실산세베리아.webp" alt="침실에 어울리는 식물">
                     </div>
                     <div class="content-text">
                         <h3>밤의 위로가 되는, 산세비에리아</h3>
@@ -832,7 +981,7 @@ opacity: 1; /* 활성 챕터만 보이게 */
                 </div>
                 <div class="content-panel" id="desk">
                     <div class="content-image">
-                         <img src="인덱스/책상스킨답서스.jpg" alt="책상에 어울리는 작은 식물">
+                         <img src="인덱스/책상스킨답서스.webp" alt="책상에 어울리는 작은 식물">
                     </div>
                     <div class="content-text">
                         <h3>집중력을 깨우는, 스킨답서스</h3>
@@ -850,11 +999,11 @@ opacity: 1; /* 활성 챕터만 보이게 */
         <div class="chapter-container">
             <div class="chapter-visual">
                 <div class="visual-panel is-active" data-chapter="1">
-                   <img src="인덱스/식물배달.jpg" alt="정성스럽게 포장된 박스">
+                   <img src="인덱스/식물배달.webp" alt="정성스럽게 포장된 박스">
 
                 </div>
                 <div class="visual-panel" data-chapter="2">
-                   <img src="인덱스/상자속식물.jpg" alt="박스에서 모습을 드러낸 식물">
+                   <img src="인덱스/상자속식물.webp" alt="박스에서 모습을 드러낸 식물">
 
                 </div>
                 <div class="visual-panel" data-chapter="3">

@@ -613,7 +613,14 @@ const plants = [
     { name: '스파티필름', light: 'low', watering_style: 'high', size: 'medium', pet_friendly: false, purpose: ['air_purification', 'flowering'], difficulty: 2, image: 'findPlant/스파티필름.webp', description: '우아한 흰색 꽃이 피고, 실내 공기 정화에 탁월해요.' },
     { name: '거미 식물', light: 'medium', watering_style: 'medium', size: 'medium', pet_friendly: true, purpose: ['beginner', 'air_purification'], difficulty: 1, image: 'findPlant/거미식물.webp', description: '새끼 식물이 달리는 모습이 독특하며, 키우기 정말 쉬워요.' },
     { name: '보스턴 고사리', light: 'medium', watering_style: 'high', size: 'medium', pet_friendly: true, purpose: ['interior'], difficulty: 3, image: 'findPlant/보스턴고사리.webp', description: '풍성한 잎이 매력적이며, 촉촉한 환경을 좋아해요.' },
-    { name: '금전수(ZZ Plant)', light: 'low', watering_style: 'low', size: 'large', pet_friendly: false, purpose: ['beginner', 'air_purification'], difficulty: 1, image: 'findPlant/금전수.webp', description: '빛이 적은 곳에서도 잘 자라며, 물을 자주 주지 않아도 되어 관리가 편해요.' }
+    { name: '금전수(ZZ Plant)', light: 'low', watering_style: 'low', size: 'large', pet_friendly: false, purpose: ['beginner', 'air_purification'], difficulty: 1, image: 'findPlant/금전수.webp', description: '빛이 적은 곳에서도 잘 자라며, 물을 자주 주지 않아도 되어 관리가 편해요.' },
+
+    // 기존 plants 배열에 아래 객체들을 추가하세요.
+{ name: '여인초', light: 'medium', watering_style: 'medium', size: 'large', pet_friendly: true, purpose: ['interior', 'beginner'], difficulty: 2, image: 'findPlant/여인초.webp', description: '넓고 시원한 잎이 매력적인 식물로, 이국적인 분위기를 연출해요.', tip: '잎이 마르지 않도록 주변에 분무해주면 더 건강하게 자라요.' },
+{ name: '아레카야자', light: 'medium', watering_style: 'high', size: 'large', pet_friendly: true, purpose: ['air_purification', 'interior'], difficulty: 3, image: 'findPlant/아레카야자.webp', description: 'NASA가 선정한 실내 공기정화 식물 1위! 가습 효과도 뛰어나요.', tip: '물을 줄 때는 겉흙이 말랐을 때 흠뻑 주는 것이 좋습니다.' },
+{ name: '필레아 페페로미오이데스', light: 'medium', watering_style: 'medium', size: 'small', pet_friendly: true, purpose: ['interior', 'beginner'], difficulty: 2, image: 'findPlant/필레아페페.webp', description: '동글동글한 잎이 귀여워 인기가 많고 번식력이 좋은 식물입니다.', tip: '새로운 잎이 잘 나도록 주기적으로 화분을 돌려 빛을 골고루 받게 해주세요.' },
+{ name: '안스리움', light: 'medium', watering_style: 'high', size: 'medium', pet_friendly: false, purpose: ['flowering', 'interior'], difficulty: 3, image: 'findPlant/안스리움.webp', description: '하트 모양의 포엽과 독특한 꽃이 1년 내내 피고 지는 식물이에요.', tip: '반려동물에게는 독성이 있으니 섭취하지 않도록 주의가 필요해요.' },
+{ name: '고무나무', light: 'medium', watering_style: 'low', size: 'large', pet_friendly: false, purpose: ['air_purification', 'beginner'], difficulty: 2, image: 'findPlant/고무나무.webp', description: '광택 있는 짙은 잎이 고급스러우며, 환경 적응력이 뛰어나요.', tip: '잎에 먼지가 쌓이면 젖은 천으로 닦아주면 광합성에 도움이 됩니다.' }
 ];
 
 
@@ -658,7 +665,7 @@ function showTypingIndicator() {
             } else {
                 renderOptions(question.options);
             }
-        }, 1200);
+        }, 1500);
     }
     
  function renderOptions(options) {
@@ -675,25 +682,64 @@ function showTypingIndicator() {
     }
 
  
-    function handleOptionClick(option) {
-        addMessage(option.text, 'user');
-        userAnswers[questions[currentStep].key] = option.value;
-        optionButtonsContainer.innerHTML = '';
+function handleOptionClick(option) {
+    addMessage(option.text, 'user');
+    userAnswers[questions[currentStep].key] = option.value;
+    optionButtonsContainer.innerHTML = '';
+
+    const currentKey = questions[currentStep].key;
+    const reactions = {
+        light: "빛은 식물에게 정말 중요하지! 알았어. ☀️",
+        space: "공간 크기를 가늠해보는 중... 🤔",
+        purpose: "그렇구나! 좋은 목표를 가졌네. 👍",
+        pet: "알려줘서 고마워! 안전이 최우선이지. 🐾",
+        watering_style: "물주기 스타일도 아주 중요한 정보야! 💧"
+    };
+
+    // ▼▼▼▼▼ 수정된 로직 ▼▼▼▼▼
+    // 리액션 메시지가 있는지 확인합니다.
+    if (reactions[currentKey]) {
+        // 리액션이 있다면, 리액션 메시지를 먼저 보여줍니다.
+        setTimeout(() => {
+            addMessage(reactions[currentKey], 'plant');
+            
+            // 리액션 메시지가 나온 후, 다음 질문으로 넘어갑니다.
+            currentStep++;
+            if (currentStep < questions.length) {
+                askQuestion();
+            }
+        }, 500); // 리액션 메시지를 위한 짧은 지연
+    } else {
+        // 리액션이 없다면(첫 질문 등), 바로 다음 질문으로 넘어갑니다.
         currentStep++;
-        
         if (currentStep < questions.length) {
             askQuestion();
         }
-    }
+    }}
     
     function showResults() {
         const filteredByPet = userAnswers.pet === 'yes' ? plants.filter(plant => plant.pet_friendly) : plants;
         const rankedPlants = filteredByPet.map(plant => {
             let score = 0;
-            if (plant.light === userAnswers.light) score += 3;
-            if (plant.watering_style === userAnswers.watering_style) score += 2;
+            // 빛: 가장 중요하므로 가중치 높게, 안 맞으면 큰 감점
+            if (plant.light === userAnswers.light) {
+                score += 5;
+            } else if (
+                (userAnswers.light === 'high' && plant.light === 'low') || 
+                (userAnswers.light === 'low' && plant.light === 'high')
+            ) {
+                score -= 5; // 최악의 조합은 감점
+            }
+
+            // 물주기 스타일: 중요
+            if (plant.watering_style === userAnswers.watering_style) score += 3;
+            
+            // 목적
             if (plant.purpose.includes(userAnswers.purpose)) score += 2;
+            
+            // 크기
             if (plant.size === userAnswers.space) score += 1;
+            
             return { ...plant, score };
         }).sort((a, b) => b.score - a.score);
         const topPlants = rankedPlants.slice(0, 2);
