@@ -625,14 +625,15 @@ document.addEventListener('DOMContentLoaded', () => {
         { name: '고무나무', light: 'medium', watering_style: 'low', size: 'large', pet_friendly: false, purpose: ['air_purification', 'beginner'], difficulty: 2, image: 'findPlant/고무나무.webp', description: '광택 있는 짙은 잎이 고급스러우며, 환경 적응력이 뛰어나요.', tip: '잎에 먼지가 쌓이면 젖은 천으로 닦아주면 광합성에 도움이 됩니다.' }
     ];
 
-     function addMessage(text, sender, contentHTML = null) {
+   // ▼▼▼ 2. AI 답변 줄 바꿈 처리를 위해 수정된 함수 ▼▼▼
+    function addMessage(text, sender, contentHTML = null) {
         const bubble = document.createElement('div');
         bubble.className = `message-bubble ${sender}-message`;
         if (contentHTML) {
             bubble.innerHTML = contentHTML;
         } else {
-            // Gemini 응답에 포함된 마크다운(**)을 HTML(<b>)로 변환
-            bubble.innerHTML = text.replace(/\*\*(.*?)\*\*/g, '<b>$1</b>');
+            // 마크다운(**)과 줄바꿈(\n)을 모두 HTML 태그로 변환
+            bubble.innerHTML = text.replace(/\*\*(.*?)\*\*/g, '<b>$1</b>').replace(/\n/g, '<br>');
         }
         messageArea.appendChild(bubble);
         messageArea.scrollTop = messageArea.scrollHeight;
@@ -742,51 +743,79 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // 2. 이미지 업로드 처리 및 API 호출
-    async function handleImageUpload(event) {
+ // ▼▼▼▼▼ 리사이징 로직이 추가된 handleImageUpload 함수 ▼▼▼▼▼
+  async function handleImageUpload(event) {
         const file = event.target.files[0];
         if (!file) return;
 
         optionButtonsContainer.innerHTML = '';
-        
         addMessage("사진을 분석하고 있어. 잠시만 기다려줘! 🌱", 'plant');
 
-        // 1.5초 뒤에 모든 후속 작업을 실행하도록 설정
+        // 1.5초 뒤에 모든 후속 작업을 순차적으로 실행
         setTimeout(() => {
             addMessage("음... 잠깐만! 거의 다 됐어! 🧐", 'plant');
             
-            // 2. 두 번째 메시지가 나온 후, 로딩창을 띄우고 파일 분석 시작
             const indicator = showTypingIndicator();
+
+            resizeImage(file).then(compressedBlob => {
+                const reader = new FileReader();
+                reader.readAsDataURL(compressedBlob);
+                reader.onloadend = async () => {
+                    const base64Image = reader.result.split(',')[1];
+                    try {
+                        const response = await fetch('/api/identify', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ image: base64Image, mimeType: compressedBlob.type })
+                        });
+
+                        indicator.remove();
+                        if (!response.ok) {
+                            const errorData = await response.json();
+                            throw new Error(errorData.error || `서버 응답 오류: ${response.statusText}`);
+                        }
+                        const data = await response.json();
+                        addMessage(data.identification, 'plant');
+                    } catch (apiError) {
+                        console.error("API 호출 오류:", apiError);
+                        indicator.remove();
+                        addMessage(`이런, 사진을 분석하는 중에 오류가 발생했어.\n(${apiError.message})`, 'plant');
+                    } finally {
+                        showRestartButton();
+                    }
+                };
+            }).catch(resizeError => {
+                 console.error("이미지 처리 오류:", resizeError);
+                indicator.remove();
+                addMessage("사진 파일을 처리하는 중 문제가 발생했어. 다른 사진으로 시도해 줄래?", 'plant');
+                showRestartButton();
+            });
+        }, 1500);
+    }
+
+    // ▼▼▼▼▼ 새로 추가할 이미지 리사이징 함수 ▼▼▼▼▼
+    function resizeImage(file) {
+        return new Promise(resolve => {
+            const MAX_WIDTH = 800; // 이미지의 최대 가로 크기를 800px로 제한
             const reader = new FileReader();
             reader.readAsDataURL(file);
-
-            reader.onloadend = async () => {
-                const base64Image = reader.result.split(',')[1];
-                try {
-                    const response = await fetch('/api/identify', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ image: base64Image, mimeType: file.type })
-                    });
-
-                    indicator.remove();
-                    
-                    if (!response.ok) {
-                        const errorData = await response.json();
-                        throw new Error(errorData.error || `서버 응답 오류: ${response.statusText}`);
-                    }
-
-                    const data = await response.json();
-                    addMessage(data.identification, 'plant');
-                    
-                } catch (error) {
-                    console.error("API 호출 오류:", error);
-                    indicator.remove();
-                    addMessage(`이런, 사진을 분석하는 중에 오류가 발생했어.\n(${error.message})`, 'plant');
-                } finally {
-                    showRestartButton();
-                }
+            reader.onload = (event) => {
+                const img = new Image();
+                img.src = event.target.result;
+                img.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    const scale = MAX_WIDTH / img.width;
+                    canvas.width = MAX_WIDTH;
+                    canvas.height = img.height * scale;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                    // 캔버스의 이미지를 80% 품질의 JPEG Blob으로 변환
+                    canvas.toBlob((blob) => {
+                        resolve(blob);
+                    }, 'image/jpeg', 0.8);
+                };
             };
-        }, 1500);
+        });
     }
     
     // 3. 다시하기 버튼 표시 (공통 사용)
