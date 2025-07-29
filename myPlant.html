@@ -654,13 +654,14 @@
                     <div class="stat-label">총 식물</div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-number" id="total-care">0</div>
-                    <div class="stat-label">총 케어</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-number" id="days-growing">0</div>
-                    <div class="stat-label">키운 일수</div>
-                </div>
+                <div class="stat-number" id="longest-plant-name">-</div>
+                <div class="stat-label">최장수 식물</div>
+                <div class="stat-desc" id="longest-plant-days" style="font-size:0.92rem; color:#b2a97e;"></div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="my-career-days">0</div>
+                <div class="stat-label">나의 식집사 경력</div>
+    </div>
             </div>
 
             <div class="plants-grid" id="plants-grid">
@@ -802,23 +803,25 @@
 
     async function loadUserPlants() {
         if (!currentUser) return [];
-        
-        try {
-            const plantsRef = collection(db, "users", currentUser.uid, "plants");
-            const plantsSnapshot = await getDocs(plantsRef);
-            const plants = [];
-            
-            for (const plantDoc of plantsSnapshot.docs) {
-                const plantData = plantDoc.data();
-                const careRecordsRef = collection(db, "users", currentUser.uid, "plants", plantDoc.id, "careRecords");
-                const careSnapshot = await getDocs(careRecordsRef);
-                const careRecords = careSnapshot.docs.map(doc => doc.data());
+
+    try {
+        const plantsRef = collection(db, "users", currentUser.uid, "plants");
+        const plantsSnapshot = await getDocs(plantsRef);
+        const plants = [];
+
+        for (const plantDoc of plantsSnapshot.docs) {
+            const plantData = plantDoc.data();
+
+            // growthDiaries 컬렉션 불러오기
+            const diariesRef = collection(db, "users", currentUser.uid, "plants", plantDoc.id, "growthDiaries");
+            const diariesSnap = await getDocs(diariesRef);
+            const growthDiaries = diariesSnap.docs.map(doc => doc.data());
                 
                 plants.push({
-                    ...plantData,
-                    careRecords: careRecords
-                });
-            }
+                ...plantData,
+                growthDiaries
+            });
+        }
             
             return plants;
         } catch (error) {
@@ -836,7 +839,47 @@
         userPlants = await loadUserPlants();
         console.log('로드된 사용자 식물:', userPlants);
     }
+
+
     
+
+// 최장수 식물 찾기
+let longestDays = 0;
+let longestPlant = null;
+userPlants.forEach(plant => {
+    if (plant.registeredAt) {
+        const days = getDaysSinceRegistered(plant.registeredAt);
+        if (days > longestDays) {
+            longestDays = days;
+            longestPlant = plant;
+        }
+    }
+});
+document.getElementById('longest-plant-name').textContent = longestPlant ? longestPlant.name : '-';
+document.getElementById('longest-plant-days').textContent = longestPlant ? `${longestDays}일째` : '';
+
+// 나의 식집사 경력 (첫 식물 등록일부터 오늘까지)
+let careerDays = 0;
+if (userPlants.length > 0) {
+    const firstDate = userPlants.reduce((earliest, plant) => {
+        if (!plant.registeredAt) return earliest;
+        const date = new Date(plant.registeredAt);
+        return earliest ? (date < earliest ? date : earliest) : date;
+    }, null);
+    if (firstDate) {
+        careerDays = Math.floor((new Date() - firstDate) / (1000 * 60 * 60 * 24));
+    }
+}
+document.getElementById('my-career-days').textContent = careerDays;
+
+
+
+
+
+
+
+
+
     const PLANTS = [
         {
             name: "몬스테라",
@@ -1492,38 +1535,82 @@
 
     // 식물도감 렌더링
     function renderPlantCollection() {
-        const plantsGrid = document.getElementById('plants-grid');
-        const emptyState = document.getElementById('empty-state');
-        const totalPlants = document.getElementById('total-plants');
-        const totalCare = document.getElementById('total-care');
-        const daysGrowing = document.getElementById('days-growing');
+    const plantsGrid = document.getElementById('plants-grid');
+    const emptyState = document.getElementById('empty-state');
+    const totalPlants = document.getElementById('total-plants');
+    const longestPlantName = document.getElementById('longest-plant-name');
+    const longestPlantDays = document.getElementById('longest-plant-days');
+    const careerDaysEl = document.getElementById('my-career-days');
 
-        // 통계 업데이트
-        const totalCareCount = userPlants.reduce((sum, plant) => sum + (plant.careRecords?.length || 0), 0);
-        const earliestDate = userPlants.reduce((earliest, plant) => {
-            const plantDate = new Date(plant.registeredAt);
-            return earliest ? (plantDate < earliest ? plantDate : earliest) : plantDate;
-        }, null);
-        const daysSinceFirst = earliestDate ? Math.floor((new Date() - earliestDate) / (1000 * 60 * 60 * 24)) : 0;
+    // 최장수 식물 찾기
+    let longestDays = 0;
+    let longestPlant = null;
+    userPlants.forEach(plant => {
+        if (plant.registeredAt) {
+            const days = getDaysSinceRegistered(plant.registeredAt);
+            if (days > longestDays) {
+                longestDays = days;
+                longestPlant = plant;
+            }
+        }
+    });
+    longestPlantName.textContent = longestPlant ? longestPlant.name : '-';
+    longestPlantDays.textContent = longestPlant ? `${longestDays}일째` : '';
 
-        totalPlants.textContent = userPlants.length;
-        totalCare.textContent = totalCareCount;
-        daysGrowing.textContent = daysSinceFirst;
+    // **총 식물 개수 표시**
+    totalPlants.textContent = userPlants.length;
 
-        if (userPlants.length === 0) {
-            plantsGrid.style.display = 'none';
-            emptyState.style.display = 'block';
-        } else {
-            plantsGrid.style.display = 'grid';
-            emptyState.style.display = 'none';
-            
-            plantsGrid.innerHTML = '';
-            userPlants.forEach(plant => {
-                const plantCard = createPlantCard(plant);
-                plantsGrid.appendChild(plantCard);
-            });
+    // **나의 식집사 경력 일 단위**
+    let careerDays = 0;
+    if (currentUser && currentUser.metadata && currentUser.metadata.creationTime) {
+        const joinedDate = new Date(currentUser.metadata.creationTime);
+        joinedDate.setHours(0,0,0,0);
+        const today = new Date();
+        today.setHours(0,0,0,0);
+        careerDays = Math.floor((today - joinedDate) / (1000 * 60 * 60 * 24)) + 1;
+    }
+    careerDaysEl.textContent = careerDays > 0 ? careerDays + '일' : '0일';
+
+    // 카드 렌더링
+    if (userPlants.length === 0) {
+        plantsGrid.style.display = 'none';
+        emptyState.style.display = 'block';
+    } else {
+        plantsGrid.style.display = 'grid';
+        emptyState.style.display = 'none';
+        plantsGrid.innerHTML = '';
+        userPlants.forEach(plant => {
+            const plantCard = createPlantCard(plant);
+            plantsGrid.appendChild(plantCard);
+        });
+    }
+}
+
+
+    function getDaysSinceRegistered(registeredAt) {
+    if (!registeredAt) return '-';
+    const start = new Date(registeredAt);
+    if (isNaN(start)) return '-';
+
+    // 오늘 날짜(시/분/초 무시) - 등록일(시/분/초 무시)
+    const today = new Date();
+    today.setHours(0,0,0,0);
+    start.setHours(0,0,0,0);
+
+    // "오늘 등록"도 1로 하고 싶으면 +1
+    return Math.floor((today - start) / (1000 * 60 * 60 * 24)) + 1;
+}
+
+function getLastDiaryDate(growthDiaries) {
+    if (!growthDiaries || growthDiaries.length === 0) return '-';
+    let latest = growthDiaries[0];
+    for (const diary of growthDiaries) {
+        if (diary.date && latest.date && diary.date > latest.date) {
+            latest = diary;
         }
     }
+    return latest.date ? latest.date : '-';
+}
 
     // 식물 카드 생성
     function createPlantCard(plant) {
@@ -1537,6 +1624,10 @@
 
         const careRecords = plant.careRecords || [];
 
+            // 성장 일지 로딩
+    const growthDiaries = plant.growthDiaries || []; // (아직 undefined일 수 있음)
+    const daysGrown = Math.floor((new Date() - new Date(plant.registeredAt)) / (1000 * 60 * 60 * 24));
+
         card.innerHTML = `
             <div class="plant-card-header">
                 <img src="${plant.img}" alt="${plant.name}" class="plant-card-image">
@@ -1547,17 +1638,17 @@
             </div>
             <div class="plant-card-stats">
                 <div class="plant-stat">
-                    <div class="plant-stat-number">${Math.floor((new Date() - new Date(plant.registeredAt)) / (1000 * 60 * 60 * 24))}</div>
+                    <div class="plant-stat-number">${getDaysSinceRegistered(plant.registeredAt)}</div>
                     <div class="plant-stat-label">키운 일수</div>
                 </div>
                 <div class="plant-stat">
-                    <div class="plant-stat-number">${careRecords.filter(r => r.type === '물주기').length}</div>
-                    <div class="plant-stat-label">물주기</div>
-                </div>
-                <div class="plant-stat">
-                    <div class="plant-stat-number">${careRecords.length}</div>
-                    <div class="plant-stat-label">총 케어</div>
-                </div>
+                <div class="plant-stat-number">${getLastDiaryDate(growthDiaries)}</div>
+                <div class="plant-stat-label">마지막 성장 일지</div>
+            </div>
+            <div class="plant-stat">
+                <div class="plant-stat-number">${growthDiaries.length}</div>
+                <div class="plant-stat-label">성장 일지</div>
+            </div>
             </div>
             <div class="plant-card-actions">
                 <button class="plant-action-btn primary">관리하기</button>
@@ -1726,6 +1817,7 @@
             document.getElementById('plant-tab-content').innerHTML = renderTab(tab);
           };
         });
+
 
          // 대시보드 최초 렌더
     function renderDashboard(tabName='캘린더') {
@@ -1955,8 +2047,6 @@
 function closeGuideModal() {
   document.getElementById('guide-modal').classList.remove('visible');
 }
-
-
 
 // 성장일지 저장
 async function addGrowthDiaryToFirebase(plantName, diaryData) {
