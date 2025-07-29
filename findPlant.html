@@ -525,7 +525,7 @@ main {
 
     <script type="module" src="navigation.js"></script>
 
- <script>
+<script>
 document.addEventListener('DOMContentLoaded', () => {
     const plantModalWrapper = document.getElementById('plant-modal-wrapper');
     const plantModalContent = document.getElementById('plant-modal-content');
@@ -534,111 +534,109 @@ document.addEventListener('DOMContentLoaded', () => {
     const plantModalName = document.getElementById('plant-modal-name');
     const plantModalDesc = document.getElementById('plant-modal-desc');
     const plantModalCare = document.getElementById('plant-modal-care');
- const plantModalDifficulty = document.getElementById('plant-modal-difficulty');
+    const plantModalDifficulty = document.getElementById('plant-modal-difficulty');
     const messageArea = document.getElementById('message-area');
     const optionButtonsContainer = document.getElementById('option-buttons');
     const plantCharacter = document.getElementById('plant-character');
     let currentStep = 0;
     const userAnswers = {};
 
-    // --- ⬇️ 이 부분이 수정되었습니다 ⬇️ ---
-    // 원인: intro 단계와 light 단계를 분리하여, intro에서 선택지가 없어 멈추는 문제 발생
-    // 해결: intro 인사말을 첫 번째 질문(light)에 통합하여 자연스럽게 질문이 시작되도록 수정
-const questions = [
-    { 
-        key: 'intro', 
-        text: "안녕! 너의 공간과 라이프스타일에 딱 맞는 식물 친구를 찾아줄게. 몇 가지만 답해줘! 😉",
-        // 첫 시작 메시지로, 선택지는 없습니다.
-        options: [{ text: '좋아, 시작할게!', value: 'start' }]
-    },
-    { 
-        key: 'light', 
-        text: "먼저, 식물을 둘 공간의 빛은 어떤 편이야?", 
-        options: [ 
-            { text: '창문이 없거나 멀어 (어두운 편)', value: 'low' }, 
-            { text: '햇빛 드는 창가 근처 (밝은 편)', value: 'medium' }, 
-            { text: '직사광선이 4시간 이상 (매우 밝음)', value: 'high' } 
-        ] 
-    },
-    {
-        key: 'space',
-        text: "식물을 놓을 공간은 얼마나 넓어?",
-        options: [
-            { text: '책상이나 선반 위 (소형)', value: 'small'},
-            { text: '바닥에 둘 공간 (중형)', value: 'medium'},
-            { text: '넓은 거실 한 켠 (대형)', value: 'large'}
-        ]
-    },
-    {
-        key: 'purpose',
-        text: '식물을 키우려는 주된 이유가 뭐야?',
-        options: [
-            { text: '인테리어 효과! 🌿', value: 'interior' },
-            { text: '공기 정화 능력', value: 'air_purification' },
-            { text: '처음이라 키우기 쉬운 식물', value: 'beginner' },
-            { text: '예쁜 꽃을 보고 싶어 🌸', value: 'flowering' }
-        ]
-    },
-    { 
-        key: 'pet', 
-        text: "혹시 반려동물과 함께 살고 있어? 🐶", 
-        options: [ 
-            { text: '응, 같이 살아!', value: 'yes' }, 
-            { text: '아니, 없어.', value: 'no' }, 
-        ] 
-    },
-    { 
-        key: 'watering_style', 
-        text: "마지막! 너의 물주기 스타일은 어때?", 
-        options: [ 
-            { text: '깜빡 잊을 때가 많아 (건조하게)', value: 'low' }, 
-            { text: '꼬박꼬박 챙겨주는 편 (보통)', value: 'medium' }, 
-            { text: '애정 듬뿍! 자주 주고 싶어 (촉촉하게)', value: 'high' } 
-        ] 
-    },
-    { 
-        key: 'result', 
-        text: "좋아, 다 됐어! 너의 성향을 분석해서 딱 맞는 친구들을 찾아볼게. 잠시만 기다려줘!", 
-        options: null 
-    }
-];
-    // --- ⬆️ 여기까지 수정되었습니다 ⬆️ ---
+    // ▼▼▼ '사진으로 식물 이름 찾기' 옵션 추가 ▼▼▼
+    const questions = [
+        { 
+            key: 'intro', 
+            text: "안녕! 만나서 반가워. 무엇을 도와줄까?",
+            options: [
+                { text: '나에게 맞는 식물 추천받기 🌿', value: 'start_recommendation' },
+                { text: '사진으로 식물 이름 찾기 📸', value: 'start_identification' }
+            ]
+        },
+        { 
+            key: 'light', 
+            text: "좋아! 먼저, 식물을 둘 공간의 빛은 어떤 편이야?", 
+            options: [ 
+                { text: '창문이 없거나 멀어 (어두운 편)', value: 'low' }, 
+                { text: '햇빛 드는 창가 근처 (밝은 편)', value: 'medium' }, 
+                { text: '직사광선이 4시간 이상 (매우 밝음)', value: 'high' } 
+            ] 
+        },
+        {
+            key: 'space',
+            text: "식물을 놓을 공간은 얼마나 넓어?",
+            options: [
+                { text: '책상이나 선반 위 (소형)', value: 'small'},
+                { text: '바닥에 둘 공간 (중형)', value: 'medium'},
+                { text: '넓은 거실 한 켠 (대형)', value: 'large'}
+            ]
+        },
+        {
+            key: 'purpose',
+            text: '식물을 키우려는 주된 이유가 뭐야?',
+            options: [
+                { text: '인테리어 효과! 🌿', value: 'interior' },
+                { text: '공기 정화 능력', value: 'air_purification' },
+                { text: '처음이라 키우기 쉬운 식물', value: 'beginner' },
+                { text: '예쁜 꽃을 보고 싶어 🌸', value: 'flowering' }
+            ]
+        },
+        { 
+            key: 'pet', 
+            text: "혹시 반려동물과 함께 살고 있어? 🐶", 
+            options: [ 
+                { text: '응, 같이 살아!', value: 'yes' }, 
+                { text: '아니, 없어.', value: 'no' }, 
+            ] 
+        },
+        { 
+            key: 'watering_style', 
+            text: "마지막! 너의 물주기 스타일은 어때?", 
+            options: [ 
+                { text: '깜빡 잊을 때가 많아 (건조하게)', value: 'low' }, 
+                { text: '꼬박꼬박 챙겨주는 편 (보통)', value: 'medium' }, 
+                { text: '애정 듬뿍! 자주 주고 싶어 (촉촉하게)', value: 'high' } 
+            ] 
+        },
+        { 
+            key: 'result', 
+            text: "좋아, 다 됐어! 너의 성향을 분석해서 딱 맞는 친구들을 찾아볼게. 잠시만 기다려줘!", 
+            options: null 
+        }
+    ];
+    // ▲▲▲▲▲ 여기까지 수정 ▲▲▲▲▲
 
-const plants = [
-    { name: '산세베리아', light: 'low', watering_style: 'low', size: 'medium', pet_friendly: false, purpose: ['air_purification', 'beginner'], difficulty: 1, image: 'findPlant/산세베리아.webp', description: '공기 정화 능력이 탁월하며 건조에 강해 초보자에게 좋아요.' },
-    { name: '스킨답서스', light: 'low', watering_style: 'medium', size: 'small', pet_friendly: false, purpose: ['beginner', 'air_purification'], difficulty: 1, image: 'findPlant/스킨답서스.webp', description: '생명력이 강해 어디서든 잘 자라는 덩굴 식물이에요.' },
-    { name: '몬스테라', light: 'medium', watering_style: 'medium', size: 'large', pet_friendly: false, purpose: ['interior', 'air_purification'], difficulty: 2, image: 'findPlant/몬스테라.webp', description: '멋진 잎 모양으로 인테리어 효과가 뛰어난 플랜테리어의 상징이죠.' },
-    { name: '선인장', light: 'high', watering_style: 'low', size: 'small', pet_friendly: true, purpose: ['beginner', 'interior'], difficulty: 2, image: 'findPlant/선인장.webp', description: '강한 햇빛을 좋아하고 물을 자주 주지 않아도 괜찮아요.' },
-    { name: '칼라테아', light: 'medium', watering_style: 'high', size: 'medium', pet_friendly: true, purpose: ['interior'], difficulty: 4, image: 'findPlant/칼라테아.webp', description: '아름다운 잎 무늬를 가졌지만, 꾸준한 습도 관리가 필요해요.' },
-    { name: '스파티필름', light: 'low', watering_style: 'high', size: 'medium', pet_friendly: false, purpose: ['air_purification', 'flowering'], difficulty: 2, image: 'findPlant/스파티필름.webp', description: '우아한 흰색 꽃이 피고, 실내 공기 정화에 탁월해요.' },
-    { name: '거미 식물', light: 'medium', watering_style: 'medium', size: 'medium', pet_friendly: true, purpose: ['beginner', 'air_purification'], difficulty: 1, image: 'findPlant/거미식물.webp', description: '새끼 식물이 달리는 모습이 독특하며, 키우기 정말 쉬워요.' },
-    { name: '보스턴 고사리', light: 'medium', watering_style: 'high', size: 'medium', pet_friendly: true, purpose: ['interior'], difficulty: 3, image: 'findPlant/보스턴고사리.webp', description: '풍성한 잎이 매력적이며, 촉촉한 환경을 좋아해요.' },
-    { name: '금전수(ZZ Plant)', light: 'low', watering_style: 'low', size: 'large', pet_friendly: false, purpose: ['beginner', 'air_purification'], difficulty: 1, image: 'findPlant/금전수.webp', description: '빛이 적은 곳에서도 잘 자라며, 물을 자주 주지 않아도 되어 관리가 편해요.' },
+    const plants = [
+        { name: '산세베리아', light: 'low', watering_style: 'low', size: 'medium', pet_friendly: false, purpose: ['air_purification', 'beginner'], difficulty: 1, image: 'findPlant/산세베리아.webp', description: '공기 정화 능력이 탁월하며 건조에 강해 초보자에게 좋아요.', tip: '물을 너무 자주 주면 뿌리가 썩을 수 있어요. 흙이 완전히 마른 것을 확인한 후에 물을 주세요.' },
+        { name: '스킨답서스', light: 'low', watering_style: 'medium', size: 'small', pet_friendly: false, purpose: ['beginner', 'air_purification'], difficulty: 1, image: 'findPlant/스킨답서스.webp', description: '생명력이 강해 어디서든 잘 자라는 덩굴 식물이에요.', tip: '잎 끝이 노랗게 변하면 과습의 신호일 수 있어요.' },
+        { name: '몬스테라', light: 'medium', watering_style: 'medium', size: 'large', pet_friendly: false, purpose: ['interior', 'air_purification'], difficulty: 2, image: 'findPlant/몬스테라.webp', description: '멋진 잎 모양으로 인테리어 효과가 뛰어난 플랜테리어의 상징이죠.', tip: '새 잎에 구멍이 없다면, 빛이 부족하다는 신호일 수 있어요.' },
+        { name: '선인장', light: 'high', watering_style: 'low', size: 'small', pet_friendly: true, purpose: ['beginner', 'interior'], difficulty: 2, image: 'findPlant/선인장.webp', description: '강한 햇빛을 좋아하고 물을 자주 주지 않아도 괜찮아요.', tip: '여름 성장기에는 한 달에 한 번, 겨울 휴면기에는 물을 거의 주지 않아도 돼요.' },
+        { name: '칼라테아', light: 'medium', watering_style: 'high', size: 'medium', pet_friendly: true, purpose: ['interior'], difficulty: 4, image: 'findPlant/칼라테아.webp', description: '아름다운 잎 무늬를 가졌지만, 꾸준한 습도 관리가 필요해요.', tip: '수돗물보다는 정수된 물을 주면 잎 끝이 타는 것을 예방할 수 있어요.' },
+        { name: '스파티필름', light: 'low', watering_style: 'high', size: 'medium', pet_friendly: false, purpose: ['air_purification', 'flowering'], difficulty: 2, image: 'findPlant/스파티필름.webp', description: '우아한 흰색 꽃이 피고, 실내 공기 정화에 탁월해요.', tip: '잎이 축 처지면 물이 필요하다는 신호랍니다. 물을 주면 금방 다시 쌩쌩해져요.' },
+        { name: '거미 식물', light: 'medium', watering_style: 'medium', size: 'medium', pet_friendly: true, purpose: ['beginner', 'air_purification'], difficulty: 1, image: 'findPlant/거미식물.webp', description: '새끼 식물이 달리는 모습이 독특하며, 키우기 정말 쉬워요.', tip: '자라나는 새끼 식물을 잘라 물에 꽂아두면 쉽게 번식시킬 수 있어요.' },
+        { name: '보스턴 고사리', light: 'medium', watering_style: 'high', size: 'medium', pet_friendly: true, purpose: ['interior'], difficulty: 3, image: 'findPlant/보스턴고사리.webp', description: '풍성한 잎이 매력적이며, 촉촉한 환경을 좋아해요.', tip: '건조한 실내 환경에서는 잎 주변에 자주 분무해주면 좋습니다.' },
+        { name: '금전수(ZZ Plant)', light: 'low', watering_style: 'low', size: 'large', pet_friendly: false, purpose: ['beginner', 'air_purification'], difficulty: 1, image: 'findPlant/금전수.webp', description: '빛이 적은 곳에서도 잘 자라며, 물을 자주 주지 않아도 되어 관리가 편해요.', tip: '돈을 불러온다는 속설이 있어 개업 선물로 인기가 많아요.' },
+        { name: '여인초', light: 'medium', watering_style: 'medium', size: 'large', pet_friendly: true, purpose: ['interior', 'beginner'], difficulty: 2, image: 'findPlant/여인초.webp', description: '넓고 시원한 잎이 매력적인 식물로, 이국적인 분위기를 연출해요.', tip: '잎이 마르지 않도록 주변에 분무해주면 더 건강하게 자라요.' },
+        { name: '아레카야자', light: 'medium', watering_style: 'high', size: 'large', pet_friendly: true, purpose: ['air_purification', 'interior'], difficulty: 3, image: 'findPlant/아레카야자.webp', description: 'NASA가 선정한 실내 공기정화 식물 1위! 가습 효과도 뛰어나요.', tip: '물을 줄 때는 겉흙이 말랐을 때 흠뻑 주는 것이 좋습니다.' },
+        { name: '필레아 페페로미오이데스', light: 'medium', watering_style: 'medium', size: 'small', pet_friendly: true, purpose: ['interior', 'beginner'], difficulty: 2, image: 'findPlant/필레아페페.webp', description: '동글동글한 잎이 귀여워 인기가 많고 번식력이 좋은 식물입니다.', tip: '새로운 잎이 잘 나도록 주기적으로 화분을 돌려 빛을 골고루 받게 해주세요.' },
+        { name: '안스리움', light: 'medium', watering_style: 'high', size: 'medium', pet_friendly: false, purpose: ['flowering', 'interior'], difficulty: 3, image: 'findPlant/안스리움.webp', description: '하트 모양의 포엽과 독특한 꽃이 1년 내내 피고 지는 식물이에요.', tip: '반려동물에게는 독성이 있으니 섭취하지 않도록 주의가 필요해요.' },
+        { name: '고무나무', light: 'medium', watering_style: 'low', size: 'large', pet_friendly: false, purpose: ['air_purification', 'beginner'], difficulty: 2, image: 'findPlant/고무나무.webp', description: '광택 있는 짙은 잎이 고급스러우며, 환경 적응력이 뛰어나요.', tip: '잎에 먼지가 쌓이면 젖은 천으로 닦아주면 광합성에 도움이 됩니다.' }
+    ];
 
-    // 기존 plants 배열에 아래 객체들을 추가하세요.
-{ name: '여인초', light: 'medium', watering_style: 'medium', size: 'large', pet_friendly: true, purpose: ['interior', 'beginner'], difficulty: 2, image: 'findPlant/여인초.webp', description: '넓고 시원한 잎이 매력적인 식물로, 이국적인 분위기를 연출해요.', tip: '잎이 마르지 않도록 주변에 분무해주면 더 건강하게 자라요.' },
-{ name: '아레카야자', light: 'medium', watering_style: 'high', size: 'large', pet_friendly: true, purpose: ['air_purification', 'interior'], difficulty: 3, image: 'findPlant/아레카야자.webp', description: 'NASA가 선정한 실내 공기정화 식물 1위! 가습 효과도 뛰어나요.', tip: '물을 줄 때는 겉흙이 말랐을 때 흠뻑 주는 것이 좋습니다.' },
-{ name: '필레아 페페로미오이데스', light: 'medium', watering_style: 'medium', size: 'small', pet_friendly: true, purpose: ['interior', 'beginner'], difficulty: 2, image: 'findPlant/필레아페페.webp', description: '동글동글한 잎이 귀여워 인기가 많고 번식력이 좋은 식물입니다.', tip: '새로운 잎이 잘 나도록 주기적으로 화분을 돌려 빛을 골고루 받게 해주세요.' },
-{ name: '안스리움', light: 'medium', watering_style: 'high', size: 'medium', pet_friendly: false, purpose: ['flowering', 'interior'], difficulty: 3, image: 'findPlant/안스리움.webp', description: '하트 모양의 포엽과 독특한 꽃이 1년 내내 피고 지는 식물이에요.', tip: '반려동물에게는 독성이 있으니 섭취하지 않도록 주의가 필요해요.' },
-{ name: '고무나무', light: 'medium', watering_style: 'low', size: 'large', pet_friendly: false, purpose: ['air_purification', 'beginner'], difficulty: 2, image: 'findPlant/고무나무.webp', description: '광택 있는 짙은 잎이 고급스러우며, 환경 적응력이 뛰어나요.', tip: '잎에 먼지가 쌓이면 젖은 천으로 닦아주면 광합성에 도움이 됩니다.' }
-];
-
-
-    function addMessage(text, sender, contentHTML = null) {
+     function addMessage(text, sender, contentHTML = null) {
         const bubble = document.createElement('div');
         bubble.className = `message-bubble ${sender}-message`;
         if (contentHTML) {
             bubble.innerHTML = contentHTML;
         } else {
-            bubble.textContent = text;
+            // Gemini 응답에 포함된 마크다운(**)을 HTML(<b>)로 변환
+            bubble.innerHTML = text.replace(/\*\*(.*?)\*\*/g, '<b>$1</b>');
         }
         messageArea.appendChild(bubble);
         messageArea.scrollTop = messageArea.scrollHeight;
-        return bubble; // --- [수정] 생성된 bubble 요소를 반환
+        return bubble;
     }
 
-function showTypingIndicator() {
-        plantCharacter.className = 'plant-character thinking'; // --- [수정] 생각하는 상태로 변경
+    function showTypingIndicator() {
+        plantCharacter.className = 'plant-character thinking';
         const indicator = document.createElement('div');
         indicator.className = 'typing-indicator plant-message';
         indicator.innerHTML = '<span></span><span></span><span></span>';
@@ -647,7 +645,7 @@ function showTypingIndicator() {
         return indicator;
     }
 
-   function askQuestion() {
+    function askQuestion() {
         const question = questions[currentStep];
         const indicator = showTypingIndicator();
 
@@ -655,9 +653,8 @@ function showTypingIndicator() {
             messageArea.removeChild(indicator);
             addMessage(question.text, 'plant');
             
-            // --- [수정] 질문을 던진 후, 캐릭터를 기본 상태로 변경
             if (question.key !== 'result') {
-                 plantCharacter.className = 'plant-character idle';
+                plantCharacter.className = 'plant-character idle';
             }
 
             if (question.key === 'result') {
@@ -665,13 +662,12 @@ function showTypingIndicator() {
             } else {
                 renderOptions(question.options);
             }
-        }, 1500);
+        }, 1200);
     }
     
- function renderOptions(options) {
+    function renderOptions(options) {
         optionButtonsContainer.innerHTML = '';
         if (!options) return;
-
         options.forEach(opt => {
             const button = document.createElement('button');
             button.textContent = opt.text;
@@ -681,132 +677,178 @@ function showTypingIndicator() {
         });
     }
 
- 
-function handleOptionClick(option) {
-    addMessage(option.text, 'user');
-    userAnswers[questions[currentStep].key] = option.value;
-    optionButtonsContainer.innerHTML = '';
+    // ▼▼▼ 선택에 따라 다른 함수를 호출하도록 수정 ▼▼▼
+    function handleOptionClick(option) {
+        addMessage(option.text, 'user');
+        userAnswers[questions[currentStep].key] = option.value;
+        optionButtonsContainer.innerHTML = '';
 
-    const currentKey = questions[currentStep].key;
-    const reactions = {
-        light: "빛은 식물에게 정말 중요하지! 알았어. ☀️",
-        space: "공간 크기를 가늠해보는 중... 🤔",
-        purpose: "그렇구나! 좋은 목표를 가졌네. 👍",
-        pet: "알려줘서 고마워! 안전이 최우선이지. 🐾",
-        watering_style: "물주기 스타일도 아주 중요한 정보야! 💧"
-    };
+        if (option.value === 'start_identification') {
+            startImageIdentification(); // 사진으로 찾기 기능 시작
+            return;
+        }
+        
+        // 기존 추천 로직
+        const currentKey = questions[currentStep].key;
+        const reactions = {
+            light: "빛은 식물에게 정말 중요하지! 알았어. ☀️",
+            space: "공간 크기를 가늠해보는 중... 🤔",
+            purpose: "그렇구나! 좋은 목표를 가졌네. 👍",
+            pet: "알려줘서 고마워! 안전이 최우선이지. 🐾",
+            watering_style: "물주기 스타일도 아주 중요한 정보야! 💧"
+        };
+        
+        if (reactions[currentKey]) {
+            setTimeout(() => {
+                addMessage(reactions[currentKey], 'plant');
+                proceedToNextStep();
+            }, 500);
+        } else {
+            proceedToNextStep();
+        }
+    }
 
-    // ▼▼▼▼▼ 수정된 로직 ▼▼▼▼▼
-    // 리액션 메시지가 있는지 확인합니다.
-    if (reactions[currentKey]) {
-        // 리액션이 있다면, 리액션 메시지를 먼저 보여줍니다.
-        setTimeout(() => {
-            addMessage(reactions[currentKey], 'plant');
-            
-            // 리액션 메시지가 나온 후, 다음 질문으로 넘어갑니다.
-            currentStep++;
-            if (currentStep < questions.length) {
-                askQuestion();
-            }
-        }, 500); // 리액션 메시지를 위한 짧은 지연
-    } else {
-        // 리액션이 없다면(첫 질문 등), 바로 다음 질문으로 넘어갑니다.
+    function proceedToNextStep() {
         currentStep++;
         if (currentStep < questions.length) {
             askQuestion();
         }
-    }}
+    }
     
+    
+        // ▼▼▼ 사진으로 찾기 관련 함수들 추가 ▼▼▼
+    
+    // 1. 사진 업로드 안내 및 버튼 생성
+    function startImageIdentification() {
+        addMessage("좋아! 궁금한 식물 사진을 올려줘.", 'plant');
+        
+        const fileInput = document.createElement('input');
+        fileInput.type = 'file';
+        fileInput.accept = 'image/*';
+        fileInput.style.display = 'none';
+        
+        fileInput.addEventListener('change', handleImageUpload);
+        
+        const uploadButton = document.createElement('button');
+        uploadButton.textContent = '여기를 눌러 사진 선택하기';
+        uploadButton.onclick = () => fileInput.click();
+        
+        optionButtonsContainer.appendChild(uploadButton);
+        document.body.appendChild(fileInput);
+    }
+
+    // 2. 이미지 업로드 처리 및 API 호출
+    async function handleImageUpload(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        optionButtonsContainer.innerHTML = '';
+        const indicator = showTypingIndicator();
+
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onloadend = async () => {
+            const base64Image = reader.result.split(',')[1];
+            try {
+                const response = await fetch('/api/identify', { // 새로 만든 API 호출
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ image: base64Image, mimeType: file.type })
+                });
+
+                indicator.remove();
+                
+                if (!response.ok) {
+                    throw new Error(`서버 응답 오류: ${response.statusText}`);
+                }
+
+                const data = await response.json();
+                addMessage(data.identification, 'plant');
+                
+            } catch (error) {
+                console.error("API 호출 오류:", error);
+                indicator.remove();
+                addMessage("이런, 사진을 분석하는 중에 오류가 발생했어. 다시 시도해줄래?", 'plant');
+            } finally {
+                showRestartButton();
+            }
+        };
+    }
+    
+    // 3. 다시하기 버튼 표시 (공통 사용)
+    function showRestartButton() {
+        setTimeout(() => {
+            const restartButton = document.createElement('button');
+            restartButton.textContent = '처음으로 돌아가기';
+            restartButton.addEventListener('click', () => {
+                messageArea.innerHTML = '';
+                currentStep = 0;
+                Object.keys(userAnswers).forEach(k => delete userAnswers[k]);
+                plantCharacter.className = 'plant-character idle';
+                askQuestion();
+            });
+            optionButtonsContainer.innerHTML = '';
+            optionButtonsContainer.appendChild(restartButton);
+        }, 1000);
+    }
+
+
     function showResults() {
         const filteredByPet = userAnswers.pet === 'yes' ? plants.filter(plant => plant.pet_friendly) : plants;
         const rankedPlants = filteredByPet.map(plant => {
             let score = 0;
-            // 빛: 가장 중요하므로 가중치 높게, 안 맞으면 큰 감점
-            if (plant.light === userAnswers.light) {
-                score += 5;
-            } else if (
-                (userAnswers.light === 'high' && plant.light === 'low') || 
-                (userAnswers.light === 'low' && plant.light === 'high')
-            ) {
-                score -= 5; // 최악의 조합은 감점
-            }
-
-            // 물주기 스타일: 중요
+            if (plant.light === userAnswers.light) { score += 5; } 
+            else if ((userAnswers.light === 'high' && plant.light === 'low') || (userAnswers.light === 'low' && plant.light === 'high')) { score -= 5; }
             if (plant.watering_style === userAnswers.watering_style) score += 3;
-            
-            // 목적
             if (plant.purpose.includes(userAnswers.purpose)) score += 2;
-            
-            // 크기
             if (plant.size === userAnswers.space) score += 1;
-            
             return { ...plant, score };
         }).sort((a, b) => b.score - a.score);
+        
         const topPlants = rankedPlants.slice(0, 2);
 
-        if (topPlants.length === 0 || topPlants[0].score === 0) {
+        if (topPlants.length === 0 || topPlants[0].score < 1) { 
             plantCharacter.className = 'plant-character idle';
             addMessage("아쉽게도 모든 조건에 딱 맞는 친구를 찾지 못했어. 조건을 조금 바꿔서 다시 시도해볼래?", 'plant');
         } else {
             plantCharacter.className = 'plant-character happy';
+            addMessage("너에게 어울리는 식물 친구들을 찾았어!", 'plant');
             topPlants.forEach(p => {
-                const contentHTML = `
-                    <div class="result-card-wrapper">
-                        <img src="${p.image}" alt="${p.name}">
-                        <h3>${p.name}</h3>
-                        <p>${p.description.substring(0, 40)}...</p> </div>`;
+                let reason = '';
+                if (p.light === userAnswers.light) reason = '빛 조건이 딱 맞고, ';
+                else if (p.purpose.includes(userAnswers.purpose)) reason = '원하는 목적에 잘 맞고, ';
                 
-                // --- [수정] 결과 카드를 추가하고, 클릭 이벤트를 바로 연결 ---
+                const contentHTML = `<div class="result-card-wrapper"><img src="${p.image}" alt="${p.name}"><h3>${p.name}</h3><p>${reason}${p.description.substring(0, 30)}...</p></div>`;
+                
                 const cardBubble = addMessage(null, 'plant', contentHTML);
                 cardBubble.querySelector('.result-card-wrapper').addEventListener('click', () => {
                     openPlantDetailModal(p);
                 });
             });
         }
-        // (재시작 버튼 로직은 수정 없음)
-    
-
-        setTimeout(() => {
-            const restartButton = document.createElement('button');
-            restartButton.textContent = '다시 추천받기';
-            restartButton.addEventListener('click', () => {
-                messageArea.innerHTML = '';
-                currentStep = 0;
-                Object.keys(userAnswers).forEach(k => delete userAnswers[k]);
-                plantCharacter.className = 'plant-character idle'; // --- [수정] 재시작 시 기본 상태로
-                askQuestion();
-            });
-            optionButtonsContainer.appendChild(restartButton);
-        }, 1000);
+        showRestartButton();
     }
 
-        // --- [추가] 식물 상세 정보 모달을 열고 데이터를 채우는 함수 ---
-     function openPlantDetailModal(plant) {
+    
+    function openPlantDetailModal(plant) {
         plantModalImg.src = plant.image;
         plantModalImg.alt = plant.name;
         plantModalName.textContent = plant.name;
         plantModalDesc.textContent = plant.description;
 
-        // --- 별점 생성 로직 ---
-    plantModalDifficulty.innerHTML = ''; // 기존 별점 초기화
-    // '난이도:' 텍스트를 span 태그로 감싸줍니다.
-    let starsHTML = '<span class="difficulty-label">난이도</span>'; 
-    for (let i = 1; i <= 5; i++) {
-        if (i <= plant.difficulty) {
-            starsHTML += '<span class="star filled">★</span>';
-        } else {
-            starsHTML += '<span class="star empty">☆</span>';
+        let starsHTML = '<span class="difficulty-label">난이도</span>'; 
+        for (let i = 1; i <= 5; i++) {
+            starsHTML += `<span class="star ${i <= plant.difficulty ? 'filled' : 'empty'}">${i <= plant.difficulty ? '★' : '☆'}</span>`;
         }
-    }
-    plantModalDifficulty.innerHTML = starsHTML;
+        plantModalDifficulty.innerHTML = starsHTML;
 
-        // --- 관리 정보 생성 로직 (기존과 동일) ---
         const careInfo = {
             '☀️ 빛': { 'low': '어두운 곳 선호', 'medium': '밝은 간접광', 'high': '직사광선 필요' }[plant.light],
             '💧 물주기': { 'low': '건조하게 관리', 'medium': '흙 마르면 듬뿍', 'high': '항상 촉촉하게' }[plant.watering_style],
             '📏 크기': { 'small': '소형', 'medium': '중형', 'large': '대형' }[plant.size],
             '🐾 반려동물': plant.pet_friendly ? '안전해요' : '주의 필요'
         };
+
         plantModalCare.innerHTML = '';
         for (const [key, value] of Object.entries(careInfo)) {
             const item = document.createElement('div');
@@ -816,22 +858,29 @@ function handleOptionClick(option) {
             item.innerHTML = `<span>${icon}</span> <div><strong>${title}</strong><br>${value}</div>`;
             plantModalCare.appendChild(item);
         }
+
+        if (plant.tip) {
+            const tipItem = document.createElement('div');
+            tipItem.className = 'care-item';
+            tipItem.style.gridColumn = '1 / -1';
+            tipItem.innerHTML = `<span>💡</span> <div><strong>Pro Tip</strong><br>${plant.tip}</div>`;
+            plantModalCare.appendChild(tipItem);
+        }
         
         plantModalWrapper.classList.add('visible');
     }
 
-    // --- [추가] 모달 닫기 이벤트 리스너 ---
     function closePlantDetailModal() {
         plantModalWrapper.classList.remove('visible');
     }
     closeModalButton.addEventListener('click', closePlantDetailModal);
     plantModalWrapper.addEventListener('click', (e) => {
-        if (e.target === plantModalWrapper) { // 모달 바깥 영역 클릭 시 닫기
+        if (e.target === plantModalWrapper) {
             closePlantDetailModal();
         }
     });
 
-    askQuestion(); // 퀴즈 시작
+    askQuestion();
 });
 </script>
 </body>
