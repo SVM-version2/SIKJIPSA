@@ -457,7 +457,13 @@
             width: 80px; height: 80px; border-radius: 50%; object-fit: cover;
             border: 3px solid #f3f5ee;
         }
-        .plant-profile h2 { margin: 0 0 0.5rem 0; font-size: 2rem; }
+        .plant-profile h2 {
+            margin: 0 0 0.5rem 0;
+            font-size: 2rem;
+            color: var(--text-dark);
+            font-weight: 800;
+            letter-spacing: -1px;
+        }
         .plant-desc { color: #7a7a5c; font-size: 1.1rem; }
         .plant-detail { color: #b2a97e; font-size: 1rem; margin-top: 0.3rem; }
         .plant-tabs { display: flex; gap: 1.5rem; margin-bottom: 1.5rem; }
@@ -476,10 +482,14 @@
         }
         .calendar-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
         .calendar-nav button { background: none; border: none; font-size: 1.2rem; cursor: pointer; }
-        .calendar-table { width: 100%; border-collapse: collapse; }
-        .calendar-table th, .calendar-table td { text-align: center; padding: 0.7rem 0; background: #f8f7f2; }
-        .care-badge { background: #7a8c6b; color: #fff; border-radius: 0.7rem; margin-top: 0.3rem; padding: 0.2rem 0.7rem; font-size: 0.95rem; }
-        .care-badge span { display: block; background: #b2a97e; color: #fff; border-radius: 0.5rem; margin: 0.1rem 0; padding: 0.1rem 0.5rem; }
+        .calendar-table th, .calendar-table td { 
+            text-align: center; 
+            padding: 1rem 0.5rem; 
+            background: #f8f7f2; 
+            min-height: 80px;
+            vertical-align: top;
+        }
+        
 
         .plant-card-content {
             background: #fff;
@@ -505,19 +515,22 @@
             box-shadow: none;
             border: none;
         }
-        .calendar-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
-        .calendar-nav button { background: none; border: none; font-size: 1.2rem; cursor: pointer; }
         .calendar-table { width: 100%; border-collapse: collapse; }
         .calendar-table th {
             background: #f3f5ee;
             color: #b2a97e;
             font-weight: 700;
             font-size: 1.1rem;
+            padding: 1rem 0.5rem;
+            min-height: 50px;
         }
         .calendar-table td {
             background: #fff;
             color: #5a5a3a;
             font-size: 1.08rem;
+            padding: 1rem 0.5rem;
+            min-height: 80px;
+            vertical-align: top;
         }
         .calendar-table td.today {
           background: #f3f5ee;
@@ -527,8 +540,47 @@
           border-radius: 0.7rem;
           box-shadow: 0 2px 8px rgba(178,169,126,0.10);
         }
-        .care-badge { background: #7a8c6b; color: #fff; border-radius: 0.7rem; margin-top: 0.3rem; padding: 0.2rem 0.7rem; font-size: 0.95rem; }
-        .care-badge span { display: block; background: #b2a97e; color: #fff; border-radius: 0.5rem; margin: 0.1rem 0; padding: 0.1rem 0.5rem; }
+        
+        .care-badge span { 
+            display: block; 
+            background: #b2a97e; 
+            color: #fff; 
+            border-radius: 0.5rem; 
+            margin: 0.1rem 0; 
+            padding: 0.1rem 0.2rem; 
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-align: center;
+            min-width: 20px;
+            max-width: 40px;
+            margin: 0.1rem auto;
+        }
+
+        .back-to-collection-btn {
+            background: #e6f0d6;
+            color: #3a3a2a;
+            border: none;
+            border-radius: 1.2rem;
+            font-size: 1.05rem;
+            font-weight: 700;
+            padding: 0.6em 1.3em 0.6em 2.1em;
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(107,123,97,0.08);
+            transition: background 0.18s, color 0.18s;
+            display: flex;
+            align-items: center;
+            gap: 0.5em;
+            margin-bottom: 1.5rem;
+        }
+        .back-to-collection-btn:hover {
+            background: #b2a97e;
+            color: #fff;
+        }
+        .back-to-collection-btn .arrow {
+            font-size: 1.1em;
+            color: #2563eb;
+            margin-right: 0.5em;
+        }
 
         @media (max-width: 768px) {
             .collection-header {
@@ -553,6 +605,22 @@
                 flex-direction: column;
             }
         }
+        #guide-modal .modal-content {
+    background: var(--bg-cream) !important;         /* 흰색 배경 */
+    color: var(--text-dark) !important;           /* 진한 텍스트 */
+    border: 2px solid #e6e3d6;
+}
+#guide-modal .modal-title,
+#guide-modal-content {
+    color: #272a1a !important;
+}
+
+#guide-modal pre {
+    background: transparent !important;  /* pre 내부도 투명하게 */
+    color: #272a1a !important;
+    font-size: 1.07rem;
+    font-family: inherit;
+}
     </style>
 </head>
 <body>
@@ -626,6 +694,69 @@
         </div>
     </div>
 
+    <div id="modal-wrapper" class="modal-wrapper">
+        <div class="modal">
+            <div class="modal-left">
+                </div>
+            <div class="modal-right">
+                <button class="close-button">&times;</button>
+                <div id="login-form" class="form-container">
+                    <div class="form-header">
+                        <a href="index.html" class="logo">식집사</a>
+                        <h2>Welcome Back</h2>
+                    </div>
+                    <form>
+                        <div class="input-group">
+                            <label for="login-email">Email</label>
+                            <input type="email" id="login-email" required>
+                        </div>
+                        <div class="input-group">
+                            <label for="login-password">Password</label>
+                            <input type="password" id="login-password" required>
+                        </div>
+                        <button type="submit" class="cta-button">Login</button>
+                    </form>
+                    <p class="form-switcher">
+                        Don't have an account? <a href="#" id="show-signup">Sign Up</a>
+                    </p>
+                </div>
+                <div id="signup-form" class="form-container" style="display: none;">
+                    <div class="form-header">
+                        <a href="index.html" class="logo">식집사</a>
+                        <h2>Create Account</h2>
+                    </div>
+                    <form>
+                        <div class="input-group">
+                            <label for="signup-name">Name</label>
+                            <input type="text" id="signup-name" required>
+                        </div>
+                        <div class="input-group">
+                            <label for="signup-email">Email</label>
+                            <input type="email" id="signup-email" required>
+                        </div>
+                        <div class="input-group">
+                            <label for="signup-password">Password</label>
+                            <input type="password" id="signup-password" required>
+                        </div>
+                        <button type="submit" class="cta-button">Create Account</button>
+                    </form>
+                    <p class="form-switcher">
+                        Already have an account? <a href="#" id="show-login">Login</a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="guide-modal" class="modal-overlay" style="z-index:2000;">
+  <div class="modal-content" style="max-width:420px;">
+    <div class="modal-header">
+      <h2 id="guide-modal-title" class="modal-title">가이드</h2>
+      <button class="close-modal" onclick="closeGuideModal()">×</button>
+    </div>
+    <pre id="guide-modal-content" style="white-space:pre-wrap; font-family:inherit; font-size:1.07rem; margin-bottom:0;"></pre>
+  </div>
+</div>
     <script type="module" src="navigation.js"></script>
     <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
@@ -648,40 +779,6 @@
     const loginNavButton = document.querySelector('header nav .cta-button');
     let currentUser = null;
     
-    onAuthStateChanged(auth, async (user) => {
-        currentUser = user;
-        if (user) {
-            const userDoc = await getDoc(doc(db, "users", user.uid));
-            if (userDoc.exists()) {
-                loginNavButton.textContent = `${userDoc.data().name} 집사님`;
-            } else {
-                loginNavButton.textContent = '정보 없음';
-            }
-        } else {
-            loginNavButton.textContent = 'Login';
-        }
-    });
-
-    // Firebase 데이터 저장 함수들
-    async function savePlantToFirebase(plantData) {
-        if (!currentUser) {
-            alert('로그인이 필요합니다.');
-            return;
-        }
-        
-        try {
-            const plantRef = doc(db, "users", currentUser.uid, "plants", plantData.name);
-            await setDoc(plantRef, {
-                ...plantData,
-                registeredAt: new Date().toISOString(),
-                userId: currentUser.uid
-            });
-            console.log('식물이 저장되었습니다:', plantData.name);
-        } catch (error) {
-            console.error('식물 저장 실패:', error);
-            alert('식물 저장에 실패했습니다.');
-        }
-    }
 
     async function saveCareRecordToFirebase(plantName, careData) {
         if (!currentUser) {
@@ -740,12 +837,14 @@
         console.log('로드된 사용자 식물:', userPlants);
     }
     
-    // PLANTS 배열 정의 (50종 식물)
     const PLANTS = [
         {
             name: "몬스테라",
             img: "findPlant/몬스테라.webp",
-            desc: "대형 잎이 특징인 인기 식물",
+            desc: "독특한 대형 잎으로 플랜테리어에 인기",
+            detail: "넓고 독특한 구멍 무늬의 잎이 특징이며, 공간을 싱그럽게 꾸며줍니다.",
+            careGuide: "햇빛이 잘 드는 곳에서 키우되, 직사광선은 피하세요. 흙이 마르면 물을 충분히 주고, 월 1회 영양제와 연 1회 분갈이 추천.",
+            tip: "공중습도에 민감하니 잎에 분무를 해주면 더욱 건강하게 자랍니다.",
             care: [
                 { type: "물주기", interval: 7, memo: "흙이 마르면 듬뿍 주세요" },
                 { type: "분갈이", interval: 365, memo: "1년에 한 번 분갈이" },
@@ -753,11 +852,27 @@
             ]
         },
         {
-            name: "스킨답서스",
-            img: "findPlant/스킨답서스.webp",
-            desc: "공기정화 효과가 뛰어난 식물",
+            name: "산세베리아",
+            img: "findPlant/산세베리아.webp",
+            desc: "물 주기가 적어 공기정화식물로 인기",
+            detail: "뾰족한 칼 모양 잎이 직립하며, 초보자도 실패하기 어려운 생명력 갑 식물.",
+            careGuide: "반음지~밝은 실내 모두 적응. 흙이 완전히 말랐을 때 물을 주고, 겨울엔 월 1회 정도로 횟수를 줄이세요.",
+            tip: "잎 끝이 갈라지면 과습이나 저온일 수 있으니 주의!",
             care: [
-                { type: "물주기", interval: 5, memo: "흙이 마르면 주세요" },
+                { type: "물주기", interval: 14, memo: "흙이 완전히 마르면 주세요" },
+                { type: "분갈이", interval: 730, memo: "2년에 한 번 분갈이" },
+                { type: "영양제", interval: 60, memo: "2개월에 1회 영양제" }
+            ]
+        },
+        {
+            name: "아글라오네마",
+            img: "findPlant/아글라오네마.webp",
+            desc: "어두운 실내에서도 잘 자라는 공기정화 식물",
+            detail: "다채로운 잎색이 매력적이며, 빛이 부족한 공간에도 강한 실내정화식물.",
+    careGuide: "간접광~반음지에 두고 흙이 마르면 물을 주세요. 겨울엔 물주는 주기를 늘리세요.",
+    tip: "잎에 먼지가 쌓이면 젖은 천으로 닦아주면 광택이 살아나요.",
+            care: [
+                { type: "물주기", interval: 7, memo: "흙이 마르면 주세요" },
                 { type: "분갈이", interval: 365, memo: "1년에 한 번 분갈이" },
                 { type: "영양제", interval: 30, memo: "월 1회 영양제" }
             ]
@@ -765,7 +880,10 @@
         {
             name: "스파티필름",
             img: "findPlant/스파티필름.webp",
-            desc: "하얀 꽃이 아름다운 식물",
+            desc: "하얀 꽃이 매력적인 공기정화 식물",
+            detail: "순백의 꽃과 짙은 녹색 잎의 조화가 아름다운 실내 플랜트.",
+    careGuide: "흙이 마르면 듬뿍 물을 주고, 반양지에서 키워주세요. 월 1회 영양제.",
+    tip: "꽃이 시들면 꽃대를 잘라주면 더 오래 피워낼 수 있어요.",
             care: [
                 { type: "물주기", interval: 7, memo: "흙이 마르면 주세요" },
                 { type: "분갈이", interval: 365, memo: "1년에 한 번 분갈이" },
@@ -773,19 +891,51 @@
             ]
         },
         {
-            name: "칼라테아",
-            img: "findPlant/칼라테아.webp",
-            desc: "예쁜 무늬가 있는 잎 식물",
+            name: "아레카야자",
+            img: "findPlant/아레카야자.webp",
+            desc: "NASA 선정 최고 공기정화, 열대 분위기의 야자",
+            detail: "가늘고 긴 잎이 다발로 뻗는 실내 야자류 대표. 공기정화능력 우수.",
+    careGuide: "밝은 실내에서 키우고, 흙이 마르면 듬뿍 관수. 월 1회 영양제.",
+    tip: "잎 끝이 갈라지면 건조신호! 분무기로 수분을 자주 공급해 주세요.",
             care: [
-                { type: "물주기", interval: 5, memo: "흙이 마르면 주세요" },
+                { type: "물주기", interval: 7, memo: "흙이 마르면 주세요" },
+                { type: "분갈이", interval: 730, memo: "2년에 한 번 분갈이" },
+                { type: "영양제", interval: 30, memo: "월 1회 영양제" }
+            ]
+        },
+        {
+            name: "인도고무나무",
+            img: "findPlant/인도고무나무.webp",
+            desc: "관리 쉽고 튼튼해 인테리어에 적합한 나무",
+            detail: "넓은 광택 잎과 튼튼한 줄기가 특징. 실내 어디든 포인트 식물로 좋아요.",
+    careGuide: "햇빛을 좋아하지만 강한 직사광선은 피하고, 흙이 마르면 물을 주세요.",
+    tip: "잎에 먼지가 쌓이면 물수건으로 닦아주면 건강하게 자랍니다.",
+            care: [
+                { type: "물주기", interval: 7, memo: "흙이 마르면 주세요" },
                 { type: "분갈이", interval: 365, memo: "1년에 한 번 분갈이" },
+                { type: "영양제", interval: 30, memo: "월 1회 영양제" }
+            ]
+        },
+        {
+            name: "파키라",
+            img: "findPlant/파키라.webp",
+            desc: "재물운을 상징하며 습도 조절에 도움되는 식물",
+            detail: "줄기가 꼬인 듯한 모양이 인상적이고, 습도 유지에 좋아 거실에 추천.",
+    careGuide: "햇빛과 통풍을 좋아하며, 흙이 마를 때 물을 듬뿍. 월 1회 영양제.",
+    tip: "건조할 땐 잎에 분무를 해주세요. 겨울엔 물을 줄이세요.",
+            care: [
+                { type: "물주기", interval: 7, memo: "흙이 마르면 주세요" },
+                { type: "분갈이", interval: 730, memo: "2년에 한 번 분갈이" },
                 { type: "영양제", interval: 30, memo: "월 1회 영양제" }
             ]
         },
         {
             name: "보스턴고사리",
             img: "findPlant/보스턴고사리.webp",
-            desc: "우아한 잎 모양의 고사리",
+            desc: "습도를 조절해주는 풍성한 잎의 고사리",
+            detail: "풍성한 잎이 늘어져 인테리어 효과 만점. 실내습도 조절에 효과적.",
+    careGuide: "반양지~음지에 두고 흙이 자주 마르지 않게 관리. 분무도 자주.",
+    tip: "잎 끝이 마르면 공중습도를 높여주세요.",
             care: [
                 { type: "물주기", interval: 3, memo: "흙이 마르면 주세요" },
                 { type: "분갈이", interval: 365, memo: "1년에 한 번 분갈이" },
@@ -793,19 +943,64 @@
             ]
         },
         {
-            name: "산세베리아",
-            img: "findPlant/산세베리아.webp",
-            desc: "공기정화 효과가 뛰어난 식물",
+            name: "필로덴드론",
+            img: "findPlant/필로덴드론.webp",
+            desc: "다양한 잎 무늬와 종으로 플랜테리어에 인기",
+            detail: "초록빛 다양한 잎 모양이 매력적이고, 키우기 쉬워 초보자에게도 적합.",
+    careGuide: "밝은 간접광에서 키우고, 흙이 마르면 물을 주세요. 분무를 해주면 좋음.",
+    tip: "성장점 근처에서 가지치기하면 더욱 풍성해져요.",
             care: [
-                { type: "물주기", interval: 14, memo: "흙이 완전히 마르면 주세요" },
+                { type: "물주기", interval: 7, memo: "흙이 마르면 주세요" },
                 { type: "분갈이", interval: 365, memo: "1년에 한 번 분갈이" },
+                { type: "영양제", interval: 30, memo: "월 1회 영양제" }
+            ]
+        },
+        {
+            name: "벤자민 고무나무",
+            img: "findPlant/벤자민 고무나무.webp",
+            desc: "실내에서 잘 자라고 오래 함께하는 관엽수",
+            detail: "가는 잎과 작은 나무 모양. 성장속도가 빨라 집이나 사무실에 추천.",
+    careGuide: "햇빛을 좋아하며, 흙이 마르면 듬뿍 물을 주세요. 겨울엔 물을 줄이세요.",
+    tip: "잎이 노랗게 변하면 과습 또는 냉해. 위치와 물주기를 체크!",
+            care: [
+                { type: "물주기", interval: 7, memo: "흙이 마르면 주세요" },
+                { type: "분갈이", interval: 730, memo: "2년에 한 번 분갈이" },
+                { type: "영양제", interval: 30, memo: "월 1회 영양제" }
+            ]
+        },
+        {
+            name: "호야",
+            img: "findPlant/호야.webp",
+            desc: "꽃이 피고 향기가 나는 두꺼운 잎의 덩굴 식물",
+             detail: "두껍고 반질반질한 잎이 덩굴로 자라며, 꽃은 향기가 진해 매력적.",
+    careGuide: "밝은 곳~반음지에서 키우고, 과습은 피해주세요. 영양제는 2달에 1번.",
+    tip: "잎에 물방울 맺히면 성장 신호, 꽃이 피려면 충분한 햇빛이 필요해요.",
+            care: [
+                { type: "물주기", interval: 7, memo: "흙이 마르면 주세요" },
+                { type: "분갈이", interval: 730, memo: "2년에 한 번 분갈이" },
                 { type: "영양제", interval: 60, memo: "2개월에 1회 영양제" }
             ]
         },
         {
-            name: "선인장",
-            img: "findPlant/선인장.webp",
-            desc: "건조한 환경을 좋아하는 식물",
+            name: "에케베리아",
+            img: "findPlant/에케베리아.webp",
+            desc: "다양한 색과 잎 모양의 대표적인 다육식물",
+            detail: "로제트형 잎이 다양한 컬러로 변화. 건조에 강함.",
+    careGuide: "햇빛이 잘 드는 곳에서 키우고, 흙이 완전히 마른 후 듬뿍 물을 줍니다.",
+    tip: "통풍이 잘 되는 곳에서 키워야 과습을 예방할 수 있어요.",
+            care: [
+                { type: "물주기", interval: 14, memo: "흙이 완전히 마르면 주세요" },
+                { type: "분갈이", interval: 730, memo: "2년에 한 번 분갈이" },
+                { type: "영양제", interval: 60, memo: "2개월에 1회 영양제" }
+            ]
+        },
+        {
+            name: "리톱스",
+            img: "findPlant/리톱스.webp",
+            desc: "돌을 닮은 신기한 모양의 작은 다육식물",
+            detail: "돌처럼 보이는 귀여운 다육이. 여름엔 휴면, 가을·겨울에 성장.",
+    careGuide: "햇빛이 잘 드는 곳, 물은 흙이 완전히 마를 때만 줍니다.",
+    tip: "과습에 매우 약하니 절대 과하게 물을 주지 마세요!",
             care: [
                 { type: "물주기", interval: 21, memo: "흙이 완전히 마르면 주세요" },
                 { type: "분갈이", interval: 730, memo: "2년에 한 번 분갈이" },
@@ -813,9 +1008,77 @@
             ]
         },
         {
-            name: "금전수",
-            img: "findPlant/금전수.webp",
-            desc: "돈을 불러온다는 인기 식물",
+            name: "금호",
+            img: "findPlant/금호.webp",
+            desc: "일명 돈나무로 불리며 번식이 쉬운 다육식물",
+            detail: "둥글고 두꺼운 잎이 풍성하게 자라며 번식도 쉽습니다.",
+    careGuide: "햇빛이 잘 드는 곳, 흙이 완전히 말랐을 때 듬뿍 관수. 분갈이와 영양제는 계절에 따라.",
+    tip: "잎이 쭈글해지면 물부족, 잎이 노랗게 변하면 과습 신호입니다.",
+            care: [
+                { type: "물주기", interval: 21, memo: "흙이 완전히 마르면 주세요" },
+                { type: "분갈이", interval: 730, memo: "2년에 한 번 분갈이" },
+                { type: "영양제", interval: 90, memo: "3개월에 1회 영양제" }
+            ]
+        },
+        {
+            name: "페페로미아",
+            img: "findPlant/페페로미아.webp",
+            desc: "작고 귀여운 잎으로 초보자에게 인기인 식물",
+            detail: "작은 잎과 다양한 컬러가 귀여워 책상 위나 작은 공간에 적합.",
+    careGuide: "간접광~반음지에 두고 흙이 마르면 물을 주세요. 2년에 1번 분갈이.",
+    tip: "습도에 약하니 너무 습하게 관리하지 마세요.",
+            care: [
+                { type: "물주기", interval: 7, memo: "흙이 마르면 주세요" },
+                { type: "분갈이", interval: 730, memo: "2년에 한 번 분갈이" },
+                { type: "영양제", interval: 30, memo: "월 1회 영양제" }
+            ]
+        },
+        {
+            name: "틸란드시아",
+            img: "findPlant/틸란드시아.webp",
+            desc: "흙 없이도 공중재배가 가능한 인테리어 플랜트",
+            detail: "흙 없이도 키우는 에어플랜트. 어디든 걸어둘 수 있어 인테리어 효과 만점.",
+    careGuide: "일주일에 1~2회 정도 미지근한 물에 20분 정도 담가주기.",
+    tip: "햇빛과 통풍을 좋아하니 창가 근처에 두는 게 좋아요.",
+            care: [
+                { type: "물주기", interval: 7, memo: "일주일에 1회 물에 담가주세요" },
+                { type: "분갈이", interval: 0, memo: "분갈이 불필요" },
+                { type: "영양제", interval: 30, memo: "월 1회 영양제" }
+            ]
+        },
+        {
+            name: "디시디아",
+            img: "findPlant/디시디아.webp",
+            desc: "공중에 매달아 키우기 좋은 행잉 플랜트",
+             detail: "덩굴성 식물로, 행잉 플랜트에 적합. 작고 동글동글한 잎이 귀여움.",
+    careGuide: "반음지에서 키우고, 물은 흙이 마르면 충분히 주세요.",
+    tip: "겨울에는 과습을 피하고, 여름에는 통풍에 신경 써주세요.",
+            care: [
+                { type: "물주기", interval: 7, memo: "흙이 마르면 주세요" },
+                { type: "분갈이", interval: 730, memo: "2년에 한 번 분갈이" },
+                { type: "영양제", interval: 60, memo: "2개월에 1회 영양제" }
+            ]
+        },
+        {
+            name: "아이비",
+            img: "findPlant/아이비.webp",
+            desc: "벽걸이와 행잉으로 인기 있는 튼튼한 넝쿨식물",
+            detail: "길게 늘어지는 덩굴형 식물, 다양한 장소에 활용 가능.",
+    careGuide: "반음지에서 키우며, 흙이 마를 때 물을 충분히 주세요.",
+    tip: "잎 끝이 마르면 건조 신호, 분무기로 수분을 보충해 주세요.",
+            care: [
+                { type: "물주기", interval: 5, memo: "흙이 마르면 주세요" },
+                { type: "분갈이", interval: 365, memo: "1년에 한 번 분갈이" },
+                { type: "영양제", interval: 30, memo: "월 1회 영양제" }
+            ]
+        },
+        {
+            name: "칼란코에",
+            img: "findPlant/칼란코에.webp",
+            desc: "다육질 잎을 가진 꽃식물로 꽃을 피우기 쉬움",
+            detail: "작고 도톰한 잎, 화려한 색의 꽃이 오랫동안 피는 다육성 식물.",
+    careGuide: "밝은 곳에서 키우고, 흙이 마르면 물을 듬뿍. 월 1회 영양제.",
+    tip: "꽃이 피는 동안 영양제를 주면 더 오래 꽃을 감상할 수 있어요.",
             care: [
                 { type: "물주기", interval: 7, memo: "흙이 마르면 주세요" },
                 { type: "분갈이", interval: 365, memo: "1년에 한 번 분갈이" },
@@ -823,13 +1086,406 @@
             ]
         },
         {
-            name: "거미식물",
-            img: "findPlant/거미식물.webp",
-            desc: "공기정화 효과가 뛰어난 식물",
+            name: "시클라멘",
+            img: "findPlant/시클라멘.webp",
+            desc: "겨울에도 아름다운 꽃을 피우는 실내 화초",
+            detail: "겨울에 꽃을 피우는 독특한 실내 식물. 잎과 꽃이 모두 아름다움.",
+    careGuide: "서늘한 실내에서 키우고, 흙 표면이 마르면 물을 주세요.",
+    tip: "꽃이 시든 후엔 뿌리가 쉴 수 있도록 관수를 줄여주세요.",
             care: [
                 { type: "물주기", interval: 7, memo: "흙이 마르면 주세요" },
                 { type: "분갈이", interval: 365, memo: "1년에 한 번 분갈이" },
                 { type: "영양제", interval: 30, memo: "월 1회 영양제" }
+            ]
+        },
+        {
+            name: "제라늄",
+            img: "findPlant/제라늄.webp",
+            desc: "향기와 꽃색이 다양하며 해충 퇴치에도 효과",
+            detail: "강한 향기와 다양한 꽃색이 특징인 인기 허브.",
+    careGuide: "햇빛을 좋아하며, 물은 흙이 마르면 듬뿍 주세요.",
+    tip: "환기가 잘 되는 곳에 두면 병충해를 예방할 수 있어요.",
+            care: [
+                { type: "물주기", interval: 5, memo: "흙이 마르면 주세요" },
+                { type: "분갈이", interval: 365, memo: "1년에 한 번 분갈이" },
+                { type: "영양제", interval: 30, memo: "월 1회 영양제" }
+            ]
+        },
+        {
+            name: "라벤더",
+            img: "findPlant/라벤더.webp",
+            desc: "향기로운 허브로 인테리어와 힐링에 좋은 식물",
+            detail: "은은한 보랏빛 꽃과 향기로 집안의 분위기를 바꿔주는 허브.",
+    careGuide: "햇빛이 잘 드는 곳에서 키우고, 흙이 마르면 물을 주세요.",
+    tip: "분갈이는 2년에 한 번, 뿌리 썩음에 주의!",
+            care: [
+                { type: "물주기", interval: 7, memo: "흙이 마르면 주세요" },
+                { type: "분갈이", interval: 730, memo: "2년에 한 번 분갈이" },
+                { type: "영양제", interval: 60, memo: "2개월에 1회 영양제" }
+            ]
+        },
+        {
+            name: "바질",
+            img: "findPlant/바질.webp",
+            desc: "실내에서 키우기 쉬워 요리에 자주 쓰이는 허브",
+            detail: "상큼한 향과 풍미, 생잎을 바로 요리에 활용할 수 있는 허브.",
+    careGuide: "햇빛이 잘 드는 곳, 흙이 마르면 듬뿍 관수. 자주 잎을 따주면 더 잘 자라요.",
+    tip: "여름철 물부족에 약하니 잎이 축 처지면 즉시 물을 주세요.",
+            care: [
+                { type: "물주기", interval: 3, memo: "흙이 마르면 주세요" },
+                { type: "분갈이", interval: 365, memo: "1년에 한 번 분갈이" },
+                { type: "영양제", interval: 30, memo: "월 1회 영양제" }
+            ]
+        },
+        {
+            name: "민트",
+            img: "findPlant/민트.webp",
+            desc: "물만 자주 주면 잘 자라는 대표적인 허브",
+            detail: "강한 생명력과 상쾌한 향이 특징. 번식력도 아주 뛰어남.",
+    careGuide: "밝은 곳에서 키우고, 흙이 마르지 않게 자주 물을 주세요.",
+    tip: "잎이 무성해지면 가지치기를 해주면 새순이 풍성하게 나옵니다.",
+            care: [
+                { type: "물주기", interval: 3, memo: "흙이 마르면 주세요" },
+                { type: "분갈이", interval: 365, memo: "1년에 한 번 분갈이" },
+                { type: "영양제", interval: 30, memo: "월 1회 영양제" }
+            ]
+        },
+        {
+            name: "로즈마리",
+            img: "findPlant/로즈마리.webp",
+            desc: "공기정화에도 도움이 되는 실내 허브 식물",
+             detail: "짙은 향과 뾰족한 잎, 요리·허브차·방향제 모두 활용 가능한 만능 허브.",
+    careGuide: "햇빛이 잘 드는 곳, 물은 흙이 마르면 주세요. 통풍도 중요.",
+    tip: "과습하면 뿌리가 쉽게 썩으니 배수에 주의하세요.",
+            care: [
+                { type: "물주기", interval: 7, memo: "흙이 마르면 주세요" },
+                { type: "분갈이", interval: 730, memo: "2년에 한 번 분갈이" },
+                { type: "영양제", interval: 60, memo: "2개월에 1회 영양제" }
+            ]
+        },
+        {
+            name: "금전수",
+            img: "findPlant/금전수.webp",
+            desc: "두꺼운 초록 잎이 특징이며 일명 돈나무로 불림",
+            detail: "둥글고 광택있는 잎, 물을 오래 저장하는 튼튼한 식물.",
+    careGuide: "반음지에서 키우며, 흙이 완전히 마르면 충분히 물을 주세요.",
+    tip: "과습에 약하니 물주기는 잎을 관찰하며 조절하세요.",
+            care: [
+                { type: "물주기", interval: 14, memo: "흙이 완전히 마르면 주세요" },
+                { type: "분갈이", interval: 730, memo: "2년에 한 번 분갈이" },
+                { type: "영양제", interval: 60, memo: "2개월에 1회 영양제" }
+            ]
+        },
+        {
+            name: "파키라 미니종",
+            img: "findPlant/파키라 미니종.webp",
+            desc: "작은 공간에서도 키우기 좋은 미니 파키라",
+            detail: "아담한 크기의 파키라, 작은 방이나 사무실 탁상용으로 적합.",
+    careGuide: "햇빛과 통풍이 잘 되는 곳, 흙이 마르면 듬뿍 관수.",
+    tip: "겨울철엔 물주기를 줄이고 따뜻한 곳에 두세요.",
+            care: [
+                { type: "물주기", interval: 5, memo: "흙이 마르면 주세요" },
+                { type: "분갈이", interval: 365, memo: "1년에 한 번 분갈이" },
+                { type: "영양제", interval: 30, memo: "월 1회 영양제" }
+            ]
+        },
+        {
+            name: "산초",
+            img: "findPlant/산초.webp",
+            desc: "특유의 향으로 해충을 쫓고 관상용으로도 좋은 식물",
+            detail: "향이 강해 해충 방지용으로도 많이 키우는 허브 나무.",
+    careGuide: "햇빛이 잘 드는 곳, 흙이 마르면 충분히 물을 주세요.",
+    tip: "향이 진해지는 봄·여름에 가지치기를 해주세요.",
+            care: [
+                { type: "물주기", interval: 7, memo: "흙이 마르면 주세요" },
+                { type: "분갈이", interval: 730, memo: "2년에 한 번 분갈이" },
+                { type: "영양제", interval: 60, memo: "2개월에 1회 영양제" }
+            ]
+        },
+        {
+            name: "스킨답서스",
+            img: "findPlant/스킨답서스.webp",
+            desc: "무늬가 아름다운 넝쿨식물로 실내 인테리어에 추천",
+            detail: "황금색 줄무늬가 매력적인 덩굴성 식물. 키우기 쉽고 공기정화도 우수.",
+    careGuide: "반음지~간접광에서 키우며, 흙이 마르면 물을 주세요.",
+    tip: "덩굴을 길게 키우려면 지지대를 활용해보세요.",
+            care: [
+                { type: "물주기", interval: 5, memo: "흙이 마르면 주세요" },
+                { type: "분갈이", interval: 365, memo: "1년에 한 번 분갈이" },
+                { type: "영양제", interval: 30, memo: "월 1회 영양제" }
+            ]
+        },
+        {
+            name: "문샤인 산세베리아",
+            img: "findPlant/문샤인 산세베리아.webp",
+            desc: "은빛 잎을 가진 산세베리아로 작은 화분에 적합",
+            detail: "은빛 광택의 잎이 우아한 느낌을 주는 미니 산세베리아.",
+    careGuide: "밝은 실내에서, 흙이 완전히 말랐을 때만 물을 주세요.",
+    tip: "잎이 꺾이거나 부러지면 새로운 포트에 삽목도 가능!",
+            care: [
+                { type: "물주기", interval: 14, memo: "흙이 완전히 마르면 주세요" },
+                { type: "분갈이", interval: 730, memo: "2년에 한 번 분갈이" },
+                { type: "영양제", interval: 60, memo: "2개월에 1회 영양제" }
+            ]
+        },
+        {
+            name: "싱고니움",
+            img: "findPlant/싱고니움.webp",
+            desc: "다양한 잎 색과 무늬로 인테리어에 인기 있는 식물",
+            detail: "화살촉 모양의 잎, 다양한 컬러와 무늬로 포인트 식물로 인기.",
+    careGuide: "밝은 간접광에서 키우고, 흙이 마르면 물을 주세요.",
+    tip: "잎이 마르면 분무를 해주고, 수형 유지를 위해 가지치기를 해주세요.",
+            care: [
+                { type: "물주기", interval: 5, memo: "흙이 마르면 주세요" },
+                { type: "분갈이", interval: 365, memo: "1년에 한 번 분갈이" },
+                { type: "영양제", interval: 30, memo: "월 1회 영양제" }
+            ]
+        },
+        {
+            name: "유카",
+            img: "findPlant/유카.webp",
+            desc: "생명력이 강해 실내에서도 잘 자라는 관엽수",
+            detail: "두꺼운 줄기와 뾰족한 잎, 큰 키로 존재감이 확실한 관엽수.",
+    careGuide: "햇빛이 잘 드는 곳, 흙이 완전히 마르면 물을 주세요.",
+    tip: "잎 끝이 갈라지면 습도가 부족한 것이니 분무를 해주세요.",
+            care: [
+                { type: "물주기", interval: 14, memo: "흙이 완전히 마르면 주세요" },
+                { type: "분갈이", interval: 730, memo: "2년에 한 번 분갈이" },
+                { type: "영양제", interval: 60, memo: "2개월에 1회 영양제" }
+            ]
+        },
+        {
+            name: "올리브나무",
+            img: "findPlant/올리브나무.webp",
+            desc: "고풍스러운 분위기를 주지만 햇빛을 좋아하는 나무",
+            detail: "지중해 느낌이 나는 분위기, 작은 잎과 매끈한 수피가 매력.",
+    careGuide: "햇빛이 아주 잘 드는 곳, 배수가 잘되는 흙에 심으세요.",
+    tip: "통풍이 중요하며 겨울엔 실내로 들여야 해요.",
+            care: [
+                { type: "물주기", interval: 7, memo: "흙이 마르면 주세요" },
+                { type: "분갈이", interval: 730, memo: "2년에 한 번 분갈이" },
+                { type: "영양제", interval: 60, memo: "2개월에 1회 영양제" }
+            ]
+        },
+        {
+            name: "홍콩야자",
+            img: "findPlant/홍콩야자.webp",
+            desc: "실내 조경용으로 좋고 잎이 넓어 무성한 식물",
+            detail: "동그랗고 넓은 잎, 실내에서도 왕성하게 자라며 초보자에게 추천.",
+    careGuide: "반양지에서 키우고 흙이 마르면 듬뿍 관수. 월 1회 영양제.",
+    tip: "잎이 힘없이 처지면 물부족, 잎 끝이 갈라지면 과습을 의심하세요.",
+            care: [
+                { type: "물주기", interval: 7, memo: "흙이 마르면 주세요" },
+                { type: "분갈이", interval: 730, memo: "2년에 한 번 분갈이" },
+                { type: "영양제", interval: 30, memo: "월 1회 영양제" }
+            ]
+        },
+        {
+            name: "무늬홍콩야자",
+            img: "findPlant/무늬홍콩야자.webp",
+            desc: "무늬 잎이 더해져 플랜테리어에 인기인 희귀종",
+            detail: "흰 무늬가 있는 희귀 홍콩야자, 인테리어 효과가 크고 관리도 쉬움.",
+    careGuide: "반음지에서 키우고, 흙이 마르면 물을 주세요. 월 1회 영양제.",
+    tip: "잎 무늬가 선명하게 유지되려면 직사광선을 피하세요.",
+            care: [
+                { type: "물주기", interval: 7, memo: "흙이 마르면 주세요" },
+                { type: "분갈이", interval: 730, memo: "2년에 한 번 분갈이" },
+                { type: "영양제", interval: 30, memo: "월 1회 영양제" }
+            ]
+        },
+        {
+            name: "쉐프레라",
+            img: "findPlant/쉐프레라.webp",
+            desc: "손바닥 모양의 잎을 가진 관리 쉬운 관엽식물",
+            detail: "손바닥처럼 갈라진 잎이 포인트. 병충해와 건조에 강해 초보자에게 적합.",
+    careGuide: "밝은 간접광에서 키우고, 흙이 마르면 듬뿍 관수. 월 1회 영양제.",
+    tip: "수형 유지를 위해 가지치기를 해주면 더욱 풍성해져요.",
+            care: [
+                { type: "물주기", interval: 7, memo: "흙이 마르면 주세요" },
+                { type: "분갈이", interval: 730, memo: "2년에 한 번 분갈이" },
+                { type: "영양제", interval: 30, memo: "월 1회 영양제" }
+            ]
+        },
+        {
+            name: "드라세나",
+            img: "findPlant/드라세나.webp",
+            desc: "줄기와 잎의 색감이 아름다워 거실과 사무실에 인기",
+            detail: "굵은 줄기와 줄무늬 잎, 공간을 산뜻하게 만들어주는 인기 관엽수.",
+    careGuide: "밝은 곳~반음지, 흙이 마르면 듬뿍 물을 주세요. 2달에 1회 영양제.",
+    tip: "잎 끝이 말라가면 실내 공기가 너무 건조한 것!",
+            care: [
+                { type: "물주기", interval: 7, memo: "흙이 마르면 주세요" },
+                { type: "분갈이", interval: 730, memo: "2년에 한 번 분갈이" },
+                { type: "영양제", interval: 60, memo: "2개월에 1회 영양제" }
+            ]
+        },
+        {
+            name: "필로덴드론 스플렌덴스",
+            img: "findPlant/필로덴드론 스플렌덴스.webp",
+            desc: "두껍고 화려한 잎을 가진 대형 플랜테리어 식물",
+            detail: "크고 두꺼운 잎에 무늬가 아름다우며, 공간을 채워주는 대형 식물.",
+    careGuide: "밝은 간접광, 흙이 마르면 물주기. 월 1회 영양제.",
+    tip: "잎에 먼지가 쌓이면 닦아주면 광택이 살아나요.",
+            care: [
+                { type: "물주기", interval: 7, memo: "흙이 마르면 주세요" },
+                { type: "분갈이", interval: 365, memo: "1년에 한 번 분갈이" },
+                { type: "영양제", interval: 30, memo: "월 1회 영양제" }
+            ]
+        },
+        {
+            name: "몬스테라 델리시오사 컷",
+            img: "findPlant/몬스테라 델리시오사 컷.webp",
+            desc: "몬스테라의 희귀 변이종으로 커뮤니티에서 인기",
+             detail: "몬스테라의 변이종으로, 잎 구멍이 더욱 독특하고 아름다움.",
+    careGuide: "간접광에서 키우고, 흙이 마르면 듬뿍 물을 주세요. 월 1회 영양제.",
+    tip: "자주 분무하면 잎이 싱싱해져요. 줄기 절단 후 삽목도 쉬워요.",
+            care: [
+                { type: "물주기", interval: 7, memo: "흙이 마르면 주세요" },
+                { type: "분갈이", interval: 365, memo: "1년에 한 번 분갈이" },
+                { type: "영양제", interval: 30, memo: "월 1회 영양제" }
+            ]
+        },
+        {
+            name: "봄꽃 미니 관화식물",
+            img: "findPlant/봄꽃 미니 관화식물.webp",
+            desc: "계절마다 꽃을 피우는 작은 화초들의 모음",
+            detail: "작고 다양한 색의 꽃이 매력적. 봄 분위기를 실내에서 즐길 수 있음.",
+    careGuide: "밝은 곳에서 키우고, 흙이 마르면 듬뿍 관수. 월 1회 영양제.",
+    tip: "꽃이 진 후엔 꽃대를 잘라주면 다음 꽃을 준비할 수 있어요.",
+            care: [
+                { type: "물주기", interval: 3, memo: "흙이 마르면 주세요" },
+                { type: "분갈이", interval: 365, memo: "1년에 한 번 분갈이" },
+                { type: "영양제", interval: 30, memo: "월 1회 영양제" }
+            ]
+        },
+        {
+            name: "무늬파비앙",
+            img: "findPlant/무늬파비앙.webp",
+            desc: "둥근 잎에 무늬가 있는 희귀한 아랄리아 품종",
+            detail: "둥글고 하얀 무늬가 있는 잎이 이국적인 느낌을 줌.",
+    careGuide: "반음지에서 키우고, 2달에 1번 영양제. 흙이 마르면 물주기.",
+    tip: "겨울엔 물주기를 줄이고, 너무 추운 곳은 피하세요.",
+            care: [
+                { type: "물주기", interval: 7, memo: "흙이 마르면 주세요" },
+                { type: "분갈이", interval: 730, memo: "2년에 한 번 분갈이" },
+                { type: "영양제", interval: 60, memo: "2개월에 1회 영양제" }
+            ]
+        },
+        {
+            name: "황금마삭줄",
+            img: "findPlant/황금마삭줄.webp",
+            desc: "행잉이나 탁자용으로 좋고 키우기 매우 쉬운 식물",
+            detail: "노란색과 초록이 어우러진 덩굴성 식물. 어디에나 잘 어울림.",
+    careGuide: "간접광에서 키우고, 흙이 마르면 듬뿍 관수. 월 1회 영양제.",
+    tip: "길게 늘어뜨려 키우거나 행잉플랜트로도 좋아요.",
+            care: [
+                { type: "물주기", interval: 7, memo: "흙이 마르면 주세요" },
+                { type: "분갈이", interval: 365, memo: "1년에 한 번 분갈이" },
+                { type: "영양제", interval: 30, memo: "월 1회 영양제" }
+            ]
+        },
+        {
+            name: "나비 파비안느",
+            img: "findPlant/나비 파비안느.webp",
+            desc: "나비를 닮은 잎 모양이 독특한 실내 식물",
+            detail: "잎이 나비처럼 생긴 귀여운 관엽식물. 인테리어 효과도 큼.",
+    careGuide: "반양지~간접광, 2달에 1번 영양제. 흙이 마르면 듬뿍 관수.",
+    tip: "잎이 노랗게 변하면 과습, 잎이 말라가면 건조 신호!",
+            care: [
+                { type: "물주기", interval: 7, memo: "흙이 마르면 주세요" },
+                { type: "분갈이", interval: 730, memo: "2년에 한 번 분갈이" },
+                { type: "영양제", interval: 60, memo: "2개월에 1회 영양제" }
+            ]
+        },
+        {
+            name: "마삭줄",
+            img: "findPlant/마삭줄.webp",
+            desc: "넝쿨성으로 성장력이 좋아 쉽게 번지는 식물",
+            detail: "줄기가 길게 뻗어 어디든 잘 퍼지는 튼튼한 식물.",
+    careGuide: "밝은 곳~반음지, 흙이 마르면 듬뿍 관수. 월 1회 영양제.",
+    tip: "가끔 가지치기를 해주면 더 촘촘하게 자라요.",
+            care: [
+                { type: "물주기", interval: 7, memo: "흙이 마르면 주세요" },
+                { type: "분갈이", interval: 365, memo: "1년에 한 번 분갈이" },
+                { type: "영양제", interval: 30, memo: "월 1회 영양제" }
+            ]
+        },
+        {
+            name: "몬스테라 아단소니",
+            img: "findPlant/몬스테라 아단소니.webp",
+            desc: "잎에 구멍이 뚫린 소형 몬스테라로 희귀종",
+            detail: "작고 귀여운 잎에 구멍이 난 소형 몬스테라. 플랜테리어에 추천.",
+    careGuide: "밝은 간접광, 흙이 마르면 물을 듬뿍. 월 1회 영양제.",
+    tip: "줄기가 길어지면 지지대를 세워주면 더 예쁘게 키울 수 있어요.",
+            care: [
+                { type: "물주기", interval: 7, memo: "흙이 마르면 주세요" },
+                { type: "분갈이", interval: 365, memo: "1년에 한 번 분갈이" },
+                { type: "영양제", interval: 30, memo: "월 1회 영양제" }
+            ]
+        },
+        {
+            name: "몬스테라 델리시오사 커스텀 컷",
+            img: "findPlant/몬스테라 델리시오사 커스텀 컷.webp",
+            desc: "특별한 희귀 몬스테라로 커뮤니티에서 화제",
+            detail: "커스텀 컷팅으로 유니크한 수형을 연출할 수 있는 몬스테라.",
+    careGuide: "간접광에서 키우고, 흙이 마르면 듬뿍 물을 주세요.",
+    tip: "잎이 축 처지면 물을 충분히 주세요. 잎에 먼지 쌓이면 닦아주세요.",
+            care: [
+                { type: "물주기", interval: 7, memo: "흙이 마르면 주세요" },
+                { type: "분갈이", interval: 365, memo: "1년에 한 번 분갈이" },
+                { type: "영양제", interval: 30, memo: "월 1회 영양제" }
+            ]
+        },
+        {
+            name: "희귀 플랜테리어계열",
+            img: "findPlant/희귀 플랜테리어계열.webp",
+            desc: "레어플랜트로 구성된 플랜테리어 계열로 마니아 인기",
+            detail: "희귀한 실내 플랜트 모음. 다양한 수형과 잎색이 특징.",
+    careGuide: "밝은 곳에서 키우고, 2달에 1번 영양제. 흙이 마르면 물을 주세요.",
+    tip: "수집 후 수형 유지를 위해 주기적으로 가지치기!",
+            care: [
+                { type: "물주기", interval: 7, memo: "흙이 마르면 주세요" },
+                { type: "분갈이", interval: 730, memo: "2년에 한 번 분갈이" },
+                { type: "영양제", interval: 60, memo: "2개월에 1회 영양제" }
+            ]
+        },
+        {
+            name: "하쿠’s 정원 인생화초",
+            img: "findPlant/하쿠’s 정원 인생화초.webp",
+            desc: "유명 유튜버가 인생화초로 꼽은 사계절 꽃식물 모음",
+            detail: "다양한 사계절 꽃식물 모음, 집안을 생기있게 만들어줌.",
+    careGuide: "밝은 실내, 흙이 마르면 듬뿍 관수. 월 1회 영양제.",
+    tip: "꽃이 진 후엔 가지치기를 해주세요.",
+            care: [
+                { type: "물주기", interval: 5, memo: "흙이 마르면 주세요" },
+                { type: "분갈이", interval: 365, memo: "1년에 한 번 분갈이" },
+                { type: "영양제", interval: 30, memo: "월 1회 영양제" }
+            ]
+        },
+        {
+            name: "베란다/거실 화초류",
+            img: "findPlant/베란다/거실 화초류.webp",
+            desc: "사계절 내내 꽃을 볼 수 있는 다양한 베란다 화초",
+            detail: "다양한 베란다용 화초, 연중 꽃과 잎을 감상할 수 있음.",
+    careGuide: "밝은 곳, 흙이 마르면 듬뿍 관수. 월 1회 영양제.",
+    tip: "화분의 위치를 주기적으로 돌려주면 고르게 자라요.",
+            care: [
+                { type: "물주기", interval: 5, memo: "흙이 마르면 주세요" },
+                { type: "분갈이", interval: 365, memo: "1년에 한 번 분갈이" },
+                { type: "영양제", interval: 30, memo: "월 1회 영양제" }
+            ]
+        },
+        {
+            name: "사계절 플랜테리어 식물",
+            img: "findPlant/사계절 플랜테리어 식물.webp",
+            desc: "초보자도 키우기 쉬운 사계절 거실용 만능 식물",
+            detail: "1년 내내 싱그러운 잎을 감상할 수 있는 거실용 식물.",
+    careGuide: "밝은 곳, 2달에 1번 영양제. 흙이 마르면 듬뿍 관수.",
+    tip: "초보자라면 월 1회 정도 물주는 빈도를 체크해보세요.",
+            care: [
+                { type: "물주기", interval: 7, memo: "흙이 마르면 주세요" },
+                { type: "분갈이", interval: 730, memo: "2년에 한 번 분갈이" },
+                { type: "영양제", interval: 60, memo: "2개월에 1회 영양제" }
             ]
         }
     ];
@@ -905,7 +1561,6 @@
             </div>
             <div class="plant-card-actions">
                 <button class="plant-action-btn primary">관리하기</button>
-                <button class="plant-action-btn secondary" onclick="event.stopPropagation();viewPlantDetails('${plant.name}')">상세보기</button>
                 <button class="plant-action-btn danger" onclick="event.stopPropagation();deletePlant('${plant.name}')">삭제</button>
             </div>
         `;
@@ -919,21 +1574,16 @@
     }
 
     // 식물 관리 페이지 열기 (실제 식물 키우기에 필요한 기능들)
-    function openPlantManagement(plant) {
+    async function openPlantManagement(plant) {
+        const careSchedule = plant.careSchedule || [];
         // 예시 데이터 (실제 데이터로 대체)
-        const careSchedule = [
-          { date: '2024-01-29', type: '물주기' },
-          { date: '2024-01-29', type: '분갈이' }
-        ];
-        const diaryList = [
-          { date: '2024-01-20', content: '새 잎이 나왔어요!' },
-          { date: '2024-01-15', content: '분갈이 후 잘 적응 중.' }
-        ];
+
+        const diaryList = await loadGrowthDiaries(plant.name);
         const plantInfo = {
-          desc: plant.desc || '몬스테라와 함께하는 나의 식물방',
-          detail: '넓은 잎, 독특한 무늬로 싱그럽게! 햇빛과 물만 잘 챙기면 성공!',
-          care: '흙이 마르면 듬뿍 물주기, 월 1회 영양제, 1년에 한 번 분갈이',
-          tip: '직사광선은 피하고, 통풍이 잘 되는 곳에서 키우세요.'
+        desc: plant.desc || '',
+        detail: plant.detail || '',
+        care: plant.careGuide || '', 
+        tip: plant.tip || ''
         };
         const stats = {
           totalCare: 12,
@@ -986,22 +1636,27 @@
           return html;
         }
 
-        // 탭별 렌더 함수
-        function renderTab(tab) {
-          if (tab === '캘린더') {
+         // 1. 달력의 년/월 상태를 지역변수로 관리
+    let calendarYear = (new Date()).getFullYear();
+    let calendarMonth = (new Date()).getMonth(); // 0~11
+
+    // 2. 탭 렌더 함수(캘린더 탭에만 연/월 상태 반영)
+    function renderTab(tab) {
+        if (tab === '캘린더') {
             return `<div class="plant-card-content">
               <div class="plant-calendar">
                 <div class="calendar-header">
                   <span>케어 캘린더</span>
                   <div class="calendar-nav">
-                    <button disabled>&lt;</button>
-                    <span>${year}년 ${month+1}월</span>
-                    <button disabled>&gt;</button>
+                    <button id="calendar-prev">&lt;</button>
+                    <span>${calendarYear}년 ${calendarMonth+1}월</span>
+                    <button id="calendar-next">&gt;</button>
                   </div>
                 </div>
-                ${renderCalendar(year, month, careSchedule)}
+                ${renderCalendar(calendarYear, calendarMonth, careSchedule)}
               </div>
             </div>`;
+
           } else if (tab === '오늘 할 일') {
             return `<div class="plant-card-content">
               <h3>오늘 할 일</h3>
@@ -1036,6 +1691,9 @@
         // 대시보드 HTML (탭 컨테이너에만 동적 렌더)
         const dashboardHTML = `
           <div class="plant-dashboard">
+            <div style="display:flex;align-items:flex-start;gap:0.5rem;">
+              <button class="back-to-collection-btn" onclick="goBackToCollection()"><span class="arrow">←</span>나의 식물도감</button>
+            </div>
             <div class="plant-profile">
               <img src="${plant.img}" alt="${plant.name}" class="plant-img" />
               <div>
@@ -1068,6 +1726,78 @@
             document.getElementById('plant-tab-content').innerHTML = renderTab(tab);
           };
         });
+
+         // 대시보드 최초 렌더
+    function renderDashboard(tabName='캘린더') {
+        document.querySelector('.container').innerHTML = `
+          <div class="plant-dashboard">
+            <div style="display:flex;align-items:flex-start;gap:0.5rem;">
+              <button class="back-to-collection-btn" onclick="goBackToCollection()"><span class="arrow">←</span>나의 식물도감</button>
+            </div>
+            <div class="plant-profile">
+              <img src="${plant.img}" alt="${plant.name}" class="plant-img" />
+              <div>
+                <h2>${plant.name}</h2>
+                <div class="plant-desc">${plantInfo.desc}</div>
+                <div class="plant-detail">${plantInfo.detail}</div>
+              </div>
+            </div>
+            <div style="display: flex; gap: 1rem; margin-bottom: 1.5rem;">
+      <button class="primary-btn" onclick="showGuideModal('분갈이', '${plant.name}')">분갈이 가이드</button>
+      <button class="primary-btn" onclick="showGuideModal('영양제', '${plant.name}')">영양제 가이드</button>
+      <button class="primary-btn" onclick="showGuideModal('물주기', '${plant.name}')">물주기 가이드</button>
+      <button class="primary-btn" onclick="showGuideModal('병충해', '${plant.name}')">병충해 예방 가이드</button>
+    </div>
+            <div class="plant-tabs" id="plant-tabs">
+              <button class="tab${tabName==='캘린더'?' active':''}" data-tab="캘린더">캘린더</button>
+              <button class="tab${tabName==='오늘 할 일'?' active':''}" data-tab="오늘 할 일">오늘 할 일</button>
+              <button class="tab${tabName==='성장 일지'?' active':''}" data-tab="성장 일지">성장 일지</button>
+              <button class="tab${tabName==='식물 정보'?' active':''}" data-tab="식물 정보">식물 정보</button>
+              <button class="tab${tabName==='통계'?' active':''}" data-tab="통계">통계</button>
+            </div>
+            <div id="plant-tab-content">
+              ${renderTab(tabName)}
+            </div>
+          </div>
+        `;
+
+        // 탭 이벤트 (렌더시마다 재등록)
+        const tabEls = document.querySelectorAll('#plant-tabs .tab');
+        tabEls.forEach(btn => {
+            btn.onclick = function() {
+                tabEls.forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                const tab = this.getAttribute('data-tab');
+                renderDashboard(tab); // 탭 바뀌면 전체 새로 그림!
+            };
+        });
+
+        // 3. **캘린더 월 이동 버튼 이벤트 추가**
+        if (tabName === '캘린더') {
+            document.getElementById('calendar-prev').onclick = () => {
+                // 이전 달로 이동
+                if (calendarMonth === 0) {
+                    calendarYear--;
+                    calendarMonth = 11;
+                } else {
+                    calendarMonth--;
+                }
+                renderDashboard('캘린더');
+            };
+            document.getElementById('calendar-next').onclick = () => {
+                // 다음 달로 이동
+                if (calendarMonth === 11) {
+                    calendarYear++;
+                    calendarMonth = 0;
+                } else {
+                    calendarMonth++;
+                }
+                renderDashboard('캘린더');
+            };
+        }
+    }
+    // 최초 렌더링
+    renderDashboard('캘린더');
     }
 
     // 식물도감으로 돌아가기
@@ -1122,30 +1852,15 @@
         }
     };
 
-    // 물주기 일정 확인
-    window.checkWateringSchedule = function(plantName) {
-        const plant = userPlants.find(p => p.name === plantName);
-        if (!plant) return;
-        
-        const careRecords = plant.careRecords || [];
-        const wateringRecords = careRecords.filter(r => r.type === '물주기').sort((a, b) => new Date(b.date) - new Date(a.date));
-        
-        let message = `${plantName}의 물주기 기록:\n\n`;
-        if (wateringRecords.length > 0) {
-            wateringRecords.slice(0, 5).forEach(record => {
-                message += `${record.date}: ${record.memo}\n`;
-            });
-        } else {
-            message += '아직 물주기 기록이 없습니다.';
-        }
-        
-        alert(message);
-    };
 
-    // 분갈이 가이드
-    window.checkRepottingGuide = function(plantName) {
-        const guide = `
-🌱 ${plantName} 분갈이 가이드
+    function showGuideModal(type, plantName) {
+  let title = '';
+  let content = '';
+
+  switch(type) {
+    case '분갈이':
+      title = plantName + ' 분갈이 가이드';
+      content = `🌱 ${plantName} 분갈이 가이드
 
 1. 적절한 시기: 봄철 (3-4월) 또는 뿌리가 분을 벗어날 때
 2. 준비물: 새로운 분, 배수구가 있는 화분, 흙, 자갈
@@ -1159,15 +1874,11 @@
 4. 주의사항:
    - 뿌리를 다치지 않도록 주의
    - 새로운 화분은 기존보다 1-2cm 큰 것 선택
-   - 분갈이 후 1주일간 직사광선 피하기
-        `;
-        alert(guide);
-    };
-
-    // 병충해 예방 가이드
-    window.showPestGuide = function(plantName) {
-        const guide = `
-🐛 ${plantName} 병충해 예방 가이드
+   - 분갈이 후 1주일간 직사광선 피하기`;
+      break;
+    case '병충해':
+      title = plantName + ' 병충해 예방 가이드';
+      content = `🐛 ${plantName} 병충해 예방 가이드
 
 1. 정기 점검:
    - 잎 뒷면과 줄기 부분 확인
@@ -1185,18 +1896,14 @@
    - 천연 살충제 사용 (비누물, 식초 등)
    - 심한 경우 전문가 상담
 
-4. 건강한 식물의 특징:
+4. 건강한 식물의 특징: 
    - 잎이 푸르고 윤기가 남
    - 새 잎이 자라남
-   - 뿌리가 건강함
-        `;
-        alert(guide);
-    };
-
-    // 영양제 가이드
-    window.checkFertilizerGuide = function(plantName) {
-        const guide = `
-🌱 ${plantName} 영양제 가이드
+   - 뿌리가 건강함`;
+      break;
+    case '영양제':
+      title = plantName + ' 영양제 가이드';
+      content = `🌱 ${plantName} 영양제 가이드
 
 1. 영양제 종류:
    - 질소(N): 잎 성장 촉진
@@ -1215,56 +1922,115 @@
 4. 주의사항:
    - 과다 사용 금지
    - 새로 분갈이한 식물은 1개월 후부터
-   - 병든 식물에는 사용 금지
-        `;
-        alert(guide);
-    };
+   - 병든 식물에는 사용 금지`;
+      break;
+    case '물주기':
+      title = plantName + ' 물주기 가이드';
+      content = `💧 ${plantName} 물주기 가이드
 
-    // 하루 기록 추가
-    window.addDiaryEntry = function(plantName) {
-        const entry = prompt(`${plantName}의 오늘 하루를 기록해주세요:\n\n(예: 새 잎이 나왔어요, 물을 많이 마시는 것 같아요 등)`);
-        if (entry && entry.trim()) {
-            const today = new Date().toISOString().split('T')[0];
-            const careData = { 
-                date: today, 
-                type: '하루기록', 
-                memo: entry.trim() 
-            };
-            
-            saveCareRecordToFirebase(plantName, careData).then(() => {
-                alert('하루 기록이 추가되었습니다!');
-                const plant = userPlants.find(p => p.name === plantName);
-                if (plant) {
-                    openPlantManagement(plant);
-                }
-            }).catch(error => {
-                console.error('기록 추가 실패:', error);
-                alert('기록 추가에 실패했습니다.');
-            });
-        }
-    };
+1. 원칙:
+   - 흙 표면이 마르면 충분히 관수
+   - 받침에 물이 고이지 않도록
+   - 식물별 주기 참고 (도감 참조)
 
-    // 기록 히스토리 보기
-    window.viewDiaryHistory = function(plantName) {
+2. 실내환경(서울 기준):
+   - 봄/가을: 7~10일 간격(대부분 관엽)
+   - 여름: 5~7일 간격, 오후 늦게(증발 방지)
+   - 겨울: 2~3주 간격(휴면기)
+   - 다육/선인장: 2~3주 간격, 물 적게
+
+3. 주의사항:
+   - 과습(잎 누름, 뿌리썩음) 주의
+   - 잎에 직접 물 X, 흙에 주입`;
+      break;
+    default:
+      title = '가이드';
+      content = '준비 중입니다.';
+  }
+  document.getElementById('guide-modal-title').textContent = title;
+  document.getElementById('guide-modal-content').textContent = content;
+  document.getElementById('guide-modal').classList.add('visible');
+}
+
+function closeGuideModal() {
+  document.getElementById('guide-modal').classList.remove('visible');
+}
+
+
+
+// 성장일지 저장
+async function addGrowthDiaryToFirebase(plantName, diaryData) {
+  if (!currentUser) {
+    alert('로그인이 필요합니다.');
+    return;
+  }
+  try {
+    const diaryRef = collection(db, "users", currentUser.uid, "plants", plantName, "growthDiaries");
+    await addDoc(diaryRef, {
+      ...diaryData,
+      createdAt: new Date().toISOString(),
+      userId: currentUser.uid
+    });
+    alert('성장 일지가 저장되었습니다!');
+  } catch (error) {
+    console.error('성장 일지 저장 실패:', error);
+    alert('성장 일지 저장에 실패했습니다.');
+  }
+}
+// 성장일지 불러오기
+async function loadGrowthDiaries(plantName) {
+  if (!currentUser) return [];
+  try {
+    const diaryRef = collection(db, "users", currentUser.uid, "plants", plantName, "growthDiaries");
+    const snapshot = await getDocs(diaryRef);
+    return snapshot.docs.map(doc => doc.data());
+  } catch (error) {
+    console.error('성장 일지 불러오기 실패:', error);
+    return [];
+  }
+}
+
+
+// 성장 일지 직접 작성 함수
+window.addDiaryEntry = async function(plantName) {
+    if (!currentUser) {
+        alert('로그인이 필요합니다.');
+        return;
+    }
+    const content = prompt(`${plantName}의 성장 일지 내용을 입력해주세요:`);
+    if (!content || content.trim() === '') {
+        alert('내용을 입력해주세요!');
+        return;
+    }
+    const today = new Date().toISOString().split('T')[0];
+    const diaryData = {
+        date: today,
+        content: content.trim()
+    };
+    try {
+        await addGrowthDiaryToFirebase(plantName, diaryData);
+        // 성장 일지 새로고침을 위해 해당 식물 객체 다시 조회
         const plant = userPlants.find(p => p.name === plantName);
-        if (!plant) return;
-        
-        const diaryRecords = (plant.careRecords || []).filter(r => r.type === '하루기록').sort((a, b) => new Date(b.date) - new Date(a.date));
-        
-        if (diaryRecords.length === 0) {
-            alert('아직 하루 기록이 없습니다.');
-            return;
+        if (plant) {
+            // 성장 일지 새로 불러오기
+            plant.growthDiaries = await loadGrowthDiaries(plantName);
+            openPlantManagement(plant); // 대시보드 새로 그리기
         }
-        
-        let message = `${plantName}의 하루 기록:\n\n`;
-        diaryRecords.forEach(record => {
-            message += `[${record.date}]\n${record.memo}\n\n`;
-        });
-        
-        alert(message);
-    };
+    } catch (error) {
+        console.error('일지 추가 실패:', error);
+        alert('일지 저장에 실패했습니다.');
+    }
+};
 
-    // 성장 측정
+
+
+
+
+
+
+
+
+    // 성장 측정 (구현)
     window.addGrowthRecord = function(plantName) {
         const height = prompt(`${plantName}의 현재 높이를 입력해주세요 (cm):`);
         if (height && !isNaN(height)) {
@@ -1288,33 +2054,8 @@
         }
     };
 
-    // 성장 그래프 보기
-    window.viewGrowthChart = function(plantName) {
-        const plant = userPlants.find(p => p.name === plantName);
-        if (!plant) return;
-        
-        const growthRecords = (plant.careRecords || []).filter(r => r.type === '성장측정').sort((a, b) => new Date(a.date) - new Date(b.date));
-        
-        if (growthRecords.length === 0) {
-            alert('아직 성장 측정 기록이 없습니다.');
-            return;
-        }
-        
-        let message = `${plantName}의 성장 기록:\n\n`;
-        growthRecords.forEach(record => {
-            message += `[${record.date}]: ${record.memo}\n`;
-        });
-        
-        alert(message);
-    };
 
-    // 식물 상세보기
-    window.viewPlantDetails = function(plantName) {
-        const plant = userPlants.find(p => p.name === plantName);
-        if (plant) {
-            alert(`${plant.name}의 상세 정보를 보여줍니다.`);
-        }
-    };
+
 
     // 식물 삭제
     window.deletePlant = async function(plantName) {
@@ -1455,6 +2196,71 @@
             setupEventListeners();
         }
     });
+
+
+    function generateCareSchedule(careArr, startDateStr, days = 180) {
+  const startDate = new Date(startDateStr);
+  const endDate = new Date(startDate);
+  endDate.setDate(endDate.getDate() + days);
+
+  const schedule = [];
+  careArr.forEach(care => {
+    let date = new Date(startDate);
+    while (date <= endDate) {
+      schedule.push({
+        date: date.toISOString().split('T')[0],
+        type: care.type,
+        memo: care.memo
+      });
+      date.setDate(date.getDate() + care.interval);
+    }
+  });
+  return schedule;
+}
+
+// 2. 식물 추가/수정 시 활용
+async function savePlantToFirebase(plantData) {
+  if (!currentUser) { alert('로그인이 필요합니다.'); return; }
+  try {
+    const now = new Date();
+    const careSchedule = generateCareSchedule(
+      plantData.care,
+      now.toISOString().split('T')[0]
+    );
+    const plantRef = doc(db, "users", currentUser.uid, "plants", plantData.name);
+    await setDoc(plantRef, {
+      ...plantData,
+      registeredAt: now.toISOString(),
+      userId: currentUser.uid,
+      careSchedule: careSchedule
+    });
+    console.log('식물이 저장되었습니다:', plantData.name);
+  } catch (error) {
+    console.error('식물 저장 실패:', error);
+    alert('식물 저장에 실패했습니다.');
+  }
+}
+
+// 3. 기존 식물에 일괄 추가 (한 번만 실행)
+async function batchAddCareScheduleForExistingPlants(userId) {
+  const plantsRef = collection(db, "users", userId, "plants");
+  const snapshot = await getDocs(plantsRef);
+  for (const docSnap of snapshot.docs) {
+    const plant = docSnap.data();
+    if (!plant.careSchedule && plant.care && plant.registeredAt) {
+      const careSchedule = generateCareSchedule(
+        plant.care, 
+        plant.registeredAt.split('T')[0]
+      );
+      const plantRef = doc(db, "users", userId, "plants", plant.name);
+      await updateDoc(plantRef, { careSchedule });
+      console.log(`${plant.name} → careSchedule 추가 완료`);
+    }
+  }
+}
+
+window.showGuideModal = showGuideModal;
+window.closeGuideModal = closeGuideModal;
     </script>
 </body>
 </html>
