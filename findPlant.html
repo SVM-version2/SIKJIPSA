@@ -743,44 +743,46 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!file) return;
 
         optionButtonsContainer.innerHTML = '';
-
+        
         addMessage("사진을 분석하고 있어. 잠시만 기다려줘! 🌱", 'plant');
 
-         // ▼▼▼▼▼ 1.5초 뒤에 나올 추가 메시지 ▼▼▼▼▼
+        // 1.5초 뒤에 모든 후속 작업을 실행하도록 설정
         setTimeout(() => {
             addMessage("음... 잠깐만! 거의 다 됐어! 🧐", 'plant');
-        }, 1500);
+            
+            // 2. 두 번째 메시지가 나온 후, 로딩창을 띄우고 파일 분석 시작
+            const indicator = showTypingIndicator();
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
 
-        const indicator = showTypingIndicator();
+            reader.onloadend = async () => {
+                const base64Image = reader.result.split(',')[1];
+                try {
+                    const response = await fetch('/api/identify', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ image: base64Image, mimeType: file.type })
+                    });
 
-        const reader = new FileReader();
-        reader.readAsDataURL(file);
-        reader.onloadend = async () => {
-            const base64Image = reader.result.split(',')[1];
-            try {
-                const response = await fetch('/api/identify', { // 새로 만든 API 호출
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ image: base64Image, mimeType: file.type })
-                });
+                    indicator.remove();
+                    
+                    if (!response.ok) {
+                        const errorData = await response.json();
+                        throw new Error(errorData.error || `서버 응답 오류: ${response.statusText}`);
+                    }
 
-                indicator.remove();
-                
-                if (!response.ok) {
-                    throw new Error(`서버 응답 오류: ${response.statusText}`);
+                    const data = await response.json();
+                    addMessage(data.identification, 'plant');
+                    
+                } catch (error) {
+                    console.error("API 호출 오류:", error);
+                    indicator.remove();
+                    addMessage(`이런, 사진을 분석하는 중에 오류가 발생했어.\n(${error.message})`, 'plant');
+                } finally {
+                    showRestartButton();
                 }
-
-                const data = await response.json();
-                addMessage(data.identification, 'plant');
-                
-            } catch (error) {
-                console.error("API 호출 오류:", error);
-                indicator.remove();
-                addMessage("이런, 사진을 분석하는 중에 오류가 발생했어. 다시 시도해줄래?", 'plant');
-            } finally {
-                showRestartButton();
-            }
-        };
+            };
+        }, 1500);
     }
     
     // 3. 다시하기 버튼 표시 (공통 사용)
