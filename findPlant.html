@@ -180,13 +180,6 @@ main {
     transition: transform 0.3s ease;
 }
 
-/* 화면이 작아지면 캐릭터 숨기기 */
-@media (max-width: 1200px) {
-    .plant-character {
-        display: none;
-    }
-}
-
 .pot {
     width: 100px;
     height: 90px;
@@ -405,6 +398,17 @@ main {
 /* 별 아이콘의 세로 정렬도 미세 조정합니다. */
 .difficulty-rating .star {
     vertical-align: middle;
+}
+
+/* 화면이 작아질 때 캐릭터 위치 및 크기 조정 */
+@media (max-width: 820px) {
+ .plant-character {
+ left: auto; /* 기존 left 속성 무효화 */
+ right: 20px; /* 오른쪽에서 20px 위치 */
+ bottom: 20px; /* 아래에서 20px 위치 */
+ transform: scale(0.8); /* 크기를 80%로 축소 */
+        transform-origin: bottom right; /* 오른쪽 아래를 기준으로 작아지도록 설정 */
+ }
 }
 </style>
 </head>
