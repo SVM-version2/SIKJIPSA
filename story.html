@@ -478,7 +478,10 @@
 <body>
 
     <header id="main-header">
-        <a href="index.html" class="logo">식집사</a>
+                       <a href="index.html" class="logo">
+            <img src="logo.png" alt="식집사 로고">
+            <span>식집사</span>
+        </a>
         <nav>
             <a href="index.html">홈</a>
             <a href="story.html" class="active">초록 이야기</a>
@@ -527,12 +530,12 @@
     </div>
 
 
-    <div id="modal-wrapper" class="modal-wrapper">
+     <div id="modal-wrapper" class="modal-wrapper">
         <div class="modal">
-            <div class="modal-left">
-            </div>
+            <div class="modal-left"></div>
             <div class="modal-right">
                 <button class="close-button">&times;</button>
+                <!-- Login Form -->
                 <div id="login-form" class="form-container">
                     <div class="form-header">
                         <a href="index.html" class="logo">식집사</a>
@@ -553,6 +556,8 @@
                         Don't have an account? <a href="#" id="show-signup">Sign Up</a>
                     </p>
                 </div>
+
+                <!-- Signup Form -->
                 <div id="signup-form" class="form-container" style="display: none;">
                     <div class="form-header">
                         <a href="index.html" class="logo">식집사</a>
@@ -571,7 +576,22 @@
                             <label for="signup-password">Password</label>
                             <input type="password" id="signup-password" required>
                         </div>
-                        <button type="submit" class="cta-button">Create Account</button>
+                        <div class="agreement-group">
+    <div class="checkbox-group">
+        <input type="checkbox" id="signup-terms" name="terms" required>
+        <label for="signup-terms">
+            [필수] <a href="terms.html" target="_blank">이용약관</a>에 동의합니다.
+        </label>
+    </div>
+    <div class="checkbox-group">
+        <input type="checkbox" id="signup-privacy" name="privacy" required>
+        <label for="signup-privacy">
+            [필수] <a href="privacy.html" target="_blank">개인정보처리방침</a>에 동의합니다.
+        </label>
+    </div>
+</div>
+
+<button type="submit" class="cta-button">Create Account</button>
                     </form>
                     <p class="form-switcher">
                         Already have an account? <a href="#" id="show-login">Login</a>
@@ -580,7 +600,6 @@
             </div>
         </div>
     </div>
-
 
 
     <script type="module" src="navigation.js"></script>
