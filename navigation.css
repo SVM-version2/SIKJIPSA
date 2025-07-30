@@ -297,3 +297,15 @@ header.scrolled nav a:not(.cta-button):hover {
     text-decoration: underline;
     font-weight: 600;
 }
+
+        .logo {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none;
+        }
+
+        .logo img {
+            width: 32px;
+            height: 32px;
+        }
