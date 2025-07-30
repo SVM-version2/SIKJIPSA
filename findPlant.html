@@ -552,7 +552,8 @@ document.addEventListener('DOMContentLoaded', () => {
             text: "안녕! 만나서 반가워. 무엇을 도와줄까?",
             options: [
                 { text: '나에게 맞는 식물 추천받기 🌿', value: 'start_recommendation' },
-                { text: '사진으로 식물 이름 찾기 📸', value: 'start_identification' }
+                { text: '사진으로 식물 이름 찾기 📸', value: 'start_identification' },
+                { text: '아픈 식물 진단받기 🩺', value: 'start_diagnosis' }
             ]
         },
         { 
@@ -689,7 +690,10 @@ document.addEventListener('DOMContentLoaded', () => {
         optionButtonsContainer.innerHTML = '';
 
         if (option.value === 'start_identification') {
-            startImageIdentification(); // 사진으로 찾기 기능 시작
+            startImageIdentification();
+            return;
+        } else if (option.value === 'start_diagnosis') { // <-- 분기 추가
+            startImageDiagnosis(); // <-- 새로운 진단 시작 함수 호출
             return;
         }
         
@@ -816,6 +820,78 @@ document.addEventListener('DOMContentLoaded', () => {
                 };
             };
         });
+    }
+
+       // 1. 식물 진단 시작 및 업로드 버튼 생성
+    function startImageDiagnosis() {
+        addMessage("좋아! 진단이 필요한 식물 사진을 올려줘.", 'plant');
+        
+        const fileInput = document.createElement('input');
+        fileInput.type = 'file';
+        fileInput.accept = 'image/*';
+        fileInput.style.display = 'none';
+        
+        // 진단용 업로드 핸들러를 연결
+        fileInput.addEventListener('change', handleImageUploadForDiagnosis);
+        
+        const uploadButton = document.createElement('button');
+        uploadButton.textContent = '여기를 눌러 진단 사진 선택하기';
+        uploadButton.onclick = () => fileInput.click();
+        
+        optionButtonsContainer.appendChild(uploadButton);
+        document.body.appendChild(fileInput);
+    }
+
+    // 2. 진단용 이미지 업로드 처리 및 /api/diagnose 호출
+    async function handleImageUploadForDiagnosis(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        optionButtonsContainer.innerHTML = '';
+        addMessage("사진을 정밀 분석하고 있어. 잠시만 기다려줘! 🩺", 'plant');
+
+        setTimeout(() => {
+            addMessage("음... 꼼꼼히 살펴볼게! 거의 다 됐어! 🧐", 'plant');
+        }, 1500);
+        
+        const indicator = showTypingIndicator();
+
+        try {
+            const compressedBlob = await resizeImage(file);
+            const reader = new FileReader();
+            reader.readAsDataURL(compressedBlob);
+            reader.onloadend = async () => {
+                const base64Image = reader.result.split(',')[1];
+                try {
+                    // API 엔드포인트를 '/api/diagnose'로 변경
+                    const response = await fetch('/api/diagnose', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ image: base64Image, mimeType: compressedBlob.type })
+                    });
+
+                    indicator.remove();
+                    if (!response.ok) {
+                        const errorData = await response.json();
+                        throw new Error(errorData.error || `서버 응답 오류: ${response.statusText}`);
+                    }
+                    const data = await response.json();
+                    // 응답 데이터 키를 'diagnosis'로 변경
+                    addMessage(data.diagnosis, 'plant');
+                } catch (apiError) {
+                    console.error("API 호출 오류:", apiError);
+                    indicator.remove();
+                    addMessage(`이런, 진단하는 중에 오류가 발생했어.\n(${apiError.message})`, 'plant');
+                } finally {
+                    showRestartButton();
+                }
+            };
+        } catch (resizeError) {
+            console.error("이미지 처리 오류:", resizeError);
+            indicator.remove();
+            addMessage("사진 파일을 처리하는 중 문제가 발생했어. 다른 사진으로 시도해 줄래?", 'plant');
+            showRestartButton();
+        }
     }
     
     // 3. 다시하기 버튼 표시 (공통 사용)
