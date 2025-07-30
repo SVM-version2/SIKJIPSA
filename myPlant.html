@@ -762,7 +762,7 @@
     <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
     import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-    import { getFirestore, doc, getDoc, setDoc, updateDoc, collection, addDoc, query, where, getDocs, deleteDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+    import { getFirestore, doc, getDoc, setDoc, updateDoc, collection, addDoc, query, where, getDocs, deleteDoc, orderBy } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
     const firebaseConfig = {
         apiKey: "AIzaSyC7mA9xLOFb98i5hKNWjKW_fORWNHvPx2s",
         authDomain: "sik-jip-sa.firebaseapp.com",
@@ -875,7 +875,16 @@ document.getElementById('my-career-days').textContent = careerDays;
 
 
 
-
+function extractHeightFromDiary(content) {
+    // "키 17cm" 또는 "높이: 16cm" 또는 "17cm" 등에서 숫자 추출
+    if (!content) return null;
+    const match = content.match(/([0-9]+(?:\.[0-9]+)?)\s*cm/);
+    if (match) return parseFloat(match[1]);
+    // 숫자만 적은 경우도 지원
+    const justNumber = content.match(/^([0-9]+(?:\.[0-9]+)?)$/);
+    if (justNumber) return parseFloat(justNumber[1]);
+    return null;
+}
 
 
 
@@ -1691,6 +1700,9 @@ function getLastDiaryDate(growthDiaries) {
         // 오늘 할 일 예시
         const todayTasks = careSchedule.filter(c => c.date === todayStr);
 
+        plant.careRecords = await loadCareRecords(plant.name);
+        plant.growthDiaries = await loadGrowthDiaries(plant.name);
+
         // 캘린더 생성 함수 (기존)
         function renderCalendar(year, month, careSchedule) {
           const firstDay = new Date(year, month, 1).getDay();
@@ -1731,6 +1743,81 @@ function getLastDiaryDate(growthDiaries) {
     let calendarYear = (new Date()).getFullYear();
     let calendarMonth = (new Date()).getMonth(); // 0~11
 
+
+function getSixMonthCareStats(plant) {
+  if (!plant.careSchedule || !plant.careRecords) return null;
+
+  const SIX_MONTHS_AGO = new Date();
+  SIX_MONTHS_AGO.setDate(SIX_MONTHS_AGO.getDate() - 180);
+  const sixMonthsAgoStr = SIX_MONTHS_AGO.toISOString().split('T')[0];
+
+  // 1. 6개월 이내의 케어 스케줄
+  const recentSchedule = plant.careSchedule.filter(c => c.date >= sixMonthsAgoStr);
+
+  // 2. 6개월 이내의 내 기록
+  const recentRecords = plant.careRecords.filter(c => c.date >= sixMonthsAgoStr);
+
+  // 3. 종류별 누락률 분석 (물주기, 분갈이, 영양제)
+  const types = Array.from(new Set(recentSchedule.map(c => c.type)));
+  const stats = {};
+
+  types.forEach(type => {
+    const scheduled = recentSchedule.filter(c => c.type === type);
+    const done = recentRecords.filter(c => c.type === type);
+
+    const scheduledCount = scheduled.length;
+    const doneCount = done.length;
+
+    const missed = Math.max(0, scheduledCount - doneCount);
+    const rate = scheduledCount === 0 ? 0 : (missed / scheduledCount) * 100;
+
+    stats[type] = {
+      scheduled: scheduledCount,
+      done: doneCount,
+      missed: missed,
+      missedRate: Math.round(rate)
+    };
+  });
+
+  // 4. 물주기 평균 간격 계산
+  const waterRecords = recentRecords.filter(c => c.type === '물주기')
+    .map(c => c.date)
+    .sort();
+  let avgInterval = '-';
+  let condition = '-';
+  if (waterRecords.length >= 2) {
+    let sum = 0;
+    for (let i = 1; i < waterRecords.length; i++) {
+      const prev = new Date(waterRecords[i-1]);
+      const curr = new Date(waterRecords[i]);
+      sum += (curr - prev) / (1000 * 60 * 60 * 24);
+    }
+    avgInterval = (sum / (waterRecords.length - 1)).toFixed(1);
+    // 기준 주기 가져오기 (플랜트 객체에서)
+    const refPlant = PLANTS.find(p => p.name === plant.name);
+    const ref = refPlant ? refPlant.care.find(c => c.type === '물주기') : null;
+    const standard = ref ? ref.interval : 7; // 기본 7일
+    if (avgInterval === '-') condition = '-';
+    else if (avgInterval < standard * 0.7) condition = '과습 경향';
+    else if (avgInterval > standard * 1.5) condition = '건조 경향';
+    else condition = '적정';
+  }
+
+  return {
+    stats,
+    avgWaterInterval: avgInterval,
+    waterCondition: condition
+  };
+}
+
+
+
+    function isCareDoneToday(plant, careType) {
+  const today = new Date().toISOString().split('T')[0];
+  if (!plant.careRecords) return false;
+  return plant.careRecords.some(rec => rec.type === careType && rec.date === today);
+}
+
     // 2. 탭 렌더 함수(캘린더 탭에만 연/월 상태 반영)
     function renderTab(tab) {
         if (tab === '캘린더') {
@@ -1750,17 +1837,30 @@ function getLastDiaryDate(growthDiaries) {
 
           } else if (tab === '오늘 할 일') {
             return `<div class="plant-card-content">
-              <h3>오늘 할 일</h3>
-              ${todayTasks.length === 0 ? '<div>오늘은 특별한 케어가 없어요!</div>' :
-                `<ul style='margin-top:1rem;'>${todayTasks.map(t => `<li><input type='checkbox' id='task-${t.type}'><label for='task-${t.type}'> ${t.type}</label></li>`).join('')}</ul>`}
+                <h3>오늘 할 일</h3>
+                ${todayTasks.length === 0 ? '<div>오늘은 특별한 케어가 없어요!</div>' :
+                `<ul style='margin-top:1rem;'>${
+                    todayTasks.map((t, idx) => 
+                    `<li>
+                        <input type='checkbox' id='task-${t.type}' data-type='${t.type}' ${isCareDoneToday(plant, t.type) ? "checked disabled" : ""}>
+                        <label for='task-${t.type}'> ${t.type}</label>
+                    </li>`).join('')
+                }</ul>`
+                }
             </div>`;
-          } else if (tab === '성장 일지') {
-            return `<div class="plant-card-content">
-              <h3>성장 일지</h3>
-              <button onclick="window.addDiaryEntry && window.addDiaryEntry('${plant.name}')" style="margin-bottom:1rem;">새 일지 작성</button>
-              <ul>${diaryList.map(d => `<li><b>${d.date}</b>: ${d.content}</li>`).join('')}</ul>
-            </div>`;
-          } else if (tab === '식물 정보') {
+            } else if (tab === '성장 일지') {
+    return `
+      <div class="plant-card-content">
+        <h3>성장 일지</h3>
+        <button onclick="window.addDiaryEntry && window.addDiaryEntry('${plant.name}')" style="margin-bottom:1rem;">새 일지 작성</button>
+        <ul style="margin-top:1.5rem;">
+          ${(plant.growthDiaries || [])
+            .sort((a, b) => b.date.localeCompare(a.date))
+            .map(d => `<li><b>${d.date}</b>: ${d.content}</li>`).join('')}
+        </ul>
+      </div>
+    `;
+}else if (tab === '식물 정보') {
             return `<div class="plant-card-content">
               <h3>식물 정보</h3>
               <div><b>설명:</b> ${plantInfo.desc}</div>
@@ -1769,13 +1869,118 @@ function getLastDiaryDate(growthDiaries) {
               <div><b>팁:</b> ${plantInfo.tip}</div>
             </div>`;
           } else if (tab === '통계') {
-            return `<div class="plant-card-content">
-              <h3>통계</h3>
-              <div><b>총 케어 횟수:</b> ${stats.totalCare}</div>
-              <div><b>최근 성장 기록:</b> ${stats.lastGrowth}</div>
-              <div style="margin-top:1rem;"><b>성장 히스토리</b><ul>${stats.growthList.map(g => `<li>${g.date}: ${g.value}</li>`).join('')}</ul></div>
-            </div>`;
-          }
+  const careStats = getSixMonthCareStats(plant);
+  // 성장 데이터 준비
+  const diaryEntries = (plant.growthDiaries || [])
+  .map(d => ({
+    date: d.date,
+    height: extractHeightFromDiary(d.content),
+    createdAt: d.createdAt
+  }))
+  .filter(d => d.height !== null)
+  // 반드시 createdAt 기준 오름차순 (없으면 date 기준)
+  .sort((a, b) => {
+    if (a.createdAt && b.createdAt) {
+      return a.createdAt.localeCompare(b.createdAt);
+    } else {
+      return a.date.localeCompare(b.date);
+    }
+  });
+const labels = diaryEntries.map(d => d.date);
+const data = diaryEntries.map(d => d.height);
+
+  let fastestGrowth = null;
+  let maxDiff = 0;
+  for (let i = 1; i < diaryEntries.length; i++) {
+      const diff = diaryEntries[i].height - diaryEntries[i-1].height;
+      if (diff > maxDiff) {
+          maxDiff = diff;
+          fastestGrowth = {
+              from: diaryEntries[i-1].date,
+              to: diaryEntries[i].date,
+              diff: diff
+          };
+      }
+  }
+
+  if (!careStats) return `<div class="plant-card-content">통계 데이터가 부족합니다.</div>`;
+
+  // 누락률 표
+  const careStatHtml = Object.entries(careStats.stats).map(([type, s]) =>
+    `<tr>
+      <td>${type}</td>
+      <td>${s.scheduled}</td>
+      <td>${s.done}</td>
+      <td>${s.missed}</td>
+      <td>${s.missedRate}%</td>
+    </tr>`
+  ).join('');
+
+  // 그래프 그리기 (탭 렌더 후 실행)
+  setTimeout(() => {
+      if (typeof Chart !== "undefined" && document.getElementById("growthChart") && labels.length > 1) {
+          new Chart(document.getElementById('growthChart').getContext('2d'), {
+              type: 'line',
+              data: {
+                  labels: labels,
+                  datasets: [{
+                      label: '키(cm)',
+                      data: data,
+                      borderColor: '#32775b',
+                      backgroundColor: 'rgba(50,119,91,0.1)',
+                      tension: 0.2,
+                      fill: true,
+                      pointRadius: 4,
+                      pointBackgroundColor: '#b2a97e',
+                  }]
+              },
+              options: {
+                  responsive: true,
+                  plugins: {
+                      legend: { display: false }
+                  },
+                  scales: {
+                      y: { beginAtZero: true }
+                  }
+              }
+          });
+      }
+  }, 100);
+
+  return `
+    <div class="plant-card-content">
+      <h3>6개월간 관리 통계</h3>
+      <table style="width:100%;margin-bottom:1.5rem;text-align:center;">
+        <thead>
+          <tr><th>케어</th><th>예정</th><th>실행</th><th>누락</th><th>누락률</th></tr>
+        </thead>
+        <tbody>
+          ${careStatHtml}
+        </tbody>
+      </table>
+      <div style="margin-top:1.5rem;">
+        <b>평균 물주기 간격:</b> <span style="font-size:1.2rem;color:#32775b">${careStats.avgWaterInterval}일</span>
+        <span style="font-size:0.95rem;color:#b2a97e;margin-left:8px;">(${careStats.waterCondition})</span>
+      </div>
+      <div style="margin-top:2.5rem;">
+        <h4 style="margin-bottom:0.6rem;">성장 변화 그래프</h4>
+        ${labels.length > 1 ? `
+          <canvas id="growthChart" width="400" height="200"></canvas>
+          <div style="margin:1rem 0; color:#2563eb;">
+            ${fastestGrowth ? 
+              `가장 빠르게 성장한 기간: <b>${fastestGrowth.from} ~ ${fastestGrowth.to}</b> <br>
+              (총 <b>${fastestGrowth.diff}cm</b> 성장!)` 
+              : '충분한 기록이 필요해요!'}
+          </div>
+        ` : `<div style="color:#aaa;">꺾은선 그래프는 키 기록이 2개 이상일 때 표시됩니다.</div>`}
+      </div>
+      <div style="margin-top:0.8rem;color:#8b7f63;font-size:0.95rem;">
+        최근 6개월간 기록을 기준으로 산출됩니다.<br>
+        (분갈이·영양제는 주기가 길어 기록이 적을 수 있어요!)
+      </div>
+    </div>
+  `;
+}
           return '';
         }
 
@@ -1817,6 +2022,19 @@ function getLastDiaryDate(growthDiaries) {
             document.getElementById('plant-tab-content').innerHTML = renderTab(tab);
           };
         });
+
+
+async function loadCareRecords(plantName) {
+  if (!currentUser) return [];
+  try {
+    const careRef = collection(db, "users", currentUser.uid, "plants", plantName, "careRecords");
+    const snapshot = await getDocs(careRef);
+    return snapshot.docs.map(doc => doc.data());
+  } catch (error) {
+    console.error('케어 기록 불러오기 실패:', error);
+    return [];
+  }
+}
 
 
          // 대시보드 최초 렌더
@@ -1863,6 +2081,24 @@ function getLastDiaryDate(growthDiaries) {
                 renderDashboard(tab); // 탭 바뀌면 전체 새로 그림!
             };
         });
+
+        if(tabName === '오늘 할 일') {
+  // 할 일 체크 이벤트 연결
+  todayTasks.forEach(t => {
+    const box = document.getElementById(`task-${t.type}`);
+    if (box && !box.disabled) {
+      box.addEventListener('change', async function() {
+        if(this.checked) {
+          // 실제 careRecords 저장!
+          await window.addCareRecord(plant.name, t.type);
+          // 기록 저장 후 다시 렌더해서 체크박스 비활성화 처리
+          plant.careRecords = await loadCareRecords(plant.name);
+          renderDashboard('오늘 할 일');
+        }
+      });
+    }
+  });
+}
 
         // 3. **캘린더 월 이동 버튼 이벤트 추가**
         if (tabName === '캘린더') {
@@ -2067,12 +2303,16 @@ async function addGrowthDiaryToFirebase(plantName, diaryData) {
     alert('성장 일지 저장에 실패했습니다.');
   }
 }
+
+
 // 성장일지 불러오기
 async function loadGrowthDiaries(plantName) {
   if (!currentUser) return [];
   try {
     const diaryRef = collection(db, "users", currentUser.uid, "plants", plantName, "growthDiaries");
-    const snapshot = await getDocs(diaryRef);
+    // createdAt만 기준으로 최신순 정렬
+    const q = query(diaryRef, orderBy("createdAt", "desc"));
+    const snapshot = await getDocs(q);
     return snapshot.docs.map(doc => doc.data());
   } catch (error) {
     console.error('성장 일지 불러오기 실패:', error);
@@ -2081,35 +2321,163 @@ async function loadGrowthDiaries(plantName) {
 }
 
 
-// 성장 일지 직접 작성 함수
+
+// 성장 일지 직접 작성 함수 (모달 부분만 완전히 리팩토링)
 window.addDiaryEntry = async function(plantName) {
     if (!currentUser) {
         alert('로그인이 필요합니다.');
         return;
     }
-    const content = prompt(`${plantName}의 성장 일지 내용을 입력해주세요:`);
-    if (!content || content.trim() === '') {
-        alert('내용을 입력해주세요!');
-        return;
-    }
-    const today = new Date().toISOString().split('T')[0];
-    const diaryData = {
-        date: today,
-        content: content.trim()
-    };
-    try {
-        await addGrowthDiaryToFirebase(plantName, diaryData);
-        // 성장 일지 새로고침을 위해 해당 식물 객체 다시 조회
-        const plant = userPlants.find(p => p.name === plantName);
-        if (plant) {
-            // 성장 일지 새로 불러오기
-            plant.growthDiaries = await loadGrowthDiaries(plantName);
-            openPlantManagement(plant); // 대시보드 새로 그리기
+
+    // 1. 먼저, 기존 열린 모달 있으면 제거 (중복 방지)
+    document.querySelectorAll('.growth-diary-modal-overlay').forEach(el => el.remove());
+
+    // 2. 모달 오버레이/컨텐츠(최상위, z-index 99999!)
+    let modal = document.createElement('div');
+    modal.className = 'growth-diary-modal-overlay';
+    modal.innerHTML = `
+      <div class="growth-diary-modal-content">
+        <div class="growth-diary-modal-header">
+          <b><span style="font-size:1.28rem;">🌱</span> ${plantName} 성장 일지 작성</b>
+          <button class="growth-diary-modal-close" aria-label="닫기">&times;</button>
+        </div>
+        <div class="growth-diary-modal-body">
+          <label>성장 일지 내용</label>
+          <textarea id="growth-content" rows="3" maxlength="600"
+            placeholder="새 잎이 나왔어요!"></textarea>
+          <label>키(cm, 숫자만, 선택사항)</label>
+          <input id="growth-height" type="number" min="0" max="999" step="0.1" placeholder="예: 24.5">
+        </div>
+        <div class="growth-diary-modal-actions">
+          <button id="growth-cancel-btn">취소</button>
+          <button id="growth-save-btn">저장</button>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(modal);
+
+    // 3. 스타일 직접 주입 (최상단 <head>에 한번만 추가)
+    if (!document.getElementById('growth-diary-modal-style')) {
+        const style = document.createElement('style');
+        style.id = 'growth-diary-modal-style';
+        style.textContent = `
+        .growth-diary-modal-overlay {
+            position: fixed; z-index: 99999; top: 0; left: 0; width: 100vw; height: 100vh;
+            background: rgba(0,0,0,0.38); display: flex; justify-content: center; align-items: center;
+            animation: fadein .23s;
         }
-    } catch (error) {
-        console.error('일지 추가 실패:', error);
-        alert('일지 저장에 실패했습니다.');
+        .growth-diary-modal-content {
+            background: #fff; border-radius: 1.5rem;
+            max-width: 430px; width: 94vw; min-width: 0;
+            box-shadow: 0 4px 32px 0 #c7c2ac33;
+            padding: 2.1rem 1.3rem 1.2rem 1.3rem;
+            display: flex; flex-direction: column;
+            max-height: 96vh; overflow-y: auto;
+        }
+        .growth-diary-modal-header {
+            display: flex; justify-content: space-between; align-items: center;
+            font-size: 1.19rem; color: #32775b; font-weight: 700;
+            margin-bottom: 1.2rem;
+        }
+        .growth-diary-modal-close {
+            background: none; border: none; color: #7a7a5c;
+            font-size: 2rem; cursor: pointer; border-radius: 50%; transition: background 0.13s;
+            width: 2.2rem; height: 2.2rem; line-height: 2rem; display: flex; align-items: center; justify-content: center;
+        }
+        .growth-diary-modal-close:hover { background: #f3f5ee; color: #b30000;}
+        .growth-diary-modal-body {
+            display: flex; flex-direction: column; gap: 1.1rem;
+        }
+        .growth-diary-modal-body label {
+            font-weight: 600; margin-bottom: 0.2rem; color: #3a3a2a; font-size: 1.01rem;
+        }
+        .growth-diary-modal-body textarea {
+            width: 100%; border-radius: 0.85rem; border: 1.5px solid #c9dcc4;
+            background: #fcfaf3; color: #3a3a2a; padding: 0.88em 1em; font-size: 1.08rem;
+            resize: vertical; min-height: 60px; box-sizing: border-box; outline: none;
+        }
+        .growth-diary-modal-body input[type=number] {
+            width: 140px; border-radius: 0.85rem; border: 1.5px solid #c9dcc4;
+            background: #fcfaf3; color: #3a3a2a; padding: 0.59em 0.7em; font-size: 1.06rem;
+            box-sizing: border-box; margin-bottom: 0.2em;
+        }
+        .growth-diary-modal-actions {
+            margin-top: 1.5rem;
+            display: flex; gap: 0.7em; justify-content: flex-end;
+        }
+        .growth-diary-modal-actions button {
+            padding: 8px 24px; border-radius: 0.9rem; font-size: 1.05rem;
+            font-weight: 700; border: none; cursor: pointer;
+            transition: background 0.17s, color 0.13s;
+        }
+        #growth-cancel-btn {
+            background: #e6e3d6; color: #4b493a; font-weight: 600;
+        }
+        #growth-save-btn {
+            background: #32775b; color: #fff;
+        }
+        #growth-save-btn:hover { background: #1d4433;}
+        #growth-cancel-btn:hover { background: #b2a97e; color: #fff;}
+        @media (max-width: 600px) {
+            .growth-diary-modal-content { padding: 1.2rem 3vw 1.1rem 3vw; max-width: 99vw;}
+            .growth-diary-modal-header { font-size: 1.07rem;}
+            .growth-diary-modal-body textarea { font-size: 0.97rem;}
+        }
+        @media (max-width: 410px) {
+            .growth-diary-modal-content { padding: 1.0rem 1vw 1.0rem 1vw;}
+        }
+        @keyframes fadein { from { opacity: 0; } to { opacity: 1; } }
+        `;
+        document.head.appendChild(style);
     }
+
+    // 4. 이벤트 바인딩
+    modal.querySelector('.growth-diary-modal-close').onclick =
+    modal.querySelector('#growth-cancel-btn').onclick = () => modal.remove();
+
+    modal.querySelector('#growth-save-btn').onclick = async () => {
+        const content = modal.querySelector('#growth-content').value.trim();
+        const height = modal.querySelector('#growth-height').value.trim();
+        if (!content) {
+            alert('내용을 입력해주세요!');
+            modal.querySelector('#growth-content').focus();
+            return;
+        }
+        const today = new Date().toISOString().split('T')[0];
+        let fullContent = content;
+        if (height) fullContent += ` (키 ${height}cm)`;
+
+        const diaryData = {
+            date: today,
+            content: fullContent,
+            height: height ? parseFloat(height) : null
+        };
+        try {
+            await addGrowthDiaryToFirebase(plantName, diaryData);
+            // 성장 일지 새로고침
+            const plant = userPlants.find(p => p.name === plantName);
+            if (plant) {
+                plant.growthDiaries = await loadGrowthDiaries(plantName);
+                openPlantManagement(plant);
+            }
+            modal.remove();
+        } catch (error) {
+            alert('일지 저장에 실패했습니다.');
+        }
+    };
+
+    // 5. 엔터키/ESC 단축키도 지원
+    modal.querySelector('#growth-content').onkeydown = function(e) {
+        if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) {
+            modal.querySelector('#growth-save-btn').click();
+        }
+    };
+    window.addEventListener('keydown', function escCloseHandler(e) {
+        if (e.key === "Escape" && document.body.contains(modal)) {
+            modal.remove();
+            window.removeEventListener('keydown', escCloseHandler);
+        }
+    });
 };
 
 
@@ -2352,5 +2720,6 @@ async function batchAddCareScheduleForExistingPlants(userId) {
 window.showGuideModal = showGuideModal;
 window.closeGuideModal = closeGuideModal;
     </script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </body>
 </html>
