@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>식집사 - 식물과의 대화</title>
 
+    <link rel="icon" href="logo.png?v=2" type="image/png">
+
+
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
@@ -422,7 +425,7 @@ main {
             <a href="index.html">홈</a>
             <a href="story.html">초록 이야기</a>
             <a href="myPlant.html">나의 식물</a>
-            <a href="findPlant.html">식물 찾기</a>
+            <a href="findPlant.html">식물 상담소</a>
             <a href="#" class="cta-button">Login</a>
         </nav>
     </header>
@@ -529,7 +532,11 @@ main {
 
     <script type="module" src="navigation.js"></script>
 
-<script>
+<script type="module">
+    // navigation.js에서 auth 객체를 가져옵니다.
+    import { auth } from './navigation.js';
+    import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
 document.addEventListener('DOMContentLoaded', () => {
     const plantModalWrapper = document.getElementById('plant-modal-wrapper');
     const plantModalContent = document.getElementById('plant-modal-content');
@@ -544,6 +551,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const plantCharacter = document.getElementById('plant-character');
     let currentStep = 0;
     const userAnswers = {};
+
+    // ▼▼▼ 1. 로그인 상태를 저장할 변수 및 리스너 추가 ▼▼▼
+    let currentUser = null;
+    onAuthStateChanged(auth, (user) => {
+    currentUser = user; // 로그인 상태가 변경될 때마다 currentUser 업데이트
+    });
 
     // ▼▼▼ '사진으로 식물 이름 찾기' 옵션 추가 ▼▼▼
     const questions = [
@@ -683,8 +696,14 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // ▼▼▼ 선택에 따라 다른 함수를 호출하도록 수정 ▼▼▼
-    function handleOptionClick(option) {
+        // ▼▼▼ 2. 함수 시작 부분에 로그인 확인 로직 추가 ▼▼▼
+        function handleOptionClick(option) {
+            // 대화의 첫 단계(currentStep === 0)이고, 로그인이 되어있지 않다면
+            if (currentStep === 0 && !currentUser) {
+                document.querySelector('.cta-button').click(); // 헤더의 로그인 버튼 클릭
+                return; // 함수 실행 중단
+            }
+
         addMessage(option.text, 'user');
         userAnswers[questions[currentStep].key] = option.value;
         optionButtonsContainer.innerHTML = '';

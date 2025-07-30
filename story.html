@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>식집사 - 초록 이야기</title>
 
+    <link rel="icon" href="logo.png?v=2" type="image/png">
+
     <!-- 폰트 및 네비게이션 CSS -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -481,7 +483,7 @@
             <a href="index.html">홈</a>
             <a href="story.html" class="active">초록 이야기</a>
             <a href="myPlant.html">나의 식물</a>
-            <a href="findPlant.html">식물 찾기</a>
+            <a href="findPlant.html">식물 상담소</a>
             <a href="#" class="cta-button">Login</a>
         </nav>
     </header>
@@ -696,9 +698,9 @@ function loadStories() {
             const isLoggedIn = !!currentUser;
 
             let imageHtml = '';
-if (story.imageUrl) {
-    imageHtml = `<img src="${story.imageUrl}" alt="업로드 이미지" style="width:100%;max-height:320px;object-fit:cover;border-radius:16px 16px 0 0;"/>`;
-}
+        if (story.imageUrl) {
+            imageHtml = `<img src="${story.imageUrl}" alt="업로드 이미지" style="width:100%;max-height:320px;object-fit:cover;border-radius:16px 16px 0 0;"/>`;
+        }
 
             // 댓글 HTML을 생성하는 부분
             let commentsHtml = '';
@@ -768,7 +770,6 @@ feed.addEventListener('click', async (e) => {
     const likeBtn = e.target.closest('.like-btn');
     if (likeBtn) {
         if (!currentUser) {
-            alert("좋아요를 누르려면 로그인이 필요합니다.");
             document.querySelector('.cta-button').click();
             return;
         }
@@ -838,9 +839,6 @@ feed.addEventListener('submit', async (e) => {
     }
 });
 
-// REMOVED: The initial load call from here is removed to prevent the race condition.
-// onAuthStateChanged will handle the initial load correctly.
-
 
 // ====== 오늘의 퀴즈 로직 ======
 
@@ -852,7 +850,7 @@ const quizData = [
         explanation: "뿌리가 과도한 물에 잠겨 숨을 쉬지 못하면, 잎으로 가는 영양 공급이 중단되어 잎이 노랗게 변하게 됩니다."
     },
     {
-        question: "실내 공기 정화 능력으로 유명하며, '나사(NASA)가 선정한 공기정화식물 1위'로 알려진 식물은 무엇일까요?",
+        question: "NASA가 선정한 공기정화식물 1위로 알려진 식물은 무엇일까요?",
         options: ["스투키", "아레카야자", "관음죽", "스파티필룸"],
         correctAnswer: "아레카야자",
         explanation: "아레카야자는 포름알데히드와 같은 유해물질 제거 능력이 뛰어나고, 가습 효과도 있어 실내 식물로 인기가 많습니다."
@@ -863,18 +861,39 @@ const quizData = [
         correctAnswer: "산소",
         explanation: "광합성은 햇빛, 물, 이산화탄소를 이용해 포도당(양분)과 '산소'를 만들어내는 과정입니다. 산소는 결과물이지, 필요 요소는 아니에요."
     },
-     {
+    {
         question: "식물의 줄기나 잎을 잘라 새로운 개체를 만드는 번식 방법을 무엇이라고 할까요?",
         options: ["파종", "분갈이", "꺾꽂이(삽목)", "물꽂이"],
         correctAnswer: "꺾꽂이(삽목)",
         explanation: "꺾꽂이(삽목)는 식물의 영양생식 방법 중 하나로, 부모 식물과 동일한 유전자를 가진 새로운 식물을 쉽게 얻을 수 있습니다."
+    },
+    {
+        question: "다육식물에 물을 너무 자주 주면 안 되는 주된 이유는 무엇일까요?",
+        options: ["잎이 너무 커져서", "뿌리가 썩기 쉬워서", "색이 옅어져서", "가시가 무뎌져서"],
+        correctAnswer: "뿌리가 썩기 쉬워서",
+        explanation: "다육식물은 건조한 환경에 적응하여 잎에 물을 저장합니다. 물을 너무 자주 주면 뿌리가 계속 젖어있어 썩기 쉽습니다."
+    },
+    {
+        question: "몬스테라 잎에 구멍이 뚫려있는 자연적인 이유는 무엇일까요?",
+        options: ["벌레가 파먹어서", "스스로 무게를 줄이기 위해", "아래쪽 잎까지 빛을 보내기 위해", "물을 더 잘 흡수하기 위해"],
+        correctAnswer: "아래쪽 잎까지 빛을 보내기 위해",
+        explanation: "몬스테라는 큰 잎을 가진 덩굴성 식물입니다. 잎에 구멍이 있으면 위쪽 잎이 아래쪽 잎의 햇빛을 가리는 것을 최소화할 수 있습니다."
+    },
+    {
+        question: "반려동물에게 독성이 있어 키울 때 주의해야 하는 식물이 아닌 것은?",
+        options: ["백합", "아이비", "알로에 베라", "캣닢"],
+        correctAnswer: "캣닢",
+        explanation: "백합, 아이비, 알로에 베라는 반려동물에게 중독 증상을 일으킬 수 있어 주의가 필요합니다. 캣닢은 고양이에게 안전하고 오히려 즐거움을 줍니다."
     }
 ];
 
 function displayDailyQuiz() {
     const today = new Date();
-    // 매일 다른 퀴즈가 나오도록 날짜를 기반으로 인덱스 계산
-    const quizIndex = today.getDate() % quizData.length;
+    // 기준일로부터 며칠이 지났는지 계산하여 매일 다른 퀴즈가 나오도록 수정
+    const startDate = new Date('2025-01-01');
+    const diffTime = Math.abs(today - startDate);
+    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24)); 
+    const quizIndex = diffDays % quizData.length;
     const dailyQuiz = quizData[quizIndex];
     
     const questionEl = document.getElementById('quiz-question');

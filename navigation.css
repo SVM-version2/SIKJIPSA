@@ -265,3 +265,35 @@ header.scrolled nav a:not(.cta-button):hover {
     color: #000;
     text-decoration: underline;
 }
+
+/* 기존 CSS 코드의 아무 곳에나 추가 */
+
+.agreement-group {
+    margin-top: 20px;
+    margin-bottom: 25px;
+    font-size: 0.9rem;
+}
+
+.checkbox-group {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.checkbox-group input[type="checkbox"] {
+    margin-right: 10px;
+    /* 기본 체크박스 스타일을 조금 더 깔끔하게 */
+    width: 16px;
+    height: 16px;
+    accent-color: var(--primary-color); /* 체크 시 색상 변경 */
+}
+
+.checkbox-group label {
+    color: #555;
+}
+
+.checkbox-group label a {
+    color: var(--primary-color);
+    text-decoration: underline;
+    font-weight: 600;
+}

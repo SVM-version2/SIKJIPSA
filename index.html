@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>식집사 - 홈</title>
 
-<link rel="icon" href="logo.png?v=2" type="image/png">
+    <link rel="icon" href="logo.png?v=2" type="image/png">
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -718,51 +718,6 @@ opacity: 1; /* 활성 챕터만 보이게 */
     }
 }
 
-/* style 태그 안에 추가 */
-/* ===== AI 진단 ====== */
-#diagnosis-result-card {
-    margin-top: 30px;
-    padding: 25px;
-    border: 1px solid var(--border-color);
-    background-color: #fdfdfd;
-    border-radius: 8px;
-    text-align: left;
-    position: relative;
-}
-#diagnosis-result-card h5 {
-    margin-top: 0;
-    margin-bottom: 15px;
-    font-size: 1.2rem;
-}
-#diagnosis-result-card p {
-    color: #555;
-    line-height: 1.8;
-}
-#close-result-btn {
-    position: absolute;
-    top: 15px;
-    right: 15px;
-    background: none;
-    border: none;
-    font-size: 1.8rem;
-    color: #aaa;
-    cursor: pointer;
-    line-height: 1;
-}
-/* 잎사귀 스캐닝 애니메이션 스타일 */
-#ai-diagnosis-btn.is-loading .icon-wrapper {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-}
-#ai-diagnosis-btn.is-loading .scanner {
-    animation: scan 1.5s ease-in-out infinite;
-}
-@keyframes scan {
-    0% { transform: translateX(-4px) rotate(-15deg); }
-    50% { transform: translateX(4px) rotate(15deg); }
-    100% { transform: translateX(-4px) rotate(-15deg); }
-}
 
 /* =================================== */
 /* === 반응형 스타일 (768px 이하) === */
@@ -925,6 +880,228 @@ opacity: 1; /* 활성 챕터만 보이게 */
         bottom: 75px;
     }
 }
+
+/* 기존 ===== 정보 모달 스타일 (팀소개, FAQ 등) ===== 부분을 이 코드로 교체하세요. */
+
+/* ===== 정보 모달 스타일 (개선안) ===== */
+.info-modal-wrapper {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    /* 변경점: 초록색 배경 대신 어두운 회색 반투명 배경 사용 */
+    background: rgba(30, 30, 30, 0.5); 
+    /* 변경점: 블러 효과를 더 강하게 적용 */
+    backdrop-filter: blur(8px); 
+    z-index: 2000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.4s ease, visibility 0.4s ease;
+}
+.info-modal-wrapper.visible {
+    opacity: 1;
+    visibility: visible;
+}
+.info-modal-content {
+    background: #fff; /* 깨끗한 흰색 배경 */
+    padding: 30px 40px 40px;
+    border-radius: 12px;
+    width: 90%;
+    max-width: 680px;
+    max-height: 85vh;
+    overflow-y: auto;
+    position: relative;
+    box-shadow: 0 15px 40px rgba(0,0,0,0.15);
+    transform: translateY(20px) scale(0.98);
+    transition: transform 0.4s ease, opacity 0.4s ease;
+    display: none; /* 기본 숨김 */
+}
+.info-modal-wrapper.visible .info-modal-content {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+}
+
+/* 닫기 버튼 */
+.close-modal-btn {
+    position: absolute;
+    top: 15px; right: 20px;
+    font-size: 2.5rem;
+    font-weight: 300;
+    color: #aaa;
+    background: none; border: none;
+    cursor: pointer;
+    transition: color 0.2s, transform 0.2s;
+}
+.close-modal-btn:hover {
+    color: #333;
+    transform: rotate(90deg);
+}
+
+/* 모달 공통 헤더 */
+.info-modal-content h2 {
+    text-align: center;
+    font-size: 2rem;
+    margin-bottom: 10px;
+    color: var(--primary-color);
+}
+.modal-subtitle {
+    text-align: center;
+    margin-top: 0;
+    margin-bottom: 35px;
+    color: #777;
+    line-height: 1.6;
+}
+.modal-body {
+    margin-top: 20px;
+}
+
+
+/* 팀 소개 모달 */
+#team-modal .modal-body { 
+    display: flex; 
+    justify-content: space-around; 
+    gap: 20px; 
+    flex-wrap: wrap; /* 모바일 반응형 대비 */
+}
+.team-member { 
+    text-align: center;
+    padding: 20px;
+    border-radius: 8px;
+    background-color: var(--secondary-color);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    width: 200px;
+}
+.team-member:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.08);
+}
+.team-member img { 
+    width: 100px; height: 100px; 
+    border-radius: 50%; 
+    object-fit: cover;
+    border: 3px solid #fff;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    margin-bottom: 15px;
+}
+.team-member h4 { margin: 10px 0 5px; color: var(--primary-color); }
+.team-member p { margin: 0; color: #777; font-size: 0.9rem; }
+
+
+/* FAQ 모달 */
+.faq-item { 
+    margin-bottom: 10px; 
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    overflow: hidden;
+}
+.faq-item summary { 
+    font-weight: 600; 
+    padding: 15px 20px;
+    cursor: pointer; 
+    position: relative;
+    list-style: none; /* 기본 마커 숨김 */
+    color: var(--text-color);
+    transition: background-color 0.2s;
+}
+.faq-item summary:hover {
+    background-color: var(--secondary-color);
+}
+.faq-item summary::-webkit-details-marker {
+    display: none; /* Safari 기본 마커 숨김 */
+}
+/* 커스텀 아코디언 아이콘 (+/-) */
+.faq-item summary::after {
+    content: '+';
+    position: absolute;
+    right: 20px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 1.5rem;
+    font-weight: 300;
+    color: var(--accent-color);
+    transition: transform 0.3s ease;
+}
+.faq-item[open] summary::after {
+    transform: translateY(-50%) rotate(45deg);
+}
+.faq-item p { 
+    background: #fff; 
+    padding: 5px 20px 20px; /* 위쪽 패딩 줄임 */
+    margin: 0; 
+    color: #555;
+    line-height: 1.7;
+}
+#faq-modal .modal-body {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+
+/* 아이디어 제안 모달 */
+#idea-form textarea { 
+    width: 100%; 
+    height: 150px; 
+    padding: 15px; 
+    font-size: 1rem; 
+    font-family: var(--font-body);
+    border: 1px solid var(--border-color); 
+    border-radius: 8px; 
+    resize: vertical; 
+    margin-bottom: 20px;
+    transition: border-color 0.3s, box-shadow 0.3s;
+}
+#idea-form textarea:focus {
+    outline: none;
+    border-color: var(--accent-color);
+    box-shadow: 0 0 0 3px rgba(199, 161, 122, 0.2); /* accent-color의 연한 버전 */
+}
+#idea-form button { 
+    width: 100%; 
+    padding: 15px;
+    font-size: 1.1rem;
+}
+
+/* h2 제목에 아이콘 추가 */
+#team-modal h2::before { content: '👥 '; }
+#faq-modal h2::before { content: '❓ '; }
+/* 기존 모달 CSS의 맨 아래에 이 코드를 추가해주세요. */
+
+/* 새로운 아이디어 제안 모달 스타일 */
+.idea-submission-body {
+    text-align: center;
+}
+.submission-guide {
+    color: #555;
+    margin-bottom: 20px;
+    line-height: 1.7;
+}
+.email-display-box {
+    background-color: var(--secondary-color);
+    border: 1px dashed var(--border-color);
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 1.1rem;
+    color: var(--primary-color);
+    /* 사용자가 쉽게 드래그하여 복사할 수 있도록 설정 */
+    user-select: all; 
+}
+#copy-email-btn {
+    width: 100%;
+    font-size: 1.1rem;
+    /* 버튼 상태 변화를 위한 transition 추가 */
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+#copy-email-btn:disabled {
+    background-color: var(--primary-color);
+    color: white;
+    cursor: default;
+}
+
  </style>
 <body>
 
@@ -934,7 +1111,7 @@ opacity: 1; /* 활성 챕터만 보이게 */
             <a href="index.html">홈</a>
             <a href="story.html">초록 이야기</a>
             <a href="myPlant.html">나의 식물</a>
-            <a href="findPlant.html">식물 찾기</a>
+            <a href="findPlant.html">식물 상담소</a>
             <a href="#" class="cta-button">Login</a>
         </nav>
     </header>
@@ -1044,7 +1221,7 @@ opacity: 1; /* 활성 챕터만 보이게 */
     
     <div class="experience-wrapper">
         <div class="experience-bg active" id="bg-1" style="background-image: url('https://images.unsplash.com/photo-1521334884684-d80222895322?q=80&w=1887');"></div>
-        <div class="experience-bg" id="bg-2" style="background-image: url('https://images.unsplash.com/photo-1616460884665-5c4967129def?q=80&w=1887');"></div>
+        <div class="experience-bg" id="bg-2" style="background-image: url('https://unsplash.com/ko/%EC%82%AC%EC%A7%84/%EB%85%B9%EC%83%89-%EC%9E%8E%EC%9D%B4-%EC%9E%88%EB%8A%94-%EC%8B%9D%EB%AC%BC-%ED%81%B4%EB%A6%BD%EC%95%84%ED%8A%B8-lWBZ01XRRoI');"></div>
         <div class="experience-bg" id="bg-3" style="background-image: url('https://images.unsplash.com/photo-1525498128493-380d1990a112?q=80&w=1887');"></div>
         
         <div class="experience-cards">
@@ -1069,54 +1246,53 @@ opacity: 1; /* 활성 챕터만 보이게 */
     </div>
 </section>
 
-
-
     </main>
+
+
 <footer id="main-footer-content">
     <div class="footer-container">
-<div class="footer-subscribe">
-    <h4>식물이 아픈가요?</h4>
-    <p>사진 한 장으로 식물의 상태를 진단받고, 식집사 AI가 제안하는 해결책을 확인해보세요.</p>
-    
-    <button id="ai-diagnosis-btn" class="cta-button" style="margin-top: 20px;">
-        사진 업로드하고 진단받기
-    </button>
-    <input type="file" id="image-upload-input" accept="image/*" style="display: none;">
 
-    <div id="diagnosis-result-card" class="hidden">
-        <h5>AI 진단 결과</h5>
-        <p id="diagnosis-text"></p>
-        <button id="close-result-btn">&times;</button>
-    </div>
-</div>
+        <div class="footer-subscribe">
+            <h4>AI 식집사에게 무엇이든 물어보세요</h4>
+            <p>나에게 맞는 식물 추천부터, 사진으로 이름 찾기, 아픈 식물 진단까지.<br>AI 식집사가 당신의 식물 생활을 도와드려요.</p>
+            
+            <a href="findPlant.html" class="cta-button" style="margin-top: 20px; display: inline-block;">
+                '식물 상담소' 바로가기
+            </a>
+        </div>
+
         <div class="footer-main">
             <div class="footer-about">
                 <a href="index.html" class="logo">식집사</a>
                 <p>식물과 함께하는 모든 순간이 더 행복하고 의미 있도록, 식집사가 당신의 초록빛 여정에 함께합니다.</p>
-                 <div class="footer-social">
-                    <a href="#">Instagram</a>
-                    <a href="#">Facebook</a>
-                    <a href="#">YouTube</a>
+                <div class="footer-social">
+                    <a href="#" target="_blank">Instagram</a>
+                    <a href="#" target="_blank">Facebook</a>
+                    <a href="#" target="_blank">YouTube</a>
                 </div>
             </div>
             <div class="footer-links-group">
                 <div class="footer-links">
                     <h4>About</h4>
                     <ul>
-                        <li><a href="story.html">초록 이야기</a></li>
-                        <li><a href="#">팀 소개</a></li>
-                        <li><a href="#">채용</a></li>
+                        <li><a href="#" id="open-team-modal">식집사 팀 소개</a></li>
                     </ul>
                 </div>
                 <div class="footer-links">
                     <h4>Support</h4>
                     <ul>
-                        <li><a href="#">고객 지원</a></li>
-                        <li><a href="#">자주 묻는 질문</a></li>
-                        <li><a href="#">연락하기</a></li>
+                        <li><a href="#" id="open-faq-modal">자주 묻는 질문</a></li>
+                        <li><a href="#" id="open-idea-modal">아이디어 제안</a></li>
                     </ul>
                 </div>
-            </div>
+                <div class="footer-links">
+                    <h4>Policy</h4>
+                    <ul>
+                        <li><a href="terms.html">이용약관</a></li>
+                        <li><a href="privacy.html">개인정보처리방침</a></li>
+                    </ul>
+                </div>
+                 </div>
         </div>
     </div>
     <div class="footer-bottom">
@@ -1172,7 +1348,22 @@ opacity: 1; /* 활성 챕터만 보이게 */
                             <label for="signup-password">Password</label>
                             <input type="password" id="signup-password" required>
                         </div>
-                        <button type="submit" class="cta-button">Create Account</button>
+                        <div class="agreement-group">
+    <div class="checkbox-group">
+        <input type="checkbox" id="signup-terms" name="terms" required>
+        <label for="signup-terms">
+            [필수] <a href="terms.html" target="_blank">이용약관</a>에 동의합니다.
+        </label>
+    </div>
+    <div class="checkbox-group">
+        <input type="checkbox" id="signup-privacy" name="privacy" required>
+        <label for="signup-privacy">
+            [필수] <a href="privacy.html" target="_blank">개인정보처리방침</a>에 동의합니다.
+        </label>
+    </div>
+</div>
+
+<button type="submit" class="cta-button">Create Account</button>
                     </form>
                     <p class="form-switcher">
                         Already have an account? <a href="#" id="show-login">Login</a>
@@ -1182,7 +1373,7 @@ opacity: 1; /* 활성 챕터만 보이게 */
         </div>
     </div>
 
-
+<!-- 챗봇 모달 -->
 <div id="chatbot-container">
     <div id="chat-window" class="hidden">
         <div class="chat-header">
@@ -1205,6 +1396,65 @@ opacity: 1; /* 활성 챕터만 보이게 */
         <svg id="chat-close-icon" class="hidden" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="24" height="24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"></path></svg>
     </button>
 </div>
+
+<div id="info-modal-wrapper" class="info-modal-wrapper">
+
+    <div id="team-modal" class="info-modal-content">
+        <button class="close-modal-btn">&times;</button>
+        <h2>Team Sikjipsa</h2>
+        <p class="modal-subtitle">
+            하나의 작은 화분이 주는 위로와 기쁨에서 '식집사'는 시작되었습니다.<br>
+            우리는 식물과 함께하는 삶의 가치를 믿으며, 그 여정이 외롭지 않도록 돕는 든든한 파트너가 되고 싶습니다.<br>
+            여러분의 초록빛 일상이 더욱 풍성해지도록, 저희도 함께 배우고 성장하겠습니다.
+        </p>
+        <div class="modal-body">
+            <div class="team-member">
+                <h4>박해진</h4>
+                <p>CEO & AI</p>
+            </div>
+            <div class="team-member">
+                <h4>이강희</h4>
+                <p>Lead Developer & UX Designer</p>
+            </div>
+        </div>
+    </div>
+
+    <div id="faq-modal" class="info-modal-content">
+        <button class="close-modal-btn">&times;</button>
+        <h2>자주 묻는 질문 (FAQ)</h2>
+        <p class="modal-subtitle">궁금한 점을 확인해보세요.</p>
+        <div class="modal-body">
+            <details class="faq-item">
+                <summary>Q. '식물 상담소'의 AI 진단은 정확한가요?</summary>
+                <p>A. AI 진단은 학습된 데이터를 기반으로 한 참고용 정보이며, 100% 정확하지 않을 수 있습니다. 식물의 상태를 판단하는 데 도움을 주는 보조 도구로 활용해주세요.</p>
+            </details>
+            <details class="faq-item">
+                <summary>Q. 이 AI는 어떤 기술로 만들어졌나요?</summary>
+                <p>A. '식집사 AI' Google의 Gemini API를 통해 AI 기능을 구현했습니다.</p>
+            </details>
+            <details class="faq-item">
+                <summary>Q. 앞으로 어떤 기능이 추가될 예정인가요?</summary>
+                <p>A. '나의 식물' 페이지에 등록된 식물의 성장 스케줄을 알려주는 알림 기능과, 사용자 간의 식물 분양 커뮤니티 기능 등을 계획하고 있습니다. 좋은 아이디어가 있다면 언제든 제안해주세요!</p>
+            </details>
+        </div>
+    </div>
+
+<div id="idea-modal" class="info-modal-content">
+    <button class="close-modal-btn">&times;</button>
+    <h2>💡 아이디어 제안</h2>
+    <p class="modal-subtitle">여러분의 소중한 의견이 식집사를 성장시킵니다.</p>
+    <div class="modal-body idea-submission-body">
+        <p class="submission-guide">
+            더 나은 서비스를 위한 아이디어가 있다면,<br>아래 이메일로 자유롭게 보내주세요.
+        </p>
+        <div class="email-display-box">
+            <span id="idea-email-address">hermann8hesse@gmail.com</span>
+        </div>
+        <button id="copy-email-btn" class="cta-button">이메일 주소 복사</button>
+    </div>
+</div>
+</div>
+
 </body>
 
     <script type="module" src="navigation.js"></script>
@@ -1589,91 +1839,85 @@ const chatTree = {
 
 
 
-//=== AI 진단 추가 =====
+// === 정보 모달 (팀소개, FAQ 등) 로직 ===
 document.addEventListener('DOMContentLoaded', () => {
-    const diagnosisBtn = document.getElementById('ai-diagnosis-btn');
-    const imageInput = document.getElementById('image-upload-input');
+    // 모달 관련 DOM 요소들
+    const modalWrapper = document.getElementById('info-modal-wrapper');
+    const modalContents = document.querySelectorAll('.info-modal-content');
+    const closeButtons = document.querySelectorAll('.close-modal-btn');
 
-    // "진단받기" 버튼을 누르면 숨겨진 파일 선택창을 클릭합니다.
-    diagnosisBtn.addEventListener('click', () => {
-        imageInput.click();
-    });
-
-    // 사용자가 이미지 파일을 선택하면 이 함수가 실행됩니다.
-    imageInput.addEventListener('change', async (event) => {
-        const file = event.target.files[0];
-        if (!file) return;
-
-        // 사용자에게 로딩 중임을 알립니다.
-    diagnosisBtn.disabled = true;
-    diagnosisBtn.classList.add('is-loading');
+    // 모달을 여는 버튼들
+    const openTeamBtn = document.getElementById('open-team-modal');
+    const openFaqBtn = document.getElementById('open-faq-modal');
+    const openIdeaBtn = document.getElementById('open-idea-modal');
     
-    // SVG 아이콘과 텍스트
-    const loadingSVG = `
-        <div class="icon-wrapper">
-            <svg class="scanner" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 22s5-3.5 5-10-5-10-5-10M12 22s5-3.5 5-10-5-10-5-10M22 22s-5-3.5-5-10 5-10 5-10"></path></svg>
-            <span style="margin-left: 4px;">진단 중...</span>
-        </div>
-    `;
-    diagnosisBtn.innerHTML = loadingSVG;
+    // 특정 모달을 여는 함수
+    const openModal = (modalId) => {
+        modalContents.forEach(content => content.style.display = 'none');
+        
+        const targetModal = document.getElementById(modalId);
+        if (targetModal) {
+            targetModal.style.display = 'block';
+            modalWrapper.classList.add('visible');
+        }
+    };
 
-        // 1. 이미지 파일을 Base64로 변환합니다.
-        const reader = new FileReader();
-        reader.readAsDataURL(file);
-        reader.onload = async () => {
-            // reader.result는 "data:image/jpeg;base64,..." 형태의 문자열입니다.
-            // 여기서 순수 Base64 데이터 부분만 추출합니다.
-            const base64Image = reader.result.split(',')[1];
-            
-            try {
-                // 2. Vercel 서버리스 함수로 데이터를 보냅니다.
-                const response = await fetch('/api/diagnose', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        image: base64Image,
-                        mimeType: file.type // 파일의 MIME 타입 (예: "image/jpeg")
-                    }),
-                });
+    // 모달을 닫는 함수
+    const closeModal = () => {
+        modalWrapper.classList.remove('visible');
+    };
 
-                const data = await response.json();
+    // 각 버튼에 클릭 이벤트 연결
+    if(openTeamBtn) openTeamBtn.addEventListener('click', (e) => { e.preventDefault(); openModal('team-modal'); });
+    if(openFaqBtn) openFaqBtn.addEventListener('click', (e) => { e.preventDefault(); openModal('faq-modal'); });
+    if(openIdeaBtn) openIdeaBtn.addEventListener('click', (e) => { e.preventDefault(); openModal('idea-modal'); });
 
-            if (response.ok) {
-                // ----- 여기부터 수정 -----
-                const resultCard = document.getElementById('diagnosis-result-card');
-                const resultText = document.getElementById('diagnosis-text');
-                const closeBtn = document.getElementById('close-result-btn');
+    // 닫기 버튼들에 클릭 이벤트 연결
+    closeButtons.forEach(btn => btn.addEventListener('click', closeModal));
 
-                // 제미나이 응답의 줄바꿈(\n)을 HTML의 <br>로 변경해줍니다.
-                resultText.innerHTML = data.diagnosis.replace(/\n/g, '<br>');
-                resultCard.classList.remove('hidden');
-
-                closeBtn.onclick = () => {
-                    resultCard.classList.add('hidden');
-                };
-                // ----- 여기까지 수정 (기존 alert() 줄은 삭제) -----
-
-            } else {
-                // 서버에서 에러가 발생한 경우
-                throw new Error(data.error || '진단에 실패했습니다.');
-            }
-
-            } catch (error) {
-                console.error('AI 진단 오류:', error);
-                alert(`오류가 발생했습니다: ${error.message}`);
-            } finally {
-                // 4. 버튼 상태를 원래대로 복구합니다.
-                diagnosisBtn.disabled = false;
-                diagnosisBtn.textContent = '사진 업로드하고 진단받기';
-                imageInput.value = ''; // 다음 선택을 위해 입력 값을 초기화합니다.
-            }
-        };
+    // 모달 바깥 영역 클릭 시 닫기
+    modalWrapper.addEventListener('click', (e) => {
+        if (e.target === modalWrapper) {
+            closeModal();
+        }
     });
+    
+    // ESC 키로 모달 닫기
+    window.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && modalWrapper.classList.contains('visible')) {
+            closeModal();
+        }
+    });
+    
+    // ▼▼▼ 새로운 이메일 복사 버튼 로직 ▼▼▼
+    const copyBtn = document.getElementById('copy-email-btn');
+    const emailAddressSpan = document.getElementById('idea-email-address');
+
+    if (copyBtn && emailAddressSpan) {
+        copyBtn.addEventListener('click', () => {
+            // 최신 클립보드 API 사용
+            navigator.clipboard.writeText(emailAddressSpan.textContent)
+                .then(() => {
+                    // 성공 시 버튼 텍스트 변경 및 비활성화
+                    const originalText = copyBtn.textContent;
+                    copyBtn.textContent = '✅ 복사 완료!';
+                    copyBtn.disabled = true;
+
+                    // 2초 후 원래 상태로 복원
+                    setTimeout(() => {
+                        copyBtn.textContent = originalText;
+                        copyBtn.disabled = false;
+                    }, 2000);
+                })
+                .catch(err => {
+                    // API 사용 실패 시 (예: http 환경) 사용자에게 알림
+                    console.error('클립보드 복사 실패:', err);
+                    alert('복사에 실패했습니다. 이메일 주소를 직접 선택하여 복사해주세요.');
+                });
+        });
+    }
 });
-//=====AI 진단 끝 === 
+
     </script>
 </body>
 </html>
