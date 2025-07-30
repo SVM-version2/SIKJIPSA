@@ -747,15 +747,13 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // 2. 이미지 업로드 처리 및 API 호출
- // ▼▼▼▼▼ 리사이징 로직이 추가된 handleImageUpload 함수 ▼▼▼▼▼
-  async function handleImageUpload(event) {
+    async function handleImageUpload(event) {
         const file = event.target.files[0];
         if (!file) return;
 
         optionButtonsContainer.innerHTML = '';
         addMessage("사진을 분석하고 있어. 잠시만 기다려줘! 🌱", 'plant');
 
-        // 1.5초 뒤에 모든 후속 작업을 순차적으로 실행
         setTimeout(() => {
             addMessage("음... 잠깐만! 거의 다 됐어! 🧐", 'plant');
             
@@ -767,11 +765,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 reader.onloadend = async () => {
                     const base64Image = reader.result.split(',')[1];
                     try {
-                        const response = await fetch('/api/identify', {
+                        // ▼▼▼ fetch 대신 fetchWithRetry 사용 ▼▼▼
+                        const response = await fetchWithRetry('/api/identify', {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({ image: base64Image, mimeType: compressedBlob.type })
                         });
+                        // ▲▲▲ fetch 대신 fetchWithRetry 사용 ▲▲▲
 
                         indicator.remove();
                         if (!response.ok) {
@@ -789,12 +789,38 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                 };
             }).catch(resizeError => {
-                 console.error("이미지 처리 오류:", resizeError);
+                console.error("이미지 처리 오류:", resizeError);
                 indicator.remove();
-                addMessage("사진 파일을 처리하는 중 문제가 발생했어. 다른 사진으로 시도해 줄래?", 'plant');
+                addMessage("사진 파일을 처리하는 중 문제가 발생했어. 다시 시도해 줄래?", 'plant');
                 showRestartButton();
             });
         }, 1500);
+    }
+
+    // ▼▼▼ 새로 추가할 자동 재시도 함수 ▼▼▼
+    function fetchWithRetry(url, options, retries = 3, delay = 1500) {
+        return new Promise((resolve, reject) => {
+            const attemptFetch = (n) => {
+                fetch(url, options)
+                    .then(response => {
+                        // 503 서버 과부하 오류이고 재시도 횟수가 남았을 경우
+                        if (response.status === 503 && n > 0) {
+                            console.log(`서버 과부하 감지. ${delay/1000}초 후 다시 시도합니다... (남은 횟수: ${n-1})`);
+                            setTimeout(() => attemptFetch(n - 1), delay);
+                        } else {
+                            resolve(response); // 성공 또는 다른 오류는 즉시 반환
+                        }
+                    })
+                    .catch(error => {
+                        if (n > 0) {
+                            setTimeout(() => attemptFetch(n - 1), delay);
+                        } else {
+                            reject(error);
+                        }
+                    });
+            };
+            attemptFetch(retries);
+        });
     }
 
     // ▼▼▼▼▼ 새로 추가할 이미지 리사이징 함수 ▼▼▼▼▼
@@ -852,46 +878,45 @@ document.addEventListener('DOMContentLoaded', () => {
 
         setTimeout(() => {
             addMessage("음... 꼼꼼히 살펴볼게! 거의 다 됐어! 🧐", 'plant');
-        }, 1500);
-        
-        const indicator = showTypingIndicator();
+            
+            const indicator = showTypingIndicator();
 
-        try {
-            const compressedBlob = await resizeImage(file);
-            const reader = new FileReader();
-            reader.readAsDataURL(compressedBlob);
-            reader.onloadend = async () => {
-                const base64Image = reader.result.split(',')[1];
-                try {
-                    // API 엔드포인트를 '/api/diagnose'로 변경
-                    const response = await fetch('/api/diagnose', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ image: base64Image, mimeType: compressedBlob.type })
-                    });
-
-                    indicator.remove();
-                    if (!response.ok) {
-                        const errorData = await response.json();
-                        throw new Error(errorData.error || `서버 응답 오류: ${response.statusText}`);
+            resizeImage(file).then(compressedBlob => {
+                const reader = new FileReader();
+                reader.readAsDataURL(compressedBlob);
+                reader.onloadend = async () => {
+                    const base64Image = reader.result.split(',')[1];
+                    try {
+                        // ▼▼▼ fetch 대신 fetchWithRetry 사용 ▼▼▼
+                        const response = await fetchWithRetry('/api/diagnose', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ image: base64Image, mimeType: compressedBlob.type })
+                        });
+                        // ▲▲▲ fetch 대신 fetchWithRetry 사용 ▲▲▲
+                        
+                        indicator.remove();
+                        if (!response.ok) {
+                            const errorData = await response.json();
+                            throw new Error(errorData.error || `서버 응답 오류: ${response.statusText}`);
+                        }
+                        const data = await response.json();
+                        addMessage(data.diagnosis, 'plant');
+                    } catch (apiError) {
+                        console.error("API 호출 오류:", apiError);
+                        indicator.remove();
+                        addMessage(`이런, 진단하는 중에 오류가 발생했어.\n(${apiError.message})`, 'plant');
+                    } finally {
+                        showRestartButton();
                     }
-                    const data = await response.json();
-                    // 응답 데이터 키를 'diagnosis'로 변경
-                    addMessage(data.diagnosis, 'plant');
-                } catch (apiError) {
-                    console.error("API 호출 오류:", apiError);
-                    indicator.remove();
-                    addMessage(`이런, 진단하는 중에 오류가 발생했어.\n(${apiError.message})`, 'plant');
-                } finally {
-                    showRestartButton();
-                }
-            };
-        } catch (resizeError) {
-            console.error("이미지 처리 오류:", resizeError);
-            indicator.remove();
-            addMessage("사진 파일을 처리하는 중 문제가 발생했어. 다른 사진으로 시도해 줄래?", 'plant');
-            showRestartButton();
-        }
+                };
+            }).catch(resizeError => {
+                console.error("이미지 처리 오류:", resizeError);
+                indicator.remove();
+                addMessage("사진 파일을 처리하는 중 문제가 발생했어. 다시 시도해 줄래?", 'plant');
+                showRestartButton();
+            });
+        }, 1500);
     }
     
     // 3. 다시하기 버튼 표시 (공통 사용)
