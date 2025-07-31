@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-    <meta charset="UTF-8">
+<meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <!-- ✅ 메타 SEO -->
     <title>오후의 식물 | 식물, 식집사, 테라리움, 인테리어화분, 화분, 미니식물 이야기</title>
@@ -489,12 +489,60 @@
   object-fit: contain; /* 👈 추가: 찌그러지지 않게 */
   box-shadow: 0 2px 10px rgba(80,100,70,0.07);
 }
+
+
+.image-upload-label {
+    display: inline-block;
+    padding: 10px 18px;
+    background-color: #f0f0f0;
+    color: #555;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    font-size: 0.95rem;
+    font-weight: 500;
+    margin-top: 10px;
+}
+.image-upload-label:hover {
+    background-color: #e0e0e0;
+}
+
+#load-more-btn {
+    border: 1.5px solid var(--primary-green);
+    background: #fff;
+    color: var(--primary-green);
+    padding: 10px 28px;
+    border-radius: 20px;
+    font-size: 1rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+#load-more-btn:hover {
+    background: var(--primary-green);
+    color: #fff;
+}
+#load-more-btn.loading {
+    cursor: wait;
+    opacity: 0.7;
+}
+
+/* 기존 CSS 어딘가에 추가 */
+.post-image {
+    width: 100%;
+    max-height: 400px;
+    object-fit: cover;
+}
+.post-content {
+    /* ... 기존 스타일 ... */
+    white-space: pre-wrap; /* JS에서 \n을 <br>로 바꾸는 코드를 대체합니다. */
+}
 </style>
 </head>
 <body>
 
     <header id="main-header">
-        <a href="index.html" class="logo">
+                       <a href="index.html" class="logo">
             <img src="logo.png" alt="식집사 로고">
             <span>식집사</span>
         </a>
@@ -508,22 +556,23 @@
     </header>
 
     <div class="main-wrapper">
-        
         <aside class="left-sidebar">
             <div class="quiz-widget">
                 <h3>🌿 오늘의 퀴즈</h3>
                 <p id="quiz-question" class="question">퀴즈를 불러오는 중입니다...</p>
-                <div id="quiz-options" class="options">
-                    </div>
-                <p id="quiz-feedback" class="feedback"></p>
+                <div id="quiz-options" class="options"></div>
+                <p id="quiz-feedback" class="feedback" style="display: none;"></p>
             </div>
         </aside>
 
         <div class="story-container">
-            <button class="write-btn" id="open-story-modal">+</button>
+            <button class="write-btn" id="open-story-modal" aria-label="초록 이야기 글쓰기">+</button>
             <div id="post-feed"></div>
+            
+            <div id="load-more-container" style="text-align: center; padding: 20px;">
+                <button id="load-more-btn" style="display: none;">더 불러오기</button>
+            </div>
         </div>
-
     </div>
 
     <div class="story-modal-wrapper" id="story-modal-wrapper">
@@ -533,20 +582,27 @@
                 <h2>초록 이야기 쓰기</h2>
             </div>
             <form id="story-form">
-    <textarea id="story-content" placeholder="당신의 초록 이야기를 자유롭게 남겨주세요!" maxlength="2000" required></textarea>
-    <input type="file" id="story-image" accept="image/*" style="margin:10px 0 0 0;">
-    <img id="image-preview" src="" style="display:none;max-width:100%;margin:10px 0 0 0;border-radius:8px;" />
-    <div id="char-counter" class="char-counter">0 / 2000</div>
-    <div class="modal-actions">
-        <button type="button" id="close-story-modal">취소</button>
-        <button type="submit" id="submit-story-btn">올리기</button>
-    </div>
-</form>
+                <textarea id="story-content" placeholder="당신의 초록 이야기를 자유롭게 남겨주세요!" maxlength="2000" required></textarea>
+                
+                <label for="story-image-input" class="image-upload-label">
+                    📷 이미지 첨부하기
+                </label>
+                <input type="file" id="story-image-input" accept="image/*" style="display: none;">
+                
+                <img id="image-preview" src="" style="display:none;max-width:100%;margin:10px 0 0 0;border-radius:8px;" />
+                <div id="char-counter" class="char-counter">0 / 2000</div>
+
+                <div class="modal-actions">
+                    <button type="button" id="close-story-modal">취소</button>
+                    <button type="submit" id="submit-story-btn">올리기</button>
+                </div>
+            </form>
         </div>
     </div>
 
 
-        <div id="modal-wrapper" class="modal-wrapper">
+
+     <div id="modal-wrapper" class="modal-wrapper">
         <div class="modal">
             <div class="modal-left"></div>
             <div class="modal-right">
@@ -617,7 +673,24 @@
         </div>
     </div>
 
-
+<nav id="bottom-nav">
+  <a href="index.html" class="nav-item">
+    <span class="nav-icon">🏠</span>
+    <span class="nav-label">홈</span>
+  </a>
+  <a href="story.html" class="nav-item">
+    <span class="nav-icon">🌱</span>
+    <span class="nav-label">이야기</span>
+  </a>
+  <a href="myPlant.html" class="nav-item">
+    <span class="nav-icon">🪴</span>
+    <span class="nav-label">나의 식물</span>
+  </a>
+  <a href="findPlant.html" class="nav-item">
+    <span class="nav-icon">💬</span>
+    <span class="nav-label">상담소</span>
+  </a>
+</nav>
 
     <script type="module" src="navigation.js"></script>
 
@@ -629,9 +702,11 @@
 // 1. navigation.js로부터 auth, db, storage 변수를 직접 import 합니다.
 import { auth, db, storage } from './navigation.js'; 
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+// 스크립트 최상단 import 문을 수정하세요.
 import { 
-    collection, addDoc, query, orderBy, onSnapshot, serverTimestamp, 
-    doc, getDoc, updateDoc, increment, arrayUnion, arrayRemove
+    collection, addDoc, query, orderBy, serverTimestamp, 
+    doc, getDoc, updateDoc, increment, arrayUnion, arrayRemove,
+    getDocs, limit, startAfter  // <--- 이 3개를 추가해야 합니다.
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 import { ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
 
@@ -644,8 +719,13 @@ const storyContent = document.getElementById('story-content');
 const charCounter = document.getElementById('char-counter');
 const submitBtn = document.getElementById('submit-story-btn');
 const feed = document.getElementById('post-feed');
-const storyImageInput = document.getElementById('story-image');
+const storyImageInput = document.getElementById('story-image-input');
 const imagePreview = document.getElementById('image-preview');
+const loadMoreBtn = document.getElementById('load-more-btn');
+
+// ====== Pagination State ======
+let lastVisible = null; // 마지막으로 불러온 문서를 저장
+const POSTS_PER_PAGE = 10; // 한 번에 불러올 게시물 수
 
 // ====== User State ======
 let currentUser = null;
@@ -711,93 +791,110 @@ function timeForToday(value) {
 
 
 // ====== Display Stories & Comments ======
-function loadStories() {
-    const storiesQuery = query(collection(db, "stories"), orderBy("createdAt", "desc"));
+// ====== Display Stories & Comments ======
+async function loadStories() {
+    feed.innerHTML = ""; // 피드를 비웁니다.
+    lastVisible = null;  // 페이지네이션 상태 초기화
+    loadMoreBtn.style.display = 'none'; // 버튼 숨기기
+
+    const firstBatch = query(
+        collection(db, "stories"), 
+        orderBy("createdAt", "desc"), 
+        limit(POSTS_PER_PAGE)
+    );
+
+    const documentSnapshots = await getDocs(firstBatch);
+
+    if (documentSnapshots.empty) {
+        feed.innerHTML = `<div style="color:#888;padding:30px;text-align:center;">아직 작성된 이야기가 없어요. 첫 번째 이야기를 남겨주세요!</div>`;
+        return;
+    }
+
+    // 마지막 문서를 저장
+    lastVisible = documentSnapshots.docs[documentSnapshots.docs.length - 1];
+
+    // 가져온 문서들을 화면에 렌더링
+    documentSnapshots.forEach(doc => {
+        renderPost(doc); // 게시물 하나를 렌더링하는 함수 (아래에서 만듦)
+    });
     
-    onSnapshot(storiesQuery, (snapshot) => {
-        if (snapshot.empty) {
-            feed.innerHTML = `<div style="color:#888;padding:30px;text-align:center;">아직 작성된 이야기가 없어요. 첫 번째 이야기를 남겨주세요!</div>`;
-            return;
-        }
+    // 불러온 게시물 수가 페이지당 게시물 수와 같으면 '더 불러오기' 버튼 표시
+    if (documentSnapshots.docs.length === POSTS_PER_PAGE) {
+        loadMoreBtn.style.display = 'inline-block';
+    }
+}
 
-        feed.innerHTML = "";
-        snapshot.forEach(doc => {
-            const story = doc.data();
-            const storyId = doc.id;
-            
-            // 데이터 변경: 이제 story.likes 배열에 직접 접근하여 확인합니다.
-            const isLiked = currentUser ? story.likes?.includes(currentUser.uid) : false;
-            
-            const authorName = story.author || "익명";
-            const dateStr = story.createdAt ? timeForToday(story.createdAt) : "";
-            const userInitial = (currentUserName?.charAt(0) || 'P').toUpperCase();
-            const isLoggedIn = !!currentUser;
+function renderPost(doc) {
+    const story = doc.data();
+    const storyId = doc.id;
+    
+    const isLiked = currentUser ? story.likes?.includes(currentUser.uid) : false;
+    const authorName = story.author || "익명";
+    const dateStr = story.createdAt ? timeForToday(story.createdAt) : "";
+    const userInitial = (currentUserName?.charAt(0) || 'P').toUpperCase();
+    const isLoggedIn = !!currentUser;
 
-            let imageHtml = '';
-        if (story.imageUrl) {
-            imageHtml = `<img src="${story.imageUrl}" alt="업로드 이미지" style="width:100%;max-height:320px;object-fit:cover;border-radius:16px 16px 0 0;"/>`;
-        }
+    let imageHtml = '';
+    if (story.imageUrl) {
+        // 이미지는 카드의 맨 위에 위치해야 radius가 예쁘게 적용됩니다.
+        imageHtml = `<img src="${story.imageUrl}" alt="스토리 이미지" class="post-image"/>`;
+    }
 
-            // 댓글 HTML을 생성하는 부분
-            let commentsHtml = '';
-            // story.comments 배열이 존재할 경우에만 순회
-            if (story.comments && story.comments.length > 0) {
-                 // 최신 댓글이 위로 오도록 배열을 복사하고 뒤집습니다.
-                const reversedComments = [...story.comments].reverse();
-                reversedComments.forEach(comment => {
-                    commentsHtml += `
-                        <div class="comment">
-                            <strong class="comment-author">${comment.author}</strong>
-                            <span class="comment-text">${comment.text}</span>
-                            <span class="comment-date">${timeForToday(comment.createdAt)}</span>
-                        </div>
-                    `;
-                });
-            }
-
-            const card = document.createElement('div');
-            card.className = 'post-card';
-            card.dataset.postId = storyId;
-            card.innerHTML = `
-            <div class="post-card-content">
-                ${imageHtml}
-                    <div class="post-header">
-                        <div class="post-author-avatar">${authorName.charAt(0).toUpperCase()}</div>
-                        <div class="post-author-info">
-                            <span class="post-author">${authorName}</span>
-                            <span class="post-date">${dateStr}</span>
-                        </div>
-                    </div>
-                    <p class="post-content">${story.content.replace(/\n/g, "<br>")}</p>
-                </div>
-                <div class="post-actions">
-                    <button class="action-btn like-btn ${isLiked ? 'liked' : ''}">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
-                        <span class="like-count">${story.likesCount || 0}</span>
-                    </button>
-                    <button class="action-btn comment-btn">
-                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
-                        <span class="comment-count-text">댓글 ${story.comments?.length || 0}</span>
-                    </button>
-                </div>
-                <div class="comments-section">
-                    <div class="comments-list">${commentsHtml}</div>
-                    <div class="comment-input-area">
-                        <div class="comment-user-avatar ${isLoggedIn ? '' : 'disabled'}">${isLoggedIn ? userInitial : '?'}</div>
-                        <div class="comment-input-wrapper">
-                            <form class="comment-form">
-                                <textarea name="comment" placeholder="${isLoggedIn ? '댓글을 남겨주세요...' : '로그인 후 댓글을 달 수 있습니다.'}" ${isLoggedIn ? '' : 'disabled'} required></textarea>
-                                <button type="submit" ${isLoggedIn ? '' : 'disabled'}>
-                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
-                                </button>
-                            </form>
-                        </div>
-                    </div>
+    let commentsHtml = '';
+    if (story.comments && story.comments.length > 0) {
+        const reversedComments = [...story.comments].reverse();
+        reversedComments.forEach(comment => {
+            commentsHtml += `
+                <div class="comment">
+                    <strong class="comment-author">${comment.author}</strong>
+                    <span class="comment-text">${comment.text}</span>
+                    <span class="comment-date">${timeForToday(comment.createdAt)}</span>
                 </div>
             `;
-            feed.appendChild(card);
         });
-    });
+    }
+
+    const card = document.createElement('div');
+    card.className = 'post-card';
+    card.dataset.postId = storyId;
+    card.innerHTML = `
+        ${imageHtml}
+        <div class="post-card-content">
+            <div class="post-header">
+                <div class="post-author-avatar">${authorName.charAt(0).toUpperCase()}</div>
+                <div class="post-author-info">
+                    <span class="post-author">${authorName}</span>
+                    <span class="post-date">${dateStr}</span>
+                </div>
+            </div>
+            <p class="post-content">${story.content}</p>
+        </div>
+        <div class="post-actions">
+            <button class="action-btn like-btn ${isLiked ? 'liked' : ''}">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+                <span class="like-count">${story.likesCount || 0}</span>
+            </button>
+            <button class="action-btn comment-btn">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+                <span class="comment-count-text">댓글 ${story.comments?.length || 0}</span>
+            </button>
+        </div>
+        <div class="comments-section">
+            <div class="comments-list">${commentsHtml}</div>
+            <div class="comment-input-area">
+                <div class="comment-user-avatar ${isLoggedIn ? '' : 'disabled'}">${isLoggedIn ? userInitial : '?'}</div>
+                <div class="comment-input-wrapper">
+                    <form class="comment-form">
+                        <textarea name="comment" placeholder="${isLoggedIn ? '댓글을 남겨주세요...' : '로그인 후 댓글을 달 수 있습니다.'}" ${isLoggedIn ? '' : 'disabled'} required></textarea>
+                        <button type="submit" ${isLoggedIn ? '' : 'disabled'}>
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    `;
+    feed.appendChild(card);
 }
 
 // ====== Event Delegation for Likes and Comments ======
@@ -859,22 +956,77 @@ feed.addEventListener('submit', async (e) => {
             text: text,
             author: currentUserName,
             uid: currentUser.uid,
-            // 배열 필드에서는 serverTimestamp를 사용할 수 없으므로 JS Date 객체 사용
             createdAt: new Date() 
         };
 
-        try {
-            await updateDoc(storyRef, {
-                comments: arrayUnion(newComment)
-            });
-            form.reset();
-        } catch (error) {
-            console.error("Error adding comment: ", error);
-            alert("댓글 작성에 실패했습니다.");
-        }
+        // DB 업데이트
+        await updateDoc(storyRef, {
+            comments: arrayUnion(newComment)
+        });
+        
+        // ▼▼▼ UI 수동 업데이트 로직 추가 ▼▼▼
+        const commentsList = card.querySelector('.comments-list');
+        const commentCountText = card.querySelector('.comment-count-text');
+
+        // 1. 새 댓글 엘리먼트 생성
+        const newCommentEl = document.createElement('div');
+        newCommentEl.className = 'comment';
+        newCommentEl.innerHTML = `
+            <strong class="comment-author">${newComment.author}</strong>
+            <span class="comment-text">${newComment.text}</span>
+            <span class="comment-date">방금 전</span>`;
+        
+        // 2. 목록 맨 위에 새 댓글 추가 (최신순)
+        commentsList.prepend(newCommentEl);
+
+        // 3. 댓글 개수 업데이트
+        const newCount = card.querySelectorAll('.comment').length;
+        commentCountText.textContent = `댓글 ${newCount}`;
+        
+        // 4. 입력창 초기화
+        form.reset();
     }
 });
 
+// loadMoreStories 함수 생성
+async function loadMoreStories() {
+    if (!lastVisible) { // 더 이상 불러올 문서가 없으면 중단
+        return;
+    }
+
+    loadMoreBtn.classList.add('loading');
+    loadMoreBtn.disabled = true;
+
+    const nextBatch = query(
+        collection(db, "stories"),
+        orderBy("createdAt", "desc"),
+        startAfter(lastVisible), // 마지막으로 본 문서 다음부터
+        limit(POSTS_PER_PAGE)
+    );
+
+    const documentSnapshots = await getDocs(nextBatch);
+    
+    if (documentSnapshots.empty) {
+        loadMoreBtn.style.display = 'none'; // 더 이상 문서가 없으면 버튼 숨기기
+        return;
+    }
+
+    lastVisible = documentSnapshots.docs[documentSnapshots.docs.length - 1];
+    
+    documentSnapshots.forEach(doc => {
+        renderPost(doc);
+    });
+
+    if (documentSnapshots.docs.length < POSTS_PER_PAGE) {
+        loadMoreBtn.style.display = 'none'; // 마지막 페이지이면 버튼 숨기기
+    }
+    
+    loadMoreBtn.classList.remove('loading');
+    loadMoreBtn.disabled = false;
+}
+
+// '더 불러오기' 버튼에 클릭 리스너 추가
+loadMoreBtn.addEventListener('click', loadMoreStories);
 
 // ====== 오늘의 퀴즈 로직 ======
 
@@ -1046,12 +1198,93 @@ storyForm.addEventListener('submit', async (e) => {
         imagePreview.src = '';
         imagePreview.style.display = 'none';
 
+        // ▼ 이 한 줄을 추가하여 피드를 새로고침합니다.
+        loadStories(); 
     } catch (err) {
         alert("글 저장 중 오류가 발생했습니다: " + err.message);
     } finally {
         submitBtn.disabled = false;
         submitBtn.classList.remove('loading');
         submitBtn.textContent = '올리기';
+    }
+});
+
+// ====== Modal & Form Logic ======
+
+// 모달을 닫는 공통 함수를 만듭니다.
+function closeModal() {
+    modalWrapper.classList.remove('open');
+    storyForm.reset();
+    imagePreview.src = '';
+    imagePreview.style.display = 'none';
+    charCounter.textContent = "0 / 2000";
+}
+
+openBtn.addEventListener('click', () => {
+    if (!currentUser) {
+        document.querySelector('.cta-button').click();
+        return;
+    }
+    // storyForm.reset() 등은 closeModal 함수가 처리하므로 여기선 제거
+    modalWrapper.classList.add('open');
+    setTimeout(() => storyContent.focus(), 250);
+});
+
+// 기존 리스너들을 closeModal 함수 호출로 변경
+closeBtn.addEventListener('click', closeModal);
+modalWrapper.addEventListener('click', (e) => {
+    if (e.target === modalWrapper) {
+        closeModal();
+    }
+});
+
+storyContent.addEventListener('input', () => {
+    charCounter.textContent = `${storyContent.value.length} / 2000`;
+});
+
+
+// ====== Event Delegation for Likes and Comments ======
+feed.addEventListener('click', async (e) => {
+    // --- Like Button Click ---
+    const likeBtn = e.target.closest('.like-btn');
+    if (likeBtn) {
+        if (!currentUser) {
+            document.querySelector('.cta-button').click();
+            return;
+        }
+        const card = likeBtn.closest('.post-card');
+        const storyId = card.dataset.postId;
+        const storyRef = doc(db, "stories", storyId);
+        const likeCountSpan = likeBtn.querySelector('.like-count');
+        const currentCount = parseInt(likeCountSpan.textContent);
+
+        // UI를 먼저 업데이트하고 DB에 요청을 보낼 수도 있습니다 (낙관적 업데이트).
+        likeBtn.classList.toggle('liked'); 
+
+        if (likeBtn.classList.contains('liked')) {
+            // UI 업데이트
+            likeCountSpan.textContent = currentCount + 1;
+            // DB 업데이트
+            await updateDoc(storyRef, {
+                likes: arrayUnion(currentUser.uid),
+                likesCount: increment(1)
+            });
+        } else {
+            // UI 업데이트
+            likeCountSpan.textContent = currentCount - 1;
+            // DB 업데이트
+            await updateDoc(storyRef, {
+                likes: arrayRemove(currentUser.uid),
+                likesCount: increment(-1)
+            });
+        }
+    }
+    
+    // --- Comment Button Click (to focus textarea) ---
+    const commentBtn = e.target.closest('.comment-btn');
+    if (commentBtn) {
+        const card = commentBtn.closest('.post-card');
+        card.querySelector('.comment-form textarea').focus();
     }
 });
     </script>
