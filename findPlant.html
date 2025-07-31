@@ -2,10 +2,10 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-    <meta charset="UTF-8">
+<meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>오후의 식물 | 식물 추천, 테라리움, 인테리어화분, 미니식물, 화분 상담소</title>
-  <meta name="description" content="오후의 식물은 테라리움, 인테리어화분, 미니식물, 화분 등 다양한 식물을 추천하고 초보도 쉽게 키울 수 있는 반려식물 관리와 식물 상담을 도와드립니다. 사진으로 식물 진단과 이름 찾기도 지원!">
+  <title>오후의 식물 | 식물 상담소</title>
+  <meta name="description" content="오후의 식물은 초보도 쉽게 키울 수 있는 반려식물 관리와 식물 상담을 도와드립니다. 사진으로 식물 진단과 이름 찾기도 지원">
   <meta name="keywords" content="오후의 식물, 식물, 테라리움, 인테리어화분, 미니식물, 화분, 반려식물, 식물추천, 식물상담, 플랜테리어, 식집사">
   <meta property="og:type" content="website">
   <meta property="og:title" content="오후의 식물 | 인테리어화분 & 미니식물 추천">
@@ -711,7 +711,7 @@ document.addEventListener('DOMContentLoaded', () => {
             // 마크다운(**)과 줄바꿈(\n)을 모두 HTML 태그로 변환
             bubble.innerHTML = text.replace(/\*\*(.*?)\*\*/g, '<b>$1</b>').replace(/\n/g, '<br>');
         }
-        messageArea.appendChild(풍선껌);
+        messageArea.appendChild(bubble);
         messageArea.scrollTop = messageArea.scrollHeight;
         return bubble;
     }
