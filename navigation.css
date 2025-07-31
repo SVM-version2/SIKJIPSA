@@ -309,3 +309,91 @@ header.scrolled nav a:not(.cta-button):hover {
             width: 32px;
             height: 32px;
         }
+
+
+#bottom-nav {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  /* nav의 메뉴 숨기고, cta-button만 보이게 */
+  header nav a:not(.cta-button) {
+    display: none !important;
+  }
+  header nav a.cta-button {
+    display: inline-block !important;
+    margin-left: auto;
+    margin-right: 0;
+    color: #fff !important;
+    padding: 0.4rem 1.1rem;
+    border-radius: 2rem;
+    font-size: 1rem;
+    font-weight: 700;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+    letter-spacing: -1px;
+  }
+    header, #main-header {
+    position: static !important;
+    top: auto !important;
+    left: auto !important;
+    width: 100%;
+    box-shadow: none;
+  }
+  /* header flex 정렬 및 유저이름, 로고 조정 */
+  #main-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 54px;
+    padding: 0 10px;
+    position: fixed;
+    width: 100vw;
+    z-index: 1001;
+  }
+  .logo {
+    font-size: 1.22rem;
+    font-weight: 700;
+    white-space: nowrap;
+  }
+  .user-name {
+    font-size: 1rem;
+    margin-left: 0.6rem;
+    font-weight: 600;
+    color: #fff;
+    white-space: nowrap;
+  }
+  #bottom-nav, .bottom-nav {
+    display: flex !important;
+    position: fixed;
+    left: 0; bottom: 0;
+    width: 100vw;
+    height: 58px;
+    background: #fff;
+    box-shadow: 0 -2px 16px rgba(0,0,0,0.08);
+    justify-content: space-around;
+    align-items: center;
+    z-index: 120;
+    border-radius: 16px 16px 0 0;
+  }
+  .nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    color: #333;
+    text-decoration: none;
+    font-size: 0.94rem;
+    flex: 1;
+    transition: color 0.12s;
+    padding: 0 2px;
+    gap: 1px;
+  }
+  .nav-item .nav-icon {
+    font-size: 1.45rem;
+    line-height: 1;
+    margin-bottom: 2px;
+  }
+  .nav-item.active, .nav-item:active, .nav-item:focus {
+    color: #4CAF50;
+    font-weight: 700;
+  }
+}

@@ -774,46 +774,71 @@ opacity: 1; /* 활성 챕터만 보이게 */
  /* --- 3. Green Chapter 섹션 (수정안) --- */
 
 /* 스크롤 애니메이션을 위한 컨테이너 비활성화 */
-.chapter-sticky-wrapper {
-    height: auto;
-}
-.chapter-container {
-    position: static; /* sticky 해제 */
-    display: block;   /* grid 대신 block으로 변경 */
-    height: auto;
-}
-
-/* 이미지와 텍스트 컨테이너 기본 스타일 초기화 */
-.chapter-visual, 
-.chapter-story {
-    height: auto;
-    position: static;
+  #green-chapter {
     padding: 0;
-}
-
-/* 내부 패널(이미지/텍스트)을 순서대로 보이도록 처리 */
-.visual-panel, 
-.story-chapter {
-    position: static; /* absolute 위치 해제 */
-    opacity: 1 !important; /* JS가 투명도를 바꿔도 보이도록 강제 */
-    transform: none !important; /* JS가 스케일을 바꿔도 크기 유지 */
-    display: block; /* 모든 요소를 보이게 함 */
-}
-
-.chapter-visual {
-    padding: 0 20px; /* 모바일 좌우 여백 */
-}
-.visual-panel {
-    height: 300px; /* 이미지 높이 통일 */
-    margin-bottom: 20px;
-}
-.story-chapter {
-    padding: 0 30px; /* 텍스트 좌우 여백 */
-    margin-bottom: 50px; /* 챕터 간 여백 */
-}
-.story-chapter:last-child {
-    margin-bottom: 0;
-}
+  }
+  .chapter-sticky-wrapper {
+    height: auto !important;
+    min-height: unset !important;
+  }
+  .chapter-container {
+    position: static !important;
+    display: block !important;
+    height: auto !important;
+    background: none;
+    box-shadow: none;
+    margin: 0;
+    padding: 0 0 30px 0;
+  }
+  .chapter-visual,
+  .chapter-story {
+    position: static !important;
+    width: 100% !important;
+    height: auto !important;
+    display: block !important;
+    padding: 0 !important;
+    margin: 0;
+  }
+  /* 각 챕터(이미지+텍스트 쌍)를 블록으로, 순차 노출 */
+  .visual-panel,
+  .story-chapter {
+    position: static !important;
+    opacity: 1 !important;
+    transform: none !important;
+    display: block !important;
+    width: 100%;
+    margin: 0 auto 12px auto;
+  }
+  .visual-panel img {
+    width: 100%;
+    height: 210px; /* or 180~240px */
+    object-fit: cover;
+    border-radius: 12px;
+    margin: 0 0 12px 0;
+  }
+  .story-chapter {
+    margin: 0 0 36px 0;
+    padding: 0 12px;
+    border-radius: 0 0 12px 12px;
+    background: #fff;
+    box-shadow: 0 4px 20px rgba(44,93,79,0.04);
+  }
+  .chapter-number {
+    margin-bottom: 4px;
+    font-size: 1rem;
+  }
+  .story-chapter h2 {
+    font-size: 1.3rem;
+    margin-bottom: 12px;
+  }
+  .story-chapter p {
+    font-size: 1.02rem;
+    margin-bottom: 12px;
+  }
+  /* 한 쌍마다 이미지-텍스트 묶임을 위한 스타일 */
+  .mobile-chapter-block {
+    margin-bottom: 36px;
+  }
 
     /* --- 4. 동적 경험 섹션 --- */
     .experience-wrapper {
@@ -871,7 +896,7 @@ opacity: 1; /* 활성 챕터만 보이게 */
 
     /* --- 7. 챗봇 --- */
     #chatbot-container {
-        bottom: 20px;
+        bottom: 70px;
         right: 20px;
     }
     #chat-window {
@@ -1457,6 +1482,28 @@ opacity: 1; /* 활성 챕터만 보이게 */
     </div>
 </div>
 </div>
+
+
+
+<nav id="bottom-nav">
+  <a href="index.html" class="nav-item">
+    <span class="nav-icon">🏠</span>
+    <span class="nav-label">홈</span>
+  </a>
+  <a href="story.html" class="nav-item">
+    <span class="nav-icon">🌱</span>
+    <span class="nav-label">초록 이야기</span>
+  </a>
+  <a href="myPlant.html" class="nav-item">
+    <span class="nav-icon">🪴</span>
+    <span class="nav-label">나의 식물</span>
+  </a>
+  <a href="findPlant.html" class="nav-item">
+    <span class="nav-icon">💬</span>
+    <span class="nav-label">식물 상담소</span>
+  </a>
+</nav>
+
 
 </body>
 

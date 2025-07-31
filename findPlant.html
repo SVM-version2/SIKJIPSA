@@ -408,10 +408,22 @@ main {
  .plant-character {
  left: auto; /* 기존 left 속성 무효화 */
  right: 20px; /* 오른쪽에서 20px 위치 */
- bottom: 20px; /* 아래에서 20px 위치 */
+ bottom: 80px; /* 아래에서 20px 위치 */
  transform: scale(0.8); /* 크기를 80%로 축소 */
         transform-origin: bottom right; /* 오른쪽 아래를 기준으로 작아지도록 설정 */
  }
+
+   main {
+    padding-bottom: 90px !important; /* 네비게이션 높이+여유 */
+  }
+  .chat-container {
+    max-width: 100vw;
+    min-height: 60vh;
+    margin-bottom: 80px; /* 하단 네비게이션 만큼 여유 공간 */
+  }
+  .message-area {
+    padding-bottom: 35px; /* 옵션버튼이 겹치지 않게 */
+  }
 }
 </style>
 </head>
@@ -549,6 +561,24 @@ main {
         </div>
     </div>
 
+<nav id="bottom-nav">
+  <a href="index.html" class="nav-item">
+    <span class="nav-icon">🏠</span>
+    <span class="nav-label">홈</span>
+  </a>
+  <a href="story.html" class="nav-item">
+    <span class="nav-icon">🌱</span>
+    <span class="nav-label">초록 이야기</span>
+  </a>
+  <a href="myPlant.html" class="nav-item">
+    <span class="nav-icon">🪴</span>
+    <span class="nav-label">나의 식물</span>
+  </a>
+  <a href="findPlant.html" class="nav-item">
+    <span class="nav-icon">💬</span>
+    <span class="nav-label">식물 상담소</span>
+  </a>
+</nav>
 
     <script type="module" src="navigation.js"></script>
 
