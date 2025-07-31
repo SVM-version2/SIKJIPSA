@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-    <meta charset="UTF-8">
+<meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>오후의 식물 | 나만의 식물도감 - 미니식물, 화분, 테라리움 인테리어</title>
   <meta name="description" content="오후의 식물는 식물, 미니식물, 인테리어화분, 테라리움, 화분 등 다양한 식물 정보를 제공하며 식물 관리와 성장일지까지 도와주는 식물 비서 서비스입니다. 나만의 식물도감으로 식집사 라이프를 시작하세요!">
@@ -25,6 +25,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="navigation.css">
+    
     <style>
         .container {
             max-width: 900px;
@@ -622,6 +623,7 @@
                 flex-direction: column;
             }
         }
+        
         #guide-modal .modal-content {
     background: var(--bg-cream) !important;         /* 흰색 배경 */
     color: var(--text-dark) !important;           /* 진한 텍스트 */
@@ -638,6 +640,7 @@
     font-size: 1.07rem;
     font-family: inherit;
 }
+
 @media (max-width: 768px) {
     .container {
         padding: 16px 4px 60px 4px;
@@ -840,6 +843,7 @@
     }
 }
 
+
 .modal-diary-btn {
   display: inline-flex;
   align-items: center;
@@ -872,11 +876,13 @@
     border-radius: 0.95rem;
   }
 }
+
+
     </style>
 </head>
 <body>
     <header id="main-header">
-        <a href="index.html" class="logo">
+                        <a href="index.html" class="logo">
             <img src="logo.png" alt="식집사 로고">
             <span>식집사</span>
         </a>
@@ -949,7 +955,7 @@
         </div>
     </div>
 
-        <div id="modal-wrapper" class="modal-wrapper">
+    <div id="modal-wrapper" class="modal-wrapper">
         <div class="modal">
             <div class="modal-left"></div>
             <div class="modal-right">
@@ -1020,6 +1026,7 @@
         </div>
     </div>
 
+    
     <div id="guide-modal" class="modal-overlay" style="z-index:2000;">
   <div class="modal-content" style="max-width:420px;">
     <div class="modal-header">
@@ -1029,6 +1036,7 @@
     <pre id="guide-modal-content" style="white-space:pre-wrap; font-family:inherit; font-size:1.07rem; margin-bottom:0;"></pre>
   </div>
 </div>
+
 <nav id="bottom-nav">
   <a href="index.html" class="nav-item">
     <span class="nav-icon">🏠</span>
@@ -1036,7 +1044,7 @@
   </a>
   <a href="story.html" class="nav-item">
     <span class="nav-icon">🌱</span>
-    <span class="nav-label">초록 이야기</span>
+    <span class="nav-label">이야기</span>
   </a>
   <a href="myPlant.html" class="nav-item">
     <span class="nav-icon">🪴</span>
@@ -1044,9 +1052,10 @@
   </a>
   <a href="findPlant.html" class="nav-item">
     <span class="nav-icon">💬</span>
-    <span class="nav-label">식물 상담소</span>
+    <span class="nav-label">상담소</span>
   </a>
 </nav>
+
     <script type="module" src="navigation.js"></script>
     <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
@@ -2051,22 +2060,22 @@ function getSixMonthCareStats(plant) {
   const stats = {};
 
   types.forEach(type => {
-  const scheduled = recentSchedule.filter(c => c.type === type);
-  const done = recentRecords.filter(c => c.type === type);
+    const scheduled = recentSchedule.filter(c => c.type === type);
+    const done = recentRecords.filter(c => c.type === type);
 
-  const scheduledCount = scheduled.length;
-  const doneCount = done.length;
+    const scheduledCount = scheduled.length;
+    const doneCount = done.length;
 
-  const missed = Math.max(0, scheduledCount - doneCount);
-  const percentSuccess = scheduledCount === 0 ? 0 : (doneCount / scheduledCount) * 100;
+    const missed = Math.max(0, scheduledCount - doneCount);
+    const rate = scheduledCount === 0 ? 0 : (missed / scheduledCount) * 100;
 
-  stats[type] = {
-    scheduled: scheduledCount,
-    done: doneCount,
-    missed: missed,
-    successRate: Math.round(percentSuccess)
-  };
-});
+    stats[type] = {
+      scheduled: scheduledCount,
+      done: doneCount,
+      missed: missed,
+      missedRate: Math.round(rate)
+    };
+  });
 
   // 4. 물주기 평균 간격 계산
   const waterRecords = recentRecords.filter(c => c.type === '물주기')
@@ -2141,7 +2150,12 @@ function getSixMonthCareStats(plant) {
     return `
       <div class="plant-card-content">
         <h3>성장 일지</h3>
-        <button onclick="window.addDiaryEntry && window.addDiaryEntry('${plant.name}')" style="margin-bottom:1rem;">새 일지 작성</button>
+        <button 
+  class="modal-diary-btn"
+  onclick="window.addDiaryEntry && window.addDiaryEntry('${plant.name}')">
+  <span style="font-size:1.15em;line-height:1;">📝</span> 새 성장 일지 작성
+</button>
+
         <ul style="margin-top:1.5rem;">
           ${(plant.growthDiaries || [])
             .sort((a, b) => b.date.localeCompare(a.date))
@@ -2194,16 +2208,16 @@ const data = diaryEntries.map(d => d.height);
 
   if (!careStats) return `<div class="plant-card-content">통계 데이터가 부족합니다.</div>`;
 
-  // 표 렌더
-const careStatHtml = Object.entries(careStats.stats).map(([type, s]) =>
-  `<tr>
-    <td>${type}</td>
-    <td>${s.scheduled}</td>
-    <td>${s.done}</td>
-    <td>${s.missed}</td>
-    <td style="color:#32775b;font-weight:700;">${s.successRate}%</td>
-  </tr>`
-).join('');
+  // 누락률 표
+  const careStatHtml = Object.entries(careStats.stats).map(([type, s]) =>
+    `<tr>
+      <td>${type}</td>
+      <td>${s.scheduled}</td>
+      <td>${s.done}</td>
+      <td>${s.missed}</td>
+      <td>${s.missedRate}%</td>
+    </tr>`
+  ).join('');
 
   // 그래프 그리기 (탭 렌더 후 실행)
   setTimeout(() => {
@@ -2241,8 +2255,8 @@ const careStatHtml = Object.entries(careStats.stats).map(([type, s]) =>
       <h3>6개월간 관리 통계</h3>
       <table style="width:100%;margin-bottom:1.5rem;text-align:center;">
         <thead>
-  <tr><th>케어</th><th>예정</th><th>실행</th><th>누락</th><th>성공률</th></tr>
-</thead>
+          <tr><th>케어</th><th>예정</th><th>실행</th><th>누락</th><th>누락률</th></tr>
+        </thead>
         <tbody>
           ${careStatHtml}
         </tbody>
@@ -2265,6 +2279,7 @@ const careStatHtml = Object.entries(careStats.stats).map(([type, s]) =>
       </div>
       <div style="margin-top:0.8rem;color:#8b7f63;font-size:0.95rem;">
         최근 6개월간 기록을 기준으로 산출됩니다.<br>
+        (분갈이·영양제는 주기가 길어 기록이 적을 수 있어요!)
       </div>
     </div>
   `;
