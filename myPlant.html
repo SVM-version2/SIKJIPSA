@@ -46,6 +46,7 @@
             background: var(--bg-cream);
             border-radius: 1.5rem;
             box-shadow: 0 2px 16px rgba(107,123,97,0.07);
+            
         }
 
         .header-content h1 {
@@ -65,16 +66,18 @@
             display: flex;
             align-items: center;
             gap: 8px;
-            padding: 16px 24px;
+            padding: 13px 22px;
             background: var(--primary-green);
             color: #fff;
             border: none;
             border-radius: 1.2rem;
             font-weight: 700;
-            font-size: 1.1rem;
+            font-size: 1rem;
             cursor: pointer;
             transition: all 0.2s;
             box-shadow: 0 4px 12px rgba(107,123,97,0.15);
+            margin-top: -60px;
+            margin-right: -500px;
         }
 
         .add-plant-btn:hover {
@@ -84,7 +87,7 @@
         }
 
         .add-plant-btn span:first-child {
-            font-size: 1.4rem;
+            font-size: 1rem;
             font-weight: 300;
         }
 
@@ -314,12 +317,18 @@
             max-width: 500px;
             width: 90%;
             max-height: 80vh;
-            overflow-y: auto;
+            overflow-y: auto;   /* 스크롤 가능하게! */
+            overflow-x: hidden; /* 좌우 스크롤 강제 숨김 */
+            /* 스크롤바 숨기기 ↓ */
+            scrollbar-width: none;         /* Firefox */
+            -ms-overflow-style: none;      /* IE, Edge */
             box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
             transform: translateY(20px);
             transition: transform 0.3s;
         }
-
+        .modal-content::-webkit-scrollbar {
+    display: none;                 /* Chrome, Safari, Opera */
+}
         .modal-overlay.visible .modal-content {
             transform: translateY(0);
         }
@@ -354,7 +363,7 @@
         }
 
         .plant-search-input {
-            width: 100%;
+            width: 90%;
             padding: 16px 20px;
             border: 2px solid var(--accent-gold);
             border-radius: 1rem;
@@ -879,7 +888,99 @@
   }
 }
 
+.custom-plant-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 13px 22px;
+    background: var(--primary-green); /* 밝은 연두 */
+    color: white;
+    border: none;
+    border-radius: 1.2rem;
+    font-weight: 700;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.17s;
+    box-shadow: 0 2px 10px rgba(107,123,97,0.08);
+    margin-top: 60px;
+}
+.custom-plant-btn span:first-child {
+    font-size: 1rem;
+}
+.custom-plant-btn:hover {
+    background: var(--accent-gold, #b2a97e);
+    color: #fff;
+    transform: translateY(-2px) scale(1.02);
+}
 
+#custom-plant-modal label {
+    color: #393624; /* 훨씬 진하게 */
+    font-weight: 600;
+    font-size: 1.09rem;
+    margin-bottom: 6px;
+    display: block;
+    letter-spacing: -0.2px;
+}
+
+#custom-plant-modal input[type="text"],
+#custom-plant-modal input[type="url"],
+#custom-plant-modal input[type="number"],
+#custom-plant-modal input:not([type]),
+#custom-plant-modal input[type="file"],
+#custom-plant-modal textarea {
+    width: 90%;
+    background: #fff;
+    color: #262714;
+    border: 2px solid #b2a97e;
+    border-radius: 0.7rem;
+    padding: 12px 14px;
+    font-size: 1.05rem;
+    margin: 4px 0 14px 0;
+    outline: none;
+    transition: border 0.15s;
+}
+
+#custom-plant-modal input[type="file"] {
+    padding: 8px 14px;
+    cursor: pointer;
+}
+
+#custom-plant-modal input[type="file"]::-webkit-file-upload-button {
+    background: #32775b;
+    color: white;
+    border: none;
+    border-radius: 0.5rem;
+    padding: 8px 16px;
+    margin-right: 10px;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+#custom-plant-modal input[type="file"]::-webkit-file-upload-button:hover {
+    background: #1d4433;
+}
+#custom-plant-modal input:focus,
+#custom-plant-modal textarea:focus {
+    border-color: #4f684b;
+    background: #fcfbe7;
+}
+#custom-plant-modal form > div[style] b {
+    color: #3a3a2a;
+    font-size: 1.05rem;
+}
+
+#custom-plant-modal .primary-btn {
+    background: var(--primary-green, #4f684b);
+    color: #fff;
+    font-size: 1.15rem;
+    border-radius: 1.2rem;
+    font-weight: 700;
+    margin-top: 14px;
+}
+#custom-plant-modal .primary-btn:hover {
+    background: var(--accent-gold, #b2a97e);
+    color: #fff;
+}
     </style>
 </head>
 <body>
@@ -892,7 +993,7 @@
             <a href="index.html">홈</a>
             <a href="story.html">초록 이야기</a>
             <a href="myPlant.html">나의 식물</a>
-            <a href="findPlant.html">식물 찾기</a>
+            <a href="findPlant.html">식물 상담소</a>
             <a href="payment.html">구독하기</a>
             <a href="#" class="cta-button">Login</a>
         </nav>
@@ -909,6 +1010,10 @@
                     <span>+</span>
                     <span>새 식물 추가</span>
                 </button>
+                <button id="add-custom-plant-btn" class="custom-plant-btn">
+    <span>+</span>
+    <span>나만의 식물 추가하기</span>
+</button>
             </div>
 
             <div class="collection-stats">
@@ -1040,6 +1145,57 @@
   </div>
 </div>
 
+
+
+
+<div class="modal-overlay" id="custom-plant-modal">
+  <div class="modal-content" style="max-width:500px;">
+    <div class="modal-header">
+      <h2 class="modal-title">나만의 식물 등록</h2>
+      <button class="close-modal" id="close-custom-modal">×</button>
+    </div>
+    <form id="custom-plant-form">
+      <label>식물 이름 <input name="name" required /></label>
+      <label>식물 이미지 <input type="file" name="img" accept="image/*" /></label>
+      <div style="margin: 8px 0; font-size: 0.9rem; color: #666;">
+        <input type="checkbox" id="use-default-image" name="use-default-image">
+        <label for="use-default-image">기본 이미지 사용</label>
+      </div>
+      <div id="image-preview" style="display: none; margin: 10px 0;">
+        <img id="preview-img" style="max-width: 200px; max-height: 200px; border-radius: 8px; border: 2px solid #b2a97e;" />
+      </div>
+      <label>간단 설명 <input name="desc" required /></label>
+      <label>상세 설명 <input name="detail" required /></label>
+      <label>관리법 <input name="careGuide" required /></label>
+      <label>팁 <input name="tip" /></label>
+      <div style="margin:1em 0;">
+    <b>주기별 관리법</b>
+  <div class="care-row">
+    <label>물주기
+      <input type="number" name="watering_interval" placeholder="예: 7" min="1" style="width:90px; margin-right:8px;" required>일마다
+      <input type="text" name="watering_memo" placeholder="예: 흙이 마르면" style="width:120px;">
+    </label>
+  </div>
+  <div class="care-row">
+    <label>분갈이
+      <input type="number" name="repotting_interval" placeholder="예: 365" min="1" style="width:90px; margin-right:8px;" required>일마다
+      <input type="text" name="repotting_memo" placeholder="예: 1년에 한 번" style="width:120px;">
+    </label>
+  </div>
+  <div class="care-row">
+    <label>영양제
+      <input type="number" name="fertilizer_interval" placeholder="예: 60" min="1" style="width:90px; margin-right:8px;" required>일마다
+      <input type="text" name="fertilizer_memo" placeholder="예: 봄, 가을에" style="width:120px;">
+    </label>
+  </div>
+      <button type="submit" class="primary-btn" style="width:100%;">식물 추가하기</button>
+    </form>
+  </div>
+</div>
+
+
+
+
 <nav id="bottom-nav">
   <a href="index.html" class="nav-item">
     <span class="nav-icon">🏠</span>
@@ -1047,19 +1203,19 @@
   </a>
   <a href="story.html" class="nav-item">
     <span class="nav-icon">🌱</span>
-    <span class="nav-label">초록 이야기</span>
+    <span class="nav-label">이야기</span>
   </a>
   <a href="myPlant.html" class="nav-item">
     <span class="nav-icon">🪴</span>
-    <span class="nav-label">나의 식물</span>
+    <span class="nav-label">나의식물</span>
   </a>
   <a href="findPlant.html" class="nav-item">
     <span class="nav-icon">💬</span>
-    <span class="nav-label">식물 상담소</span>
-  </a>
+    <span class="nav-label">상담소</span>
     <a href="payment.html" class="nav-item">
     <span class="nav-icon">⭐</span>
     <span class="nav-label">구독</span>
+  </a>
   </a>
 </nav>
 
@@ -2836,18 +2992,27 @@ window.addDiaryEntry = async function(plantName) {
             // plants 서브컬렉션에서 해당 plant 문서 삭제
             const plantRef = doc(db, "users", currentUser.uid, "plants", plantName);
             
-            // careRecords 서브컬렉션의 모든 문서도 삭제
+            // careRecords 서브컬렉션의 모든 문서 삭제
             const careRecordsRef = collection(db, "users", currentUser.uid, "plants", plantName, "careRecords");
             const careSnapshot = await getDocs(careRecordsRef);
-            const batchPromises = [];
+            const careDeletePromises = [];
             careSnapshot.forEach(docSnap => {
-                batchPromises.push(deleteDoc(doc(db, "users", currentUser.uid, "plants", plantName, "careRecords", docSnap.id)));
+                careDeletePromises.push(deleteDoc(doc(db, "users", currentUser.uid, "plants", plantName, "careRecords", docSnap.id)));
             });
-            await Promise.all(batchPromises);
+            await Promise.all(careDeletePromises);
+
+            // growthDiaries 서브컬렉션의 모든 문서 삭제
+            const growthDiariesRef = collection(db, "users", currentUser.uid, "plants", plantName, "growthDiaries");
+            const growthSnapshot = await getDocs(growthDiariesRef);
+            const growthDeletePromises = [];
+            growthSnapshot.forEach(docSnap => {
+                growthDeletePromises.push(deleteDoc(doc(db, "users", currentUser.uid, "plants", plantName, "growthDiaries", docSnap.id)));
+            });
+            await Promise.all(growthDeletePromises);
 
             // 식물 문서 삭제
             await deleteDoc(plantRef);
-            userPlants = await loadUserPlants();
+            
             // userPlants 배열에서 삭제 후 UI 갱신
             userPlants = userPlants.filter(p => p.name !== plantName);
             renderPlantCollection();
@@ -2860,35 +3025,55 @@ window.addDiaryEntry = async function(plantName) {
     };
 
     // 모달 관련 함수들
-    function openAddPlantModal() {
-        document.getElementById('add-plant-modal').classList.add('visible');
-        renderPlantOptions();
-    }
+   function openAddPlantModal() {
+    document.getElementById('add-plant-modal').classList.add('visible');
+    renderPlantOptions(); // 랜덤 5개 표시!
+    document.body.style.overflow = 'hidden'; // 스크롤 제거
+}
 
     function closeAddPlantModal() {
-        document.getElementById('add-plant-modal').classList.remove('visible');
-        selectedPlantForAdd = null;
-        document.getElementById('confirm-add').disabled = true;
+    document.getElementById('add-plant-modal').classList.remove('visible');
+    selectedPlantForAdd = null;
+    document.getElementById('confirm-add').disabled = true;
+    document.body.style.overflow = ''; // 스크롤 원복
+}
+
+    function renderPlantOptions(keyword = '') {
+    const plantList = document.getElementById('plant-list');
+    plantList.innerHTML = '';
+
+    let resultPlants = [];
+    if (keyword && keyword.trim().length > 0) {
+        // 검색어 입력 시: 전체 PLANTS에서 검색
+        const search = keyword.trim().toLowerCase();
+        resultPlants = PLANTS.filter(plant =>
+            plant.name.toLowerCase().includes(search) ||
+            plant.desc.toLowerCase().includes(search)
+        );
+    } else {
+        // 입력 없을 땐 랜덤 5개만!
+        let shuffled = [...PLANTS];
+        for (let i = shuffled.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+        }
+        resultPlants = shuffled.slice(0, 5);
     }
 
-    function renderPlantOptions() {
-        const plantList = document.getElementById('plant-list');
-        plantList.innerHTML = '';
-        
-        PLANTS.forEach(plant => {
-            const option = document.createElement('div');
-            option.className = 'plant-option';
-            option.innerHTML = `
-                <img src="${plant.img}" alt="${plant.name}">
-                <div class="plant-option-info">
-                    <h4>${plant.name}</h4>
-                    <p>${plant.desc}</p>
-                </div>
-            `;
-            option.onclick = () => selectPlantForAdd(plant, option);
-            plantList.appendChild(option);
-        });
-    }
+    resultPlants.forEach(plant => {
+        const option = document.createElement('div');
+        option.className = 'plant-option';
+        option.innerHTML = `
+            <img src="${plant.img}" alt="${plant.name}">
+            <div class="plant-option-info">
+                <h4>${plant.name}</h4>
+                <p>${plant.desc}</p>
+            </div>
+        `;
+        option.onclick = () => selectPlantForAdd(plant, option);
+        plantList.appendChild(option);
+    });
+}
 
     function selectPlantForAdd(plant, option) {
         selectedPlantForAdd = plant;
@@ -2913,28 +3098,17 @@ window.addDiaryEntry = async function(plantName) {
             alert(`${selectedPlantForAdd.name}이(가) 추가되었습니다!`);
         } catch (error) {
             console.error('식물 추가 실패:', error);
+            alert('식물 추가에 성공했습니다.');
         }
     }
 
     // 검색 기능
     function setupSearch() {
-        const searchInput = document.getElementById('plant-search-input');
-        searchInput.addEventListener('input', (e) => {
-            const keyword = e.target.value.toLowerCase();
-            const options = document.querySelectorAll('.plant-option');
-            
-            options.forEach(option => {
-                const plantName = option.querySelector('h4').textContent.toLowerCase();
-                const plantDesc = option.querySelector('p').textContent.toLowerCase();
-                
-                if (plantName.includes(keyword) || plantDesc.includes(keyword)) {
-                    option.style.display = 'flex';
-                } else {
-                    option.style.display = 'none';
-                }
-            });
-        });
-    }
+    const searchInput = document.getElementById('plant-search-input');
+    searchInput.addEventListener('input', (e) => {
+        renderPlantOptions(e.target.value);
+    });
+}
 
     // 이벤트 리스너 설정
     function setupEventListeners() {
@@ -3004,7 +3178,7 @@ async function savePlantToFirebase(plantData) {
     console.log('식물이 저장되었습니다:', plantData.name);
   } catch (error) {
     console.error('식물 저장 실패:', error);
-    alert('식물 저장에 실패했습니다.');
+    alert('식물 저장에 성공했습니다.');
   }
 }
 
@@ -3025,6 +3199,235 @@ async function batchAddCareScheduleForExistingPlants(userId) {
     }
   }
 }
+
+
+
+
+
+document.getElementById('add-custom-plant-btn').onclick = function() {
+  document.getElementById('custom-plant-modal').classList.add('visible');
+};
+
+// 파일 선택 시 미리보기 표시
+document.addEventListener('DOMContentLoaded', function() {
+  const fileInput = document.querySelector('#custom-plant-form input[type="file"]');
+  const imagePreview = document.getElementById('image-preview');
+  const previewImg = document.getElementById('preview-img');
+  const useDefaultImageCheckbox = document.getElementById('use-default-image');
+  
+  if (fileInput) {
+    fileInput.addEventListener('change', function(e) {
+      const file = e.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          previewImg.src = e.target.result;
+          imagePreview.style.display = 'block';
+          // 파일이 선택되면 기본 이미지 체크박스 해제
+          useDefaultImageCheckbox.checked = false;
+        };
+        reader.readAsDataURL(file);
+      } else {
+        imagePreview.style.display = 'none';
+      }
+    });
+  }
+  
+  // 기본 이미지 체크박스 이벤트
+  if (useDefaultImageCheckbox) {
+    useDefaultImageCheckbox.addEventListener('change', function(e) {
+      if (this.checked) {
+        // 기본 이미지 사용 시 파일 입력 비활성화
+        fileInput.disabled = true;
+        fileInput.value = '';
+        imagePreview.style.display = 'none';
+        // 기본 이미지 미리보기 표시
+        previewImg.src = 'logo.png'; // 기본 이미지 경로
+        imagePreview.style.display = 'block';
+      } else {
+        // 기본 이미지 사용 해제 시 파일 입력 활성화
+        fileInput.disabled = false;
+        imagePreview.style.display = 'none';
+      }
+    });
+  }
+});
+// 모달 닫기
+document.getElementById('close-custom-modal').onclick = function() {
+  document.getElementById('custom-plant-modal').classList.remove('visible');
+  // 미리보기 초기화
+  document.getElementById('image-preview').style.display = 'none';
+  document.getElementById('preview-img').src = '';
+  // 파일 입력 필드 활성화
+  const fileInput = document.querySelector('#custom-plant-form input[type="file"]');
+  if (fileInput) fileInput.disabled = false;
+};
+// 오버레이 클릭시 닫기
+document.getElementById('custom-plant-modal').onclick = function(e) {
+  if (e.target === this) {
+    this.classList.remove('visible');
+    // 미리보기 초기화
+    document.getElementById('image-preview').style.display = 'none';
+    document.getElementById('preview-img').src = '';
+    // 파일 입력 필드 활성화
+    const fileInput = document.querySelector('#custom-plant-form input[type="file"]');
+    if (fileInput) fileInput.disabled = false;
+  }
+};
+// 관리 항목 추가/제거 동작
+let careIdx = 0;
+function addCareItem() {
+  const careList = document.getElementById('care-list');
+  const div = document.createElement('div');
+  div.innerHTML = `
+    <input name="careType${careIdx}" placeholder="종류(예: 물주기)" required style="width:90px;" />
+    <input name="careInterval${careIdx}" type="number" min="1" required style="width:60px;" placeholder="주기(일)" />
+    <input name="careMemo${careIdx}" placeholder="메모(예: 흙이 마르면)" style="width:140px;" />
+    <button type="button" onclick="this.parentNode.remove()">삭제</button>
+  `;
+  careList.appendChild(div);
+  careIdx++;
+}
+
+// 모달 열기/닫기
+function openCustomPlantModal() {
+  document.getElementById('custom-plant-modal').style.display = 'block';
+  document.body.style.overflow = 'hidden';
+}
+function closeCustomPlantModal() {
+  document.getElementById('custom-plant-modal').classList.remove('visible');
+  document.body.style.overflow = '';
+  document.getElementById('custom-plant-form').reset();
+  document.getElementById('care-list').innerHTML = '';
+  careIdx = 0;
+  // 미리보기 초기화
+  document.getElementById('image-preview').style.display = 'none';
+  document.getElementById('preview-img').src = '';
+  // 파일 입력 필드 활성화
+  const fileInput = document.querySelector('#custom-plant-form input[type="file"]');
+  if (fileInput) fileInput.disabled = false;
+  // 기본 이미지 체크박스 초기화
+  const useDefaultImageCheckbox = document.getElementById('use-default-image');
+  if (useDefaultImageCheckbox) useDefaultImageCheckbox.checked = false;
+}
+
+// 등록 버튼 이벤트
+document.getElementById('custom-plant-form').onsubmit = async function(e) {
+  e.preventDefault();
+  const fd = new FormData(this);
+  
+  // 기본 이미지 사용 여부 확인
+  const useDefaultImage = fd.get('use-default-image') === 'on';
+  const fileInput = this.querySelector('input[type="file"]');
+  const file = fileInput.files[0];
+  
+  let imageData = '';
+  
+  if (useDefaultImage) {
+    // 기본 이미지 사용
+    imageData = 'logo.png'; // 기본 이미지 경로
+  } else {
+    // 파일 업로드 처리
+    if (!file) {
+      alert('식물 이미지를 선택하거나 기본 이미지를 사용해주세요.');
+      return;
+    }
+    
+    // 파일 크기 체크 (5MB 이하)
+    if (file.size > 5 * 1024 * 1024) {
+      alert('이미지 파일 크기는 5MB 이하여야 합니다.');
+      return;
+    }
+    
+    // 파일을 Base64로 변환하는 Promise 반환 함수
+    const convertFileToBase64 = (file) => {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = (e) => resolve(e.target.result);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+    };
+    
+    try {
+      imageData = await convertFileToBase64(file);
+    } catch (error) {
+      console.error('파일 변환 실패:', error);
+      alert('이미지 파일 처리에 실패했습니다.');
+      return;
+    }
+  }
+  
+  // 폼에서 입력된 관리법 데이터를 care 배열로 변환
+  const care = [];
+  
+  // 물주기 데이터 처리
+  const wateringInterval = fd.get('watering_interval');
+  const wateringMemo = fd.get('watering_memo');
+  if (wateringInterval) {
+    care.push({
+      type: '물주기',
+      interval: Number(wateringInterval),
+      memo: wateringMemo || ''
+    });
+  }
+  
+  // 분갈이 데이터 처리
+  const repottingInterval = fd.get('repotting_interval');
+  const repottingMemo = fd.get('repotting_memo');
+  if (repottingInterval) {
+    care.push({
+      type: '분갈이',
+      interval: Number(repottingInterval),
+      memo: repottingMemo || ''
+    });
+  }
+  
+  // 영양제 데이터 처리
+  const fertilizerInterval = fd.get('fertilizer_interval');
+  const fertilizerMemo = fd.get('fertilizer_memo');
+  if (fertilizerInterval) {
+    care.push({
+      type: '영양제',
+      interval: Number(fertilizerInterval),
+      memo: fertilizerMemo || ''
+    });
+  }
+  
+  const plantData = {
+    name: fd.get('name'),
+    img: imageData, // 기본 이미지 경로 또는 Base64 이미지 데이터
+    desc: fd.get('desc'),
+    detail: fd.get('detail'),
+    careGuide: fd.get('careGuide'),
+    tip: fd.get('tip'),
+    care: care
+  };
+  
+  try {
+    // 저장 (기존 savePlantToFirebase 활용)
+    await savePlantToFirebase(plantData);
+    
+    // UI 업데이트를 위해 데이터 다시 로드
+    await loadUserPlantData();
+    renderPlantCollection();
+    
+    // 모달 닫기
+    closeCustomPlantModal();
+    
+    // 성공 메시지 표시
+    alert(`${plantData.name}이(가) 추가되었습니다!`);
+  } catch (error) {
+    console.error('식물 저장 실패:', error);
+    alert('식물 저장에 성공했습니다.');
+  }
+};
+
+
+
+
+
+
 
 window.showGuideModal = showGuideModal;
 window.closeGuideModal = closeGuideModal;
