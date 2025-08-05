@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>오후의 식물 | 식물 이름 찾기와 식집사 기능</title>
+    <meta name="description" content="식물 이름 찾기, 병해충 진단, 무제한 등록까지! 식집사를 위한 Pro 구독">
+
+    <meta name="keywords" content="식물, 테라리움, 화분, 미니식물, 식물 추천, 식물상담, 식집사, 플랜테리어">
+
+    <!-- OG 메타태그 (SNS 공유용) -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="오후의 식물 | 식물 이름 찾기와 식집사 기능">
+    <meta property="og:description" content="식물 이름 찾기, 병해충 진단, 무제한 등록까지! 식집사를 위한 Pro 구독">
+    <meta property="og:image" content="https://plantnoon.com/logo.png">
+    <meta property="og:url" content="https://plantnoon.com/payment.html">
+
+    <!-- 트위터 카드 -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="오후의 식물 | 식물 이름 찾기와 식집사 기능">
+    <meta name="twitter:description" content="식물 이름 찾기, 병해충 진단, 무제한 등록까지! 식집사를 위한 Pro 구독">
+    <meta name="twitter:image" content="https://plantnoon.com/logo.png">
+
+    <link rel="icon" href="logo.png?v=2" type="image/png">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="navigation.css">
+    
+    <style>
+        /* ------------------- */
+        /* --- 기본 스타일 --- */
+        /* ------------------- */
+        /* navigation.css에 정의된 변수를 사용한다고 가정합니다. 
+           만약 없다면 아래 주석을 해제하여 사용하세요.
+        :root {
+            --primary-green: #2C5F2D;
+            --font-serif: 'Playfair Display', serif;
+            --text-dark: #1F2937;
+        }
+        */
+
+        .font-playfair { 
+            font-family: var(--font-serif);
+        }
+
+        /* ------------------- */
+        /* --- 메인 컨텐츠 --- */
+        /* ------------------- */
+        .payment-container {
+            width: 100%;
+            max-width: 896px; /* 56rem */
+            /* margin: 0 auto; 를 margin-left/right로 분리 */
+            margin-left: auto;
+            margin-right: auto;
+            
+            /* [수정] 헤더와 겹치지 않도록 padding 대신 margin-top으로 공간 확보 */
+            margin-top: 60px;
+            /* [수정] 내부 여백을 위한 padding 값 조정 */
+            padding: 2rem;
+        }
+ 
+        .plan-card {
+            background: linear-gradient(to top right, #F9FAFB, #FFFFFF);
+            border: 1px solid #E5E7EB;
+            border-radius: 1.5rem; /* 24px */
+            box-shadow: 0 20px 25px -5px rgba(44, 95, 45, 0.08), 0 8px 10px -6px rgba(44, 95, 45, 0.08);
+            overflow: hidden;
+            padding: 2rem;
+            transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+        }
+        .plan-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 25px 40px -10px rgba(44, 95, 45, 0.15), 0 10px 20px -8px rgba(44, 95, 45, 0.15);
+        }
+        .plan-card-header {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+        .plan-title-group {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        .plan-title-group h2 {
+            font-size: 1.875rem; /* 30px */
+            font-weight: 700;
+            font-family: var(--font-serif);
+            color: var(--primary-green);
+            margin: 0;
+        }
+        .plan-badge {
+            background-color: #EAF4E1;
+            color: var(--primary-green);
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.875rem; /* 14px */
+            font-weight: 600;
+        }
+        .plan-subtitle {
+            color: var(--text-dark);
+            margin-top: 0.5rem;
+        }
+        .plan-toggle-wrapper {
+            margin-top: 1.5rem;
+        }
+
+        /* 가격 표시 */
+        .price-section {
+            text-align: center;
+            margin: 2.5rem 0;
+        }
+        #price-display {
+            transition: opacity 0.3s ease-in-out;
+        }
+        #price-display.is-loading {
+            opacity: 0;
+        }
+        .price-value {
+            font-size: 3rem; /* 48px */
+            font-weight: 700;
+            font-family: var(--font-serif);
+            color: var(--text-dark);
+        }
+        .price-period {
+            font-size: 1.25rem; /* 20px */
+            color: var(--text-dark);
+        }
+        .price-discount {
+            font-size: 1.125rem; /* 18px */
+            color: #16A34A;
+            font-weight: 600;
+        }
+
+        /* 기능 목록 */
+        .features-section {
+            border-top: 1px solid #E5E7EB;
+            padding-top: 2rem;
+        }
+        .features-section h3 {
+            font-size: 1.25rem; /* 20px */
+            font-weight: 700;
+            text-align: center;
+            margin-bottom: 2rem;
+            color: #374151;
+        }
+        .features-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1.5rem 3rem;
+        }
+        .feature-item {
+            display: flex;
+            align-items: flex-start;
+        }
+        .feature-item svg {
+            width: 1.5rem;
+            height: 1.5rem;
+            color: var(--primary-green);
+            margin-right: 0.75rem;
+            margin-top: 0.25rem;
+            flex-shrink: 0;
+        }
+        .feature-item h4 {
+            font-weight: 600;
+            color: var(--text-dark);
+            margin: 0;
+        }
+        .feature-item p {
+            color: var(--text-dark);
+            font-size: 0.875rem; /* 14px */
+            margin: 0.25rem 0 0 0;
+        }
+        /* CTA 버튼 */
+        .cta-section {
+            margin-top: 2.5rem;
+        }
+        .cta-button-main {
+            width: 100%;
+            background-color: var(--primary-green);
+            color: white;
+            font-weight: 700;
+            padding: 1rem 2rem;
+            border-radius: 0.75rem; /* 12px */
+            font-size: 1.125rem; /* 18px */
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease-in-out;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        .cta-button-main:hover {
+            background-color: #5a6950; /* navigation.css hover color */
+            transform: scale(1.02);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+        }
+        .plan-note {
+            text-align: center;
+            font-size: 0.75rem; /* 12px */
+            color: #9CA3AF;
+            margin-top: 1rem;
+        }
+
+        /* 커스텀 토글 */
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 240px;
+            height: 44px;
+            background-color: #F0EFEA;
+            border-radius: 22px;
+            cursor: pointer;
+        }
+        .toggle-switch-slider {
+            position: absolute;
+            top: 4px;
+            left: 4px;
+            width: calc(50% - 4px);
+            height: 36px;
+            background-color: white;
+            border-radius: 18px;
+            transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        .toggle-switch input:checked + .toggle-switch-slider {
+            transform: translateX(116px);
+        }
+        .toggle-options {
+            position: relative;
+            display: flex;
+            justify-content: space-around;
+            align-items: flex-end;
+            height: 100%;
+            color: #555;
+            font-weight: 500;
+            z-index: 1;
+        }
+        
+        /* ------------------- */
+        /* --- 반응형 --- */
+        /* ------------------- */
+        @media (max-width: 768px) {
+            .plan-card { padding: 1.5rem; }
+        }
+
+        @media (min-width: 768px) {
+            /* [수정] 데스크탑에서 더 넓은 마진과 패딩 적용 */
+            .payment-container {
+                margin-top: 160px;
+                padding: 3rem;
+            }
+            .plan-card { padding: 3rem; }
+            .plan-card-header {
+                flex-direction: row;
+                align-items: center;
+            }
+            .plan-toggle-wrapper {
+                margin-top: 0;
+            }
+            .features-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 헤더는 기존 코드를 그대로 사용합니다. -->
+    <header id="main-header">
+        <a href="index.html" class="logo">
+            <img src="logo.png" alt="오후의식물 로고">
+            <span>오후의 식물</span>
+        </a>
+        <nav>
+            <a href="index.html">홈</a>
+            <a href="story.html">초록 이야기</a>
+            <a href="myPlant.html">나의 식물</a>
+            <a href="findPlant.html">식물 찾기</a>
+            <a href="payment.html">구독하기</a>
+            <a href="#" class="cta-button">Login</a>
+        </nav>
+    </header>
+
+    <!-- 메인 컨텐츠 -->
+    <main class="payment-container">
+
+        <!-- Pro 플랜 카드 (내용은 동일) -->
+        <div class="plan-card">
+            <div class="plan-card-header">
+                <div>
+                    <div class="plan-title-group">
+                        <h2>Pro Plan</h2>
+                        <span class="plan-badge">추천</span>
+                    </div>
+                    <p class="plan-subtitle">성공적인 식물 생활을 위한 모든 것</p>
+                </div>
+                <div class="plan-toggle-wrapper">
+                    <label for="plan-toggle" class="toggle-switch">
+                        <input type="checkbox" id="plan-toggle">
+                        <div class="toggle-switch-slider"></div>
+                        <div class="toggle-options">
+                            <span>월간</span>
+                            <span>연간</span>
+                        </div>
+                    </label>
+                </div>
+            </div>
+
+            <div class="price-section">
+                <div id="price-display"></div>
+            </div>
+            
+            <div class="features-section">
+                <h3>Pro 플랜에서만 가능한 특별한 혜택</h3>
+                <div class="features-grid">
+                    <!-- 기능 아이템들 -->
+                    <div class="feature-item">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                        <div>
+                            <h4>무제한 식물 등록</h4>
+                            <p>반려식물을 제한 없이 등록하고, 더 자유롭게 관리해보세요.</p>
+                        </div>
+                    </div>
+                    <div class="feature-item">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+                        <div>
+                            <h4>무제한 병충해 진단</h4>
+                            <p>사진만 올리면 병해충 진단과 해결책을 바로 알려드립니다.</p>
+                        </div>
+                    </div>
+                    <div class="feature-item">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path></svg>
+                        <div>
+                            <h4>식물 이름 무제한 찾기</h4>
+                            <p>모르는 식물도 사진으로 한 번에! 이름과 기본 정보를 바로 확인하세요.</p>
+                        </div>
+                    </div>
+                    <div class="feature-item">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
+                        <div>
+                            <h4>스마트 알림 문자</h4>
+                            <p>물주기나 분갈이 시기, 자동으로 문자로 알려드려요.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="cta-section">
+                <button class="cta-button-main">
+                    Pro 플랜으로 업그레이드
+                </button>
+            </div>
+             <p class="plan-note">Basic 플랜의 모든 기능이 포함되어 있습니다.</p>
+        </div>
+    </main>
+
+
+         <div id="modal-wrapper" class="modal-wrapper">
+        <div class="modal">
+            <div class="modal-left"></div>
+            <div class="modal-right">
+                <button class="close-button">&times;</button>
+                <!-- Login Form -->
+                <div id="login-form" class="form-container">
+                    <div class="form-header">
+                        <a href="index.html" class="logo">오후의 식물</a>
+                        <h2>Welcome Back</h2>
+                    </div>
+                    <form>
+                        <div class="input-group">
+                            <label for="login-email">Email</label>
+                            <input type="email" id="login-email" required>
+                        </div>
+                        <div class="input-group">
+                            <label for="login-password">Password</label>
+                            <input type="password" id="login-password" required>
+                        </div>
+                        <button type="submit" class="cta-button">Login</button>
+                    </form>
+                    <p class="form-switcher">
+                        Don't have an account? <a href="#" id="show-signup">Sign Up</a>
+                    </p>
+                </div>
+
+                <!-- Signup Form -->
+                <div id="signup-form" class="form-container" style="display: none;">
+                    <div class="form-header">
+                        <a href="index.html" class="logo">오후의 식물</a>
+                        <h2>Create Account</h2>
+                    </div>
+                    <form>
+                        <div class="input-group">
+                            <label for="signup-name">Name</label>
+                            <input type="text" id="signup-name" required>
+                        </div>
+                        <div class="input-group">
+                            <label for="signup-email">Email</label>
+                            <input type="email" id="signup-email" required>
+                        </div>
+                        <div class="input-group">
+                            <label for="signup-password">Password</label>
+                            <input type="password" id="signup-password" required>
+                        </div>
+                        <div class="agreement-group">
+    <div class="checkbox-group">
+        <input type="checkbox" id="signup-terms" name="terms" required>
+        <label for="signup-terms">
+            [필수] <a href="terms.html" target="_blank">이용약관</a>에 동의합니다.
+        </label>
+    </div>
+    <div class="checkbox-group">
+        <input type="checkbox" id="signup-privacy" name="privacy" required>
+        <label for="signup-privacy">
+            [필수] <a href="privacy.html" target="_blank">개인정보처리방침</a>에 동의합니다.
+        </label>
+    </div>
+</div>
+
+<button type="submit" class="cta-button">Create Account</button>
+                    </form>
+                    <p class="form-switcher">
+                        Already have an account? <a href="#" id="show-login">Login</a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+<nav id="bottom-nav">
+  <a href="index.html" class="nav-item">
+    <span class="nav-icon">🏠</span>
+    <span class="nav-label">홈</span>
+  </a>
+  <a href="story.html" class="nav-item">
+    <span class="nav-icon">🌱</span>
+    <span class="nav-label">초록 이야기</span>
+  </a>
+  <a href="myPlant.html" class="nav-item">
+    <span class="nav-icon">🪴</span>
+    <span class="nav-label">나의 식물</span>
+  </a>
+  <a href="findPlant.html" class="nav-item">
+    <span class="nav-icon">💬</span>
+    <span class="nav-label">식물 상담소</span>
+  </a>
+    <a href="payment.html" class="nav-item">
+    <span class="nav-icon">⭐</span>
+    <span class="nav-label">구독</span>
+  </a>
+</nav>
+
+    <!-- 스크립트는 동일하게 유지합니다. -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const toggle = document.getElementById('plan-toggle');
+            const priceDisplay = document.getElementById('price-display');
+
+            const monthlyPriceHTML = `
+                <div>
+                    <span class="price-value">₩2,900</span>
+                    <span class="price-period">/ 월</span>
+                </div>
+            `;
+            
+            const yearlyPriceHTML = `
+                <div>
+                    <p class="price-discount">2개월분 무료!</p>
+                    <span class="price-value">₩29,000</span>
+                    <span class="price-period">/ 년</span>
+                </div>
+            `;
+
+            function updatePrice(isYearly) {
+                priceDisplay.classList.add('is-loading');
+                setTimeout(() => {
+                    priceDisplay.innerHTML = isYearly ? yearlyPriceHTML : monthlyPriceHTML;
+                    priceDisplay.classList.remove('is-loading');
+                }, 150);
+            }
+
+            toggle.addEventListener('change', function() {
+                updatePrice(this.checked);
+            });
+
+            // 초기 로드 시 월간 구독으로 설정
+            updatePrice(false);
+        });
+    </script>
+    <script type="module" src="navigation.js"></script>
+
+</body>
+</html>
