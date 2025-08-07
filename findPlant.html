@@ -827,34 +827,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const plantCharacter = document.getElementById('plant-character');
     let currentStep = 0;
     const userAnswers = {};
-    // 로그인/회원가입 모달
-    const loginModalWrapper = document.getElementById('modal-wrapper');
-    const loginModalCloseBtns = loginModalWrapper.querySelectorAll('.close-button');
-
-        // 닫기 버튼(X) 클릭시 모달 닫기
-    loginModalCloseBtns.forEach(btn => {
-        btn.addEventListener('click', () => {
-            loginModalWrapper.style.opacity = 0;
-            loginModalWrapper.style.visibility = "hidden";
-        });
-    });
-
-       // (선택) 로그인 버튼 누르면 모달 열기
-    document.querySelectorAll('.cta-button').forEach(btn => {
-        btn.addEventListener('click', (e) => {
-            e.preventDefault();
-            loginModalWrapper.style.opacity = 1;
-            loginModalWrapper.style.visibility = "visible";
-        });
-    });
-        // 바깥(배경) 클릭 시 모달 닫기
-    loginModalWrapper.addEventListener('click', (e) => {
-        if (e.target === loginModalWrapper) { // 바깥 영역(배경) 클릭
-            loginModalWrapper.style.opacity = 0;
-            loginModalWrapper.style.visibility = "hidden";
-        }
-    });
-
     
     // ▼▼▼ 1. 로그인 상태를 저장할 변수 및 리스너 추가 ▼▼▼
     let currentUser = null;

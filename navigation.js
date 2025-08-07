@@ -59,7 +59,7 @@ window.addEventListener('scroll', () => {
 const header = document.getElementById('main-header');
 const modalWrapper = document.getElementById('modal-wrapper');
 const loginNavButton = document.querySelector('header nav .cta-button');
-const closeButton = document.querySelector('.close-button');
+const closeButton = document.querySelector('#modal-wrapper .close-button');
 
 const loginForm = document.getElementById('login-form');
 const signupForm = document.getElementById('signup-form');
