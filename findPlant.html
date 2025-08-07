@@ -186,12 +186,31 @@ main {
 /* ⬇️ 아래 내용을 <style> 태그 안에 추가하세요 ⬇️ */
 
 /* 동적 캐릭터 */
+/* 1. 기본 상태의 plant와 character에 transition 추가 */
+/* ⬇️ 캐릭터 관련 CSS 전체를 이 코드로 교체하세요 ⬇️ */
+
+/* "펑!" 효과를 위한 애니메이션 정의 */
+@keyframes puff-effect {
+  0% {
+    transform: scale(0);
+    opacity: 0.8;
+  }
+  100% {
+    transform: scale(1.2); /* 크기를 1.2배로 키움 */
+    opacity: 0; /* 완전히 투명하게 만듦 */
+  }
+}
+
+/* --- 캐릭터 기본 스타일 --- */
+
 .plant-character {
     position: fixed;
     bottom: 40px;
-    left: calc(50% - 400px); /* 챗봇 왼쪽에 위치하도록 조정 */
+    left: calc(50% - 400px);
     z-index: 10;
-    transition: transform 0.3s ease;
+    transition: opacity 0.5s ease-in-out, visibility 0.5s;
+    opacity: 1;
+    visibility: visible;
 }
 
 .pot {
@@ -199,8 +218,9 @@ main {
     height: 90px;
     background: #D4A373; /* 흙색 계열 */
     border-radius: 0 0 40px 40px;
-    position: relative;
+    position: relative; /* ::after 요소를 제어하기 위해 추가 */
 }
+
 .pot::before { /* 화분 윗부분 장식 */
     content: '';
     position: absolute;
@@ -212,6 +232,20 @@ main {
     border-radius: 10px;
 }
 
+/* "펑" 효과를 담당할 가상 요소 */
+.pot::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    box-shadow: inset 0 0 30px #ffffff;
+    transform: scale(0);
+    opacity: 0;
+}
+
 .eyes {
     position: absolute;
     bottom: 35px;
@@ -220,6 +254,7 @@ main {
     display: flex;
     gap: 15px;
 }
+
 .eye {
     width: 10px;
     height: 10px;
@@ -233,6 +268,7 @@ main {
     bottom: 70px;
     left: 50%;
     transform-origin: bottom center;
+    transition: transform 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55); /* 통통 튀는 듯한 전환 효과 */
 }
 
 .leaf {
@@ -254,6 +290,25 @@ main {
 }
 .leaf-3 {
     transform: rotate(20deg) translateX(10px);
+}
+
+
+/* --- 캐릭터 숨겨질 때 애니메이션 --- */
+
+.plant-character.hidden {
+    opacity: 0;
+    visibility: hidden;
+    transition-delay: 0.2s; /* 잎이 다 들어간 후 0.2초 뒤에 투명해지도록 설정 */
+}
+
+.plant-character.hidden .plant {
+    /* Y축으로 60px만큼 내려가 화분 속에 숨은 것처럼 보이게 함 */
+    transform: translateY(60px); 
+}
+
+/* 캐릭터가 숨겨지는 순간, "펑" 애니메이션 실행 */
+.plant-character.hidden .pot::after {
+    animation: puff-effect 0.5s ease-out forwards;
 }
 
 /* 캐릭터 상태별 애니메이션 */
@@ -912,6 +967,34 @@ document.addEventListener('DOMContentLoaded', () => {
         messageArea.scrollTop = messageArea.scrollHeight;
         return indicator;
     }
+
+    /* ⬇️ 아래 내용을 <script> 태그의 DOMContentLoaded 이벤트 리스너 안에 추가하세요 ⬇️ */
+
+// 푸터 감지를 위한 코드 시작
+const footer = document.querySelector('.main-footer');
+
+const observerOptions = {
+    root: null, // 뷰포트(화면 전체)를 기준으로 감시
+    rootMargin: '0px',
+    threshold: 0.1 // 푸터가 10% 정도 보이면 감지
+};
+
+const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+        // entry.isIntersecting이 true이면 푸터가 화면에 보인다는 의미
+        if (entry.isIntersecting) {
+            plantCharacter.classList.add('hidden'); // 푸터가 보이면 캐릭터에 hidden 클래스 추가
+        } else {
+            plantCharacter.classList.remove('hidden'); // 푸터가 안 보이면 hidden 클래스 제거
+        }
+    });
+}, observerOptions);
+
+// 푸터 감시 시작
+observer.observe(footer);
+// 푸터 감지를 위한 코드 끝
+
+askQuestion(); // 기존에 있던 코드
 
     function askQuestion() {
         const question = questions[currentStep];
