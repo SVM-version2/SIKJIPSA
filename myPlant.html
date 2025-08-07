@@ -1194,6 +1194,7 @@
 </div>
 
 
+<div id="footer-placeholder"></div>
 
 
 <nav id="bottom-nav">
@@ -1219,24 +1220,27 @@
   </a>
 </nav>
 
-    <script type="module" src="navigation.js"></script>
-    <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-    import { getFirestore, doc, getDoc, setDoc, updateDoc, collection, addDoc, query, where, getDocs, deleteDoc, orderBy } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-    const firebaseConfig = {
-        apiKey: "AIzaSyC7mA9xLOFb98i5hKNWjKW_fORWNHvPx2s",
-        authDomain: "sik-jip-sa.firebaseapp.com",
-        projectId: "sik-jip-sa",
-        storageBucket: "sik-jip-sa.appspot.com",
-        messagingSenderId: "401707534850",
-        appId: "1:401707534850:web:e15b2f67e2d4484a07351b",
-        measurementId: "G-HX50P6C0NT"
-    };
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db = getFirestore(app);
-    
+<script type="module" src="navigation.js"></script>
+
+<script type="module">
+    // ▼▼▼ [핵심] navigation.js에서 모든 Firebase 기능을 가져옵니다. ▼▼▼
+    import { 
+        auth, 
+        db,
+        onAuthStateChanged,
+        doc,
+        getDoc,
+        setDoc,
+        updateDoc,
+        collection,
+        addDoc,
+        query,
+        where,
+        getDocs,
+        deleteDoc,
+        orderBy
+    } from './navigation.js';
+
     // 네비게이션 로그인/로그아웃 UI
     const loginNavButton = document.querySelector('header nav .cta-button');
     let currentUser = null;
