@@ -446,7 +446,110 @@ opacity: 1; /* 활성 챕터만 보이게 */
 }
 
 
+/* === 푸터 === */
+/* === 새로운 푸터 디자인 === */
+#main-footer-content {
+    background-color: var(--secondary-color);
+    color: var(--text-color);
+    padding: 80px 20px 0;
+    border-top: 1px solid var(--border-color);
+}
 
+.footer-container {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.footer-subscribe {
+    background-color: #fff;
+    padding: 40px;
+    border-radius: 8px;
+    text-align: center;
+    margin-bottom: 80px;
+    border: 1px solid var(--border-color);
+}
+
+.footer-subscribe h4 {
+    font-size: 1.8rem;
+    margin-top: 0;
+    margin-bottom: 10px;
+}
+
+.subscribe-form {
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
+    gap: 10px;
+}
+
+.subscribe-form input {
+    width: 300px;
+    padding: 12px;
+    border: 1px solid var(--border-color);
+    border-radius: 50px;
+    font-size: 1rem;
+}
+
+.footer-main {
+    display: grid;
+    grid-template-columns: 1.5fr 1fr;
+    gap: 60px;
+    padding-bottom: 60px;
+}
+
+.footer-about .logo {
+    font-size: 1.8rem;
+    color: var(--primary-color);
+    margin-bottom: 1rem;
+    display: inline-block;
+}
+
+.footer-about p {
+    color: #555;
+    line-height: 1.8;
+    max-width: 400px;
+}
+
+.footer-social {
+    margin-top: 20px;
+}
+
+.footer-social a {
+    margin-right: 20px;
+    font-weight: 700;
+}
+
+.footer-links-group {
+    display: flex;
+    gap: 60px;
+}
+
+.footer-links h4 {
+    font-size: 1.2rem;
+    color: var(--text-color);
+    margin-bottom: 1.5rem;
+}
+
+.footer-links ul {
+    list-style: none;
+    padding: 0; margin: 0;
+}
+
+.footer-links li {
+    margin-bottom: 1rem;
+}
+
+.footer-links a {
+    color: #555;
+}
+
+.footer-bottom {
+    border-top: 1px solid var(--border-color);
+    padding: 25px 0;
+    text-align: center;
+    font-size: 0.9rem;
+    color: #888;
+}
 
 
 /* === 챗봇 스타일 === */
@@ -833,8 +936,224 @@ opacity: 1; /* 활성 챕터만 보이게 */
 
 /* 기존 ===== 정보 모달 스타일 (팀소개, FAQ 등) ===== 부분을 이 코드로 교체하세요. */
 
+/* ===== 정보 모달 스타일 (개선안) ===== */
+.info-modal-wrapper {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    /* 변경점: 초록색 배경 대신 어두운 회색 반투명 배경 사용 */
+    background: rgba(30, 30, 30, 0.5); 
+    /* 변경점: 블러 효과를 더 강하게 적용 */
+    backdrop-filter: blur(8px); 
+    z-index: 2000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.4s ease, visibility 0.4s ease;
+}
+.info-modal-wrapper.visible {
+    opacity: 1;
+    visibility: visible;
+}
+.info-modal-content {
+    background: #fff; /* 깨끗한 흰색 배경 */
+    padding: 30px 40px 40px;
+    border-radius: 12px;
+    width: 90%;
+    max-width: 680px;
+    max-height: 85vh;
+    overflow-y: auto;
+    position: relative;
+    box-shadow: 0 15px 40px rgba(0,0,0,0.15);
+    transform: translateY(20px) scale(0.98);
+    transition: transform 0.4s ease, opacity 0.4s ease;
+    display: none; /* 기본 숨김 */
+}
+.info-modal-wrapper.visible .info-modal-content {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+}
+
+/* 닫기 버튼 */
+.close-modal-btn {
+    position: absolute;
+    top: 15px; right: 20px;
+    font-size: 2.5rem;
+    font-weight: 300;
+    color: #aaa;
+    background: none; border: none;
+    cursor: pointer;
+    transition: color 0.2s, transform 0.2s;
+}
+.close-modal-btn:hover {
+    color: #333;
+    transform: rotate(90deg);
+}
+
+/* 모달 공통 헤더 */
+.info-modal-content h2 {
+    text-align: center;
+    font-size: 2rem;
+    margin-bottom: 10px;
+    color: var(--primary-color);
+}
+.modal-subtitle {
+    text-align: center;
+    margin-top: 0;
+    margin-bottom: 35px;
+    color: #777;
+    line-height: 1.6;
+}
+.modal-body {
+    margin-top: 20px;
+}
 
 
+/* 팀 소개 모달 */
+#team-modal .modal-body { 
+    display: flex; 
+    justify-content: space-around; 
+    gap: 20px; 
+    flex-wrap: wrap; /* 모바일 반응형 대비 */
+}
+.team-member { 
+    text-align: center;
+    padding: 20px;
+    border-radius: 8px;
+    background-color: var(--secondary-color);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    width: 200px;
+}
+.team-member:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.08);
+}
+.team-member img { 
+    width: 100px; height: 100px; 
+    border-radius: 50%; 
+    object-fit: cover;
+    border: 3px solid #fff;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    margin-bottom: 15px;
+}
+.team-member h4 { margin: 10px 0 5px; color: var(--primary-color); }
+.team-member p { margin: 0; color: #777; font-size: 0.9rem; }
+
+
+/* FAQ 모달 */
+.faq-item { 
+    margin-bottom: 10px; 
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    overflow: hidden;
+}
+.faq-item summary { 
+    font-weight: 600; 
+    padding: 15px 20px;
+    cursor: pointer; 
+    position: relative;
+    list-style: none; /* 기본 마커 숨김 */
+    color: var(--text-color);
+    transition: background-color 0.2s;
+}
+.faq-item summary:hover {
+    background-color: var(--secondary-color);
+}
+.faq-item summary::-webkit-details-marker {
+    display: none; /* Safari 기본 마커 숨김 */
+}
+/* 커스텀 아코디언 아이콘 (+/-) */
+.faq-item summary::after {
+    content: '+';
+    position: absolute;
+    right: 20px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 1.5rem;
+    font-weight: 300;
+    color: var(--accent-color);
+    transition: transform 0.3s ease;
+}
+.faq-item[open] summary::after {
+    transform: translateY(-50%) rotate(45deg);
+}
+.faq-item p { 
+    background: #fff; 
+    padding: 5px 20px 20px; /* 위쪽 패딩 줄임 */
+    margin: 0; 
+    color: #555;
+    line-height: 1.7;
+}
+#faq-modal .modal-body {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+
+/* 아이디어 제안 모달 */
+#idea-form textarea { 
+    width: 100%; 
+    height: 150px; 
+    padding: 15px; 
+    font-size: 1rem; 
+    font-family: var(--font-body);
+    border: 1px solid var(--border-color); 
+    border-radius: 8px; 
+    resize: vertical; 
+    margin-bottom: 20px;
+    transition: border-color 0.3s, box-shadow 0.3s;
+}
+#idea-form textarea:focus {
+    outline: none;
+    border-color: var(--accent-color);
+    box-shadow: 0 0 0 3px rgba(199, 161, 122, 0.2); /* accent-color의 연한 버전 */
+}
+#idea-form button { 
+    width: 100%; 
+    padding: 15px;
+    font-size: 1.1rem;
+}
+
+/* h2 제목에 아이콘 추가 */
+#team-modal h2::before { content: '👥 '; }
+#faq-modal h2::before { content: '❓ '; }
+/* 기존 모달 CSS의 맨 아래에 이 코드를 추가해주세요. */
+
+/* 새로운 아이디어 제안 모달 스타일 */
+.idea-submission-body {
+    text-align: center;
+}
+.submission-guide {
+    color: #555;
+    margin-bottom: 20px;
+    line-height: 1.7;
+}
+.email-display-box {
+    background-color: var(--secondary-color);
+    border: 1px dashed var(--border-color);
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 1.1rem;
+    color: var(--primary-color);
+    /* 사용자가 쉽게 드래그하여 복사할 수 있도록 설정 */
+    user-select: all; 
+}
+#copy-email-btn {
+    width: 100%;
+    font-size: 1.1rem;
+    /* 버튼 상태 변화를 위한 transition 추가 */
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+#copy-email-btn:disabled {
+    background-color: var(--primary-color);
+    color: white;
+    cursor: default;
+}
 
  </style>
 <body>
@@ -986,6 +1305,61 @@ opacity: 1; /* 활성 챕터만 보이게 */
 
     </main>
 
+
+<footer id="main-footer-content">
+    <div class="footer-container">
+
+        <div class="footer-subscribe">
+            <h4>오후의 식물 AI에게 무엇이든 물어보세요</h4>
+            <p>나에게 맞는 식물 추천부터, 사진으로 이름 찾기, 아픈 식물 진단까지.<br>오후의 식물 AI가 당신의 식물 생활을 도와드려요.</p>
+            
+            <a href="findPlant.html" class="cta-button" style="margin-top: 20px; display: inline-block;">
+                '식물 상담소' 바로가기
+            </a>
+        </div>
+
+        <div class="footer-main">
+            <div class="footer-about">
+                <a href="index.html" class="logo">오후의 식물</a>
+                <p>식물과 함께하는 모든 순간이 더 행복하고 의미 있도록, 오후의 식물이 당신의 초록빛 여정에 함께합니다.</p>
+                    <div class="footer-social">
+                        <a href="https://www.instagram.com/plantnoon/" target="_blank">Instagram<br></a>
+                        <a href="https://blog.naver.com/happy_care_service/223955159263" target="_blank">Blog<br></a>
+                        <a href="https://open.kakao.com/o/gJLPjuKh" target="_blank">Open Chat<br></a>
+                        <a>hermann8hesse@gmail.com</a>
+                    </div>
+            </div>
+            <div class="footer-links-group">
+                <div class="footer-links">
+                    <h4>About</h4>
+                    <ul>
+                        <li><a href="#" id="open-team-modal">팀 소개</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>Support</h4>
+                    <ul>
+                        <li><a href="#" id="open-faq-modal">자주 묻는 질문</a></li>
+                        <li><a href="#" id="open-idea-modal">아이디어 제안</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>Policy</h4>
+                    <ul>
+                        <li><a href="terms.html">이용약관</a></li>
+                        <li><a href="privacy.html">개인정보처리방침</a></li>
+                        <li><a href="refund.html">환불정책</a></li>
+                    </ul>
+                </div>
+                 </div>
+        </div>
+    </div>
+    <div class="footer-bottom">
+        <p>&copy; 2025 Plantnoon. All Rights Reserved.</p>
+    </div>
+</footer>
+
+
     <!-- 기존 로그인/회원가입 모달, JS 등 유지 -->
     <div id="modal-wrapper" class="modal-wrapper">
         <div class="modal">
@@ -1082,33 +1456,81 @@ opacity: 1; /* 활성 챕터만 보이게 */
     </button>
 </div>
 
+<div id="info-modal-wrapper" class="info-modal-wrapper">
 
+    <div id="team-modal" class="info-modal-content">
+        <button class="close-modal-btn">&times;</button>
+        <h2>Team 오후의 식물</h2>
+        <p class="modal-subtitle">
+            하나의 작은 화분이 주는 위로와 기쁨에서 '오후의 식물'은 시작되었습니다.<br>
+            우리는 식물과 함께하는 삶의 가치를 믿으며, 그 여정이 외롭지 않도록 돕는 든든한 파트너가 되고 싶습니다.<br>
+            여러분의 초록빛 일상이 더욱 풍성해지도록, 저희도 함께 배우고 성장하겠습니다.
+        </p>
+        <div class="modal-body">
+            <div class="team-member">
+                <h4>박해진</h4>
+                <p>CEO & AI</p>
+            </div>
+            <div class="team-member">
+                <h4>이강희</h4>
+                <p>Lead Developer & UX Designer</p>
+            </div>
+        </div>
+    </div>
 
-<div id="footer-placeholder"></div>
+    <div id="faq-modal" class="info-modal-content">
+        <button class="close-modal-btn">&times;</button>
+        <h2>자주 묻는 질문 (FAQ)</h2>
+        <p class="modal-subtitle">궁금한 점을 확인해보세요.</p>
+        <div class="modal-body">
+            <details class="faq-item">
+                <summary>Q. '식물 상담소'의 AI 진단은 정확한가요?</summary>
+                <p>A. AI 진단은 학습된 데이터를 기반으로 한 참고용 정보이며, 100% 정확하지 않을 수 있습니다. 식물의 상태를 판단하는 데 도움을 주는 보조 도구로 활용해주세요.</p>
+            </details>
+            <details class="faq-item">
+                <summary>Q. 이 AI는 어떤 기술로 만들어졌나요?</summary>
+                <p>A. '오후의식물 AI' Google의 Gemini API를 통해 AI 기능을 구현했습니다.</p>
+            </details>
+            <details class="faq-item">
+                <summary>Q. 앞으로 어떤 기능이 추가될 예정인가요?</summary>
+                <p>A. '나의 식물' 페이지에 등록된 식물의 성장 스케줄을 알려주는 알림 기능과, 사용자 간의 식물 분양 커뮤니티 기능 등을 계획하고 있습니다. 좋은 아이디어가 있다면 언제든 제안해주세요!</p>
+            </details>
+        </div>
+    </div>
 
+<div id="idea-modal" class="info-modal-content">
+    <button class="close-modal-btn">&times;</button>
+    <h2>💡 아이디어 제안</h2>
+    <p class="modal-subtitle">여러분의 소중한 의견이 오후의 식물을 성장시킵니다.</p>
+    <div class="modal-body idea-submission-body">
+        <p class="submission-guide">
+            더 나은 서비스를 위한 아이디어가 있다면,<br>아래 이메일로 자유롭게 보내주세요.
+        </p>
+        <div class="email-display-box">
+            <span id="idea-email-address">hermann8hesse@gmail.com</span>
+        </div>
+        <button id="copy-email-btn" class="cta-button">이메일 주소 복사</button>
+    </div>
+</div>
+</div>
 
 
 
 <nav id="bottom-nav">
   <a href="index.html" class="nav-item">
     <span class="nav-icon">🏠</span>
-    <span class="nav-label">홈</span>
   </a>
   <a href="story.html" class="nav-item">
     <span class="nav-icon">🌱</span>
-    <span class="nav-label">이야기</span>
   </a>
   <a href="myPlant.html" class="nav-item">
     <span class="nav-icon">🪴</span>
-    <span class="nav-label">나의식물</span>
   </a>
   <a href="findPlant.html" class="nav-item">
     <span class="nav-icon">💬</span>
-    <span class="nav-label">상담소</span>
   </a>
     <a href="payment.html" class="nav-item">
     <span class="nav-icon">⭐</span>
-    <span class="nav-label">구독</span>
   </a>
 </nav>
 

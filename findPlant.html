@@ -437,6 +437,128 @@ main {
     padding-bottom: 35px; /* 옵션버튼이 겹치지 않게 */
   }
 }
+
+/* 푸터 전용 스타일 */
+    .main-footer {
+        background-color: var(--bg-cream);
+        color: var(--text-dark);
+        padding: 50px 20px 20px;
+        border-top: 1px solid #e9e6e6;
+        font-size: 0.95rem;
+    }
+    .footer-container {
+        max-width: 900px;
+        margin: 0 auto;
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
+        gap: 40px;
+        padding-bottom: 40px;
+        border-bottom: 1px solid #e0dcd1;
+    }
+    .footer-about {
+        max-width: 300px;
+    }
+    .footer-about .logo {
+        font-family: var(--font-serif);
+        font-size: 1.8rem;
+        font-weight: 600;
+        color: var(--primary-green);
+        text-decoration: none;
+        margin-bottom: 12px;
+        display: inline-block;
+    }
+    .footer-about p {
+        line-height: 1.7;
+        color: #7a7a5c;
+        margin-bottom: 20px;
+    }
+    .footer-social a {
+        color: #7a7a5c;
+        text-decoration: none;
+        margin-right: 18px;
+        transition: color 0.2s;
+    }
+    .footer-social a:hover {
+        color: var(--primary-green);
+    }
+    .footer-links-group {
+        display: flex;
+        gap: 50px;
+    }
+    .footer-links h4 {
+        font-family: var(--font-serif);
+        color: var(--text-dark);
+        font-size: 1.2rem;
+        margin-bottom: 15px;
+    }
+    .footer-links ul {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+    .footer-links li {
+        margin-bottom: 10px;
+    }
+    .footer-links a {
+        color: #7a7a5c;
+        text-decoration: none;
+        transition: color 0.2s;
+    }
+    .footer-links a:hover {
+        color: var(--primary-green);
+        text-decoration: underline;
+    }
+    .footer-bottom {
+        text-align: center;
+        padding-top: 20px;
+        font-size: 0.85rem;
+        color: #b2a97e;
+    }
+    /* 푸터 하단 및 사업자 정보 스타일 */
+.business-info {
+    font-size: 0.8rem;
+    color: #908976; /* 기존보다 약간 더 잘 보이는 색상 */
+    line-height: 1.7;
+    margin-bottom: 20px;
+}
+
+.business-info strong {
+    color: #7a7a5c;
+    font-weight: 500;
+}
+
+.business-info p {
+    margin: 0;
+}
+
+/* 기존 저작권 텍스트의 클래스명을 추가하여 스타일을 명확히 함 */
+.copyright-text {
+    font-size: 0.85rem;
+    color: #b2a97e;
+    margin: 0;
+}
+
+    @media (max-width: 768px) {
+        .footer-container {
+            flex-direction: column;
+            text-align: center;
+        }
+        .footer-about {
+            max-width: 100%;
+        }
+        .footer-social {
+            margin-bottom: 20px;
+        }
+        .footer-links-group {
+            width: 100%;
+            justify-content: space-around;
+            text-align: center;
+        }
+            .business-info {
+        font-size: 0.75rem; /* 모바일에서 글자 크기 살짝 줄임 */
+    }
+    }
 </style>
 </head>
 
@@ -452,7 +574,7 @@ main {
             <a href="index.html">홈</a>
             <a href="story.html">초록 이야기</a>
             <a href="myPlant.html">나의 식물</a>
-            <a href="findPlant.html">식물 찾기</a>
+            <a href="findPlant.html">식물 상담소</a>
             <a href="payment.html">구독하기</a>
             <a href="#" class="cta-button">Login</a>
         </nav>
@@ -574,29 +696,56 @@ main {
         </div>
     </div>
 
-<div id="footer-placeholder"></div>
+    <footer class="main-footer">
+    <div class="footer-container">
+        <div class="footer-about">
+            <a href="index.html" class="logo">오후의 식물</a>
+            <p>식물과 함께하는 모든 순간이 더 행복하고 의미 있도록, 오후의 식물이 당신의 초록빛 여정에 함께합니다.</p>
+            <div class="footer-social">
+                <a href="https://www.instagram.com/plantnoon/" target="_blank">Instagram</a>
+                <a href="https://blog.naver.com/happy_care_service/223955159263" target="_blank">Blog</a>
+                <a href="https://open.kakao.com/o/gJLPjuKh" target="_blank">Open Chat</a>
+            </div>
+        </div>
+        <div class="footer-links-group">
+            <div class="footer-links">
+                <h4>Policy</h4>
+                <ul>
+                    <li><a href="terms.html">이용약관</a></li>
+                    <li><a href="privacy.html">개인정보처리방침</a></li>
+                    <li><a href="refund.html">환불정책</a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    <div class="footer-bottom">
+        <div class="business-info">
+            <p>
+                <strong>고하이어(GoHigher)</strong> | 대표: 박해진 | 사업자등록번호: 407-09-54622<br>
+                주소: 대구광역시 북구 동천로 155, 12층 | <br>
+                고객센터: 070-8010-1675 (평일 09:00 - 18:00) | 이메일: hermann8hesse@gmail.com
+            </p>
+        </div>
+        <p class="copyright-text">&copy; 2025 Plantnoon. All Rights Reserved.</p>
+    </div>
+</footer>
 
 
 <nav id="bottom-nav">
   <a href="index.html" class="nav-item">
     <span class="nav-icon">🏠</span>
-    <span class="nav-label">홈</span>
   </a>
   <a href="story.html" class="nav-item">
     <span class="nav-icon">🌱</span>
-    <span class="nav-label">이야기</span>
   </a>
   <a href="myPlant.html" class="nav-item">
     <span class="nav-icon">🪴</span>
-    <span class="nav-label">나의식물</span>
   </a>
   <a href="findPlant.html" class="nav-item">
     <span class="nav-icon">💬</span>
-    <span class="nav-label">상담소</span>
   </a>
     <a href="payment.html" class="nav-item">
     <span class="nav-icon">⭐</span>
-    <span class="nav-label">구독</span>
   </a>
 </nav>
 
