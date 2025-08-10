@@ -29,6 +29,20 @@
     
     <link rel="stylesheet" href="navigation.css">
     
+
+    <!-- PortOne (iamport) JavaScript SDK -->
+<script src="https://cdn.iamport.kr/v1/iamport.js"></script>
+<script>
+  // SDK가 로드된 뒤에 확실히 init
+  window.addEventListener('DOMContentLoaded', function () {
+    if (!window.IMP) {
+      alert('결제 모듈 로드에 실패했습니다. 새로고침 후 다시 시도해주세요.');
+      return;
+    }
+    window.IMP.init('imp11786186'); // ← 너의 imp 코드
+  });
+</script>
+
     <style>
 
         /* 기본 변수 설정 */
@@ -362,6 +376,86 @@
     display: block; /* 제목과 설명이 다른 줄에 표시되도록 합니다. */
     margin-top: 2px;
 }
+
+
+
+
+
+    /* 애니메이션 정의 */
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    header#main-header nav a {
+  color: #FDFBF8; /* 부드러운 아이보리/크림색 */
+  text-shadow: 0 1px 2px rgba(0,0,0,0.1); /* 가독성을 위한 미세한 그림자 */
+}
+header#main-header nav a:hover {
+  color: #ffffff; /* 마우스를 올렸을 때 순백색으로 변경 */
+}
+
+/* 'Login' 버튼의 색상 대비도 조정합니다. */
+header#main-header .cta-button {
+    background-color: transparent;
+    border: 1px solid #FDFBF8;
+    color: #FDFBF8;
+}
+header#main-header .cta-button:hover {
+    background-color: #FDFBF8;
+    color: #3a593b; /* 마우스를 올리면 글자색 반전 (기존 녹색 사용) */
+}
+
+
+/* [2. 메인 헤드라인(h1) 색상 변경]
+  가장 큰 제목의 글자색을 밝게 변경합니다.
+*/
+.page-header-animated h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: 2.8rem;
+    color: #FDFBF8; /* 밝은 아이보리색 */
+    margin-bottom: 15px;
+    line-height: 1.4;
+    margin-top: 6rem;
+    /* 애니메이션 실행 */
+    animation: fadeInUp 0.8s ease-out forwards;
+    opacity: 0; /* 시작 전 숨김 */
+}
+
+/* 설명(p) 스타일 및 애니메이션 적용 */
+.page-header-animated p {
+    font-size: 1.1rem;
+    color: #FDFBF8; /* 밝은 아이보리색 */
+    max-width: 650px;
+    margin: 0 auto;
+    line-height: 1.7;
+    
+    /* h1보다 0.3초 늦게 애니메이션 실행 */
+    animation: fadeInUp 0.8s ease-out 0.3s forwards;
+    opacity: 0; /* 시작 전 숨김 */
+}
+
+/* 설명 문구 안의 단어 강조 스타일 */
+.page-header-animated .highlight {
+    color: #B4D9B5; /* 배경과 어울리는 밝은 민트색 */
+    font-weight: 700;
+}
+
+/* 모바일 반응형 스타일 */
+@media (max-width: 768px) {
+  .page-header-animated h1 {
+      font-size: 2.2rem;
+  }
+  .page-header-animated p {
+      font-size: 1rem;
+  }
+}
     </style>
 </head>
 <body>
@@ -384,10 +478,13 @@
 
 
       <main class="payment-container">
-        <div class="page-header">
-            <h1>당신의 식물 생활을 업그레이드하세요</h1>
-            <p>오후의 식물 Pro와 함께라면 식물 관리가 더욱 쉬워지고 즐거워집니다. 당신에게 맞는 플랜을 선택해보세요.</p>
-        </div>
+        <div class="page-header page-header-animated">
+        <h1>당신의 공간이, 살아있는 정원이 됩니다</h1>
+        <p>
+            식물 하나가 주는 위로와 행복의 가치를 아시나요? 단순한 관리를 넘어,<br>
+            식물과 교감하며 <span class="highlight">나만의 작은 숲</span>을 가꾸어보세요.
+        </p>
+    </div>
 
         <div class="plans-wrapper">
 <div class="plan-card free">
@@ -438,7 +535,8 @@
             </div>
         </li>
     </ul>
-    <a href="#" class="plan-button">Pro로 업그레이드</a>
+    <a href="#" id="kakao-test-pay" class="plan-button">Pro로 업그레이드</a>
+
 </div>
         </div>
     </main>
@@ -607,32 +705,73 @@
 
 
     <!-- 스크립트는 동일하게 유지합니다. -->
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-    // 프로 결제 버튼 선택 (클래스명 .plan-button, 두 번째 버튼)
-    const proButton = document.querySelector('.plan-card.pro .plan-button');
-    const paymentModal = document.getElementById('payment-modal');
-    const closePaymentModal = document.getElementById('close-payment-modal');
+    <!-- <script>
+//         document.addEventListener('DOMContentLoaded', function () {
+//     // 프로 결제 버튼 선택 (클래스명 .plan-button, 두 번째 버튼)
+//     const proButton = document.querySelector('.plan-card.pro .plan-button');
+//     const paymentModal = document.getElementById('payment-modal');
+//     const closePaymentModal = document.getElementById('close-payment-modal');
 
-    // Pro 버튼 클릭 시 모달 열기
-    proButton.addEventListener('click', function(e) {
-        e.preventDefault();
-        paymentModal.style.display = 'flex';
-    });
+//     // Pro 버튼 클릭 시 모달 열기
+//     proButton.addEventListener('click', function(e) {
+//         e.preventDefault();
+//         paymentModal.style.display = 'flex';
+//     });
 
-    // 닫기 버튼 및 바깥 영역 클릭 시 모달 닫기
-    closePaymentModal.addEventListener('click', function() {
-        paymentModal.style.display = 'none';
-    });
-    paymentModal.addEventListener('click', function(e) {
-        if (e.target === paymentModal) paymentModal.style.display = 'none';
-    });
-    window.addEventListener('keydown', function(e) {
-        if (e.key === 'Escape') paymentModal.style.display = 'none';
-    });
-});
-    </script>
+//     // 닫기 버튼 및 바깥 영역 클릭 시 모달 닫기
+//     closePaymentModal.addEventListener('click', function() {
+//         paymentModal.style.display = 'none';
+//     });
+//     paymentModal.addEventListener('click', function(e) {
+//         if (e.target === paymentModal) paymentModal.style.display = 'none';
+//     });
+//     window.addEventListener('keydown', function(e) {
+//         if (e.key === 'Escape') paymentModal.style.display = 'none';
+//     });
+// });
+    </script> -->
     <script type="module" src="navigation.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  const payBtn = document.getElementById('kakao-test-pay');
+
+  payBtn.addEventListener('click', function (e) {
+    e.preventDefault();
+
+    if (!window.IMP) {
+      alert("결제 모듈이 로드되지 않았습니다.");
+      return;
+    }
+
+    const merchantUid = "pro_" + Date.now();
+
+    window.IMP.request_pay({
+      pg: "kakaopay",    // ✅ 테스트 CID 명시
+      pay_method: "card",
+      merchant_uid: merchantUid,
+      name: "오후의 식물 Pro 구독(테스트)",
+      amount: 2900,
+      buyer_email: "test@plantnoon.com",
+      buyer_name: "테스트 유저",
+      buyer_tel: "010-0000-0000",
+      m_redirect_url: "https://plantnoon.com/payment-complete.html?oid=" + merchantUid
+    }, function (rsp) {
+      if (rsp.success) {
+        fetch("/api/payments/verify", {
+          method: "POST",
+          headers: {"Content-Type":"application/json"},
+          body: JSON.stringify({ imp_uid: rsp.imp_uid, merchant_uid: rsp.merchant_uid })
+        })
+        .then(()=> alert("테스트 결제 성공! (서버 검증 호출)"))
+        .catch(()=> alert("서버 검증 호출 실패"));
+      } else {
+        alert("결제 실패: " + rsp.error_msg);
+      }
+    });
+  });
+});
+
+</script>
 
 </body>
 </html>
