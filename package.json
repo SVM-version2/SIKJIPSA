@@ -3,13 +3,17 @@
   "version": "1.0.0",
   "main": "navigation.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "description": "",
   "dependencies": {
-    "@google/generative-ai": "^0.24.1"
-  }
+    "@google/generative-ai": "^0.24.1",
+    "axios": "^1.11.0",
+    "dotenv": "^17.2.1",
+    "firebase-admin": "^13.4.0"
+  },
+  "description": ""
 }
