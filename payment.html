@@ -734,7 +734,7 @@ document.addEventListener('DOMContentLoaded', function () {
         buyer_email: "gohigher_dev@example.com", // <-- 변경: 테스트를 진행할 실제 이메일
         buyer_name: "박해진",                   // <-- 변경: 테스트용 실명
         buyer_tel: "010-1234-5678",          // <-- 변경: 테스트용 실제 연락처
-        m_redirect_url: "https://plantnoon.com/payment-complete.html" // 결제 완료 후 이동할 URL
+        m_redirect_url: "https://plantnoon.com/payment.html" // 결제 완료 후 이동할 URL
     }, function (rsp) {
         if (rsp.success) {
             console.log("결제 성공 응답:", rsp);
