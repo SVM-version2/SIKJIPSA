@@ -796,6 +796,8 @@ proPlanButton.addEventListener('click', function (e) {
         pg: "kakaopay.CA61377641",
         pay_method: "card",
         merchant_uid: merchantUid, // ✅ 다시 추가 (필수)
+        // 고객의 고유 ID를 customer_uid로 전달하여 빌링키 발급을 요청합니다.
+        customer_uid: userUid, 
         name: "오후의 식물 Pro 구독",   // ✅ 다시 추가 (필수)
         amount: 100,               // 실제 서비스 금액으로 변경
         buyer_email: user.email,    // ✅ 다시 추가 (로그인한 사용자 이메일)
