@@ -29,6 +29,23 @@
     
     <link rel="stylesheet" href="navigation.css">
     
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyC7mA9xLOFb98i5hKNWjKW_fORWNHvPx2s",
+  authDomain: "sik-jip-sa.firebaseapp.com",
+  projectId: "sik-jip-sa",
+  storageBucket: "sik-jip-sa.firebasestorage.app",
+  messagingSenderId: "401707534850",
+  appId: "1:401707534850:web:e15b2f67e2d4484a07351b",
+  measurementId: "G-HX50P6C0NT"
+};
+ // Firebase 앱 초기화
+ if (!firebase.apps.length) {
+  firebase.initializeApp(firebaseConfig);
+ }
+</script>
 
     <!-- PortOne (iamport) JavaScript SDK -->
 <script src="https://cdn.iamport.kr/v1/iamport.js"></script>
@@ -39,7 +56,7 @@
       alert('결제 모듈 로드에 실패했습니다. 새로고침 후 다시 시도해주세요.');
       return;
     }
-    window.IMP.init('imp11786186'); // ← 너의 imp 코드
+    window.IMP.init('imp11786186'); 
   });
 </script>
 
@@ -715,6 +732,18 @@ document.addEventListener('DOMContentLoaded', function () {
   payBtn.addEventListener('click', function (e) {
     e.preventDefault();
 
+        // Firebase Auth를 통해 현재 사용자 정보 가져오기
+    const user = firebase.auth().currentUser;
+
+    if (!user) {
+        alert("결제를 진행하려면 먼저 로그인해주세요.");
+        // 여기서 로그인 모달을 띄우는 등의 처리를 할 수 있습니다.
+        return;
+    }
+
+    // 사용자의 고유 UID
+    const userUid = user.uid; 
+
     if (!window.IMP) {
       alert("결제 모듈이 로드되지 않았습니다.");
       return;
@@ -736,14 +765,27 @@ document.addEventListener('DOMContentLoaded', function () {
         buyer_tel: "010-1234-5678",          // <-- 변경: 테스트용 실제 연락처
         m_redirect_url: "https://plantnoon.com/payment.html" // 결제 완료 후 이동할 URL
     }, function (rsp) {
-        if (rsp.success) {
-            console.log("결제 성공 응답:", rsp);
-            // TODO: 서버로 imp_uid, merchant_uid를 보내 결제 위변조 검증을 요청합니다.
-            // fetch("/api/payments/verify", { ... });
-            alert("실 결제 테스트에 성공했습니다!");
-            // 성공 시 결제 완료 페이지로 이동시키거나 UI를 업데이트합니다.
-            // window.location.href = "/payment-complete.html?imp_uid=" + rsp.imp_uid;
-        } else {
+    if (rsp.success) {
+        // 기존 코드: fetch("/api/payments/verify", { ... })
+        // 수정된 코드: body에 userUid를 추가합니다.
+        fetch("/api/payments/verify", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                imp_uid: rsp.imp_uid,
+                merchant_uid: rsp.merchant_uid,
+                user_uid: userUid // <-- 로그인한 사용자의 UID 추가
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === "success") {
+                alert("결제 및 Pro 플랜 적용이 완료되었습니다!");
+            } else {
+                alert("서버 검증에 실패했습니다. 관리자에게 문의하세요.");
+            }
+        });
+    } else {
             console.log("결제 실패 응답:", rsp);
             alert("결제에 실패했습니다. 에러 메시지: " + rsp.error_msg);
         }
