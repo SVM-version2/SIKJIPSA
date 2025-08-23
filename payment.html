@@ -502,9 +502,7 @@ const firebaseConfig = {
             </div>
         </li>
     </ul>
-    <a href="#" class="plan-button disabled" tabindex="-1" aria-disabled="true">현재 플랜 유지하기</a>
-
-<a href="#" id="free-plan-button" class="plan-button disabled" tabindex="-1" aria-disabled="true">현재 플랜 유지하기</a>
+     <a href="#" id="free-plan-button" class="plan-button disabled" tabindex="-1" aria-disabled="true">현재 플랜 유지하기</a>
 </div>
 
 <div class="plan-card pro">
@@ -532,9 +530,7 @@ const firebaseConfig = {
             </div>
         </li>
     </ul>
-   <a href="#" id="kakao-test-pay" class="plan-button">Pro로 업그레이드</a>
-
-<a href="#" id="pro-plan-button" class="plan-button">Pro로 업그레이드</a>
+  <a href="#" id="pro-plan-button" class="plan-button">Pro로 업그레이드</a>
 
 </div>
         </div>
@@ -759,38 +755,42 @@ document.addEventListener('DOMContentLoaded', function () {
     }
     
     // --- 결제 로직 ---
-    proPlanButton.addEventListener('click', function (e) {
-        e.preventDefault();
-        
-        const user = firebase.auth().currentUser;
-        if (!user) {
-            alert("로그인이 필요합니다.");
-            // 로그인 모달 띄우기
-            return;
-        }
+proPlanButton.addEventListener('click', function (e) {
+    e.preventDefault();
+    
+    const user = firebase.auth().currentUser;
+    if (!user) {
+        alert("로그인이 필요합니다.");
+        return;
+    }
 
-        // 이미 Pro 구독자라면 결제 진행 안함
-        if (proPlanButton.classList.contains('disabled')) {
-            return;
-        }
+    if (proPlanButton.classList.contains('disabled')) {
+        return;
+    }
 
-        // ... (기존 window.IMP.request_pay 로직) ...
-        const userUid = user.uid; 
-        window.IMP.request_pay({
-            // ... 파라미터들 ...
-            pg: "kakaopay.CA61377641",
-            amount: 100, // 실제 서비스 금액으로 변경
-            // ...
-        }, function (rsp) {
-            if (rsp.success) {
-                fetch("/api/payments/verify", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({
-                        imp_uid: rsp.imp_uid,
-                        merchant_uid: rsp.merchant_uid,
-                        user_uid: userUid
-                    })
+    const userUid = user.uid;
+    const merchantUid = "pro_" + new Date().getTime(); // 고유한 주문번호 생성
+
+    window.IMP.request_pay({
+        pg: "kakaopay.CA61377641",
+        pay_method: "card",
+        merchant_uid: merchantUid, // ✅ 다시 추가 (필수)
+        name: "오후의 식물 Pro 구독",   // ✅ 다시 추가 (필수)
+        amount: 100,               // 실제 서비스 금액으로 변경
+        buyer_email: user.email,    // ✅ 다시 추가 (로그인한 사용자 이메일)
+        buyer_name: user.displayName || "구매자", // ✅ 다시 추가 (로그인한 사용자 이름)
+        buyer_tel: "010-0000-0000",  // ✅ 다시 추가 (필요시 사용자 정보에서 가져옴)
+        m_redirect_url: "https://plantnoon.com/payment.html" 
+    }, function (rsp) {
+        if (rsp.success) {
+            fetch("/api/payments/verify", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    imp_uid: rsp.imp_uid,
+                    merchant_uid: merchantUid, // 생성한 주문번호를 그대로 전달
+                    user_uid: userUid
+                })
                 })
                 .then(res => res.json())
                 .then(data => {
