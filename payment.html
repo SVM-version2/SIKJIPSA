@@ -31,6 +31,7 @@
     
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
 <script>
 const firebaseConfig = {
   apiKey: "AIzaSyC7mA9xLOFb98i5hKNWjKW_fORWNHvPx2s",
@@ -502,6 +503,8 @@ const firebaseConfig = {
         </li>
     </ul>
     <a href="#" class="plan-button disabled" tabindex="-1" aria-disabled="true">현재 플랜 유지하기</a>
+
+<a href="#" id="free-plan-button" class="plan-button disabled" tabindex="-1" aria-disabled="true">현재 플랜 유지하기</a>
 </div>
 
 <div class="plan-card pro">
@@ -529,7 +532,9 @@ const firebaseConfig = {
             </div>
         </li>
     </ul>
-    <a href="#" id="kakao-test-pay" class="plan-button">Pro로 업그레이드</a>
+   <a href="#" id="kakao-test-pay" class="plan-button">Pro로 업그레이드</a>
+
+<a href="#" id="pro-plan-button" class="plan-button">Pro로 업그레이드</a>
 
 </div>
         </div>
@@ -700,66 +705,108 @@ const firebaseConfig = {
     <script type="module" src="navigation.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function () {
-  const payBtn = document.getElementById('kakao-test-pay');
+    const proPlanButton = document.getElementById('pro-plan-button');
 
-  payBtn.addEventListener('click', function (e) {
-    e.preventDefault();
-
-        // Firebase Auth를 통해 현재 사용자 정보 가져오기
-    const user = firebase.auth().currentUser;
-
-    // 사용자의 고유 UID
-    const userUid = user.uid; 
-
-    if (!window.IMP) {
-      alert("결제 모듈이 로드되지 않았습니다.");
-      return;
-    }
-
-    const merchantUid = "pro_" + Date.now();
-
-    window.IMP.request_pay({
-        pg: "kakaopay.CA61377641",      // <-- 변경: 'kakaopay' 뒤에 '.'과 함께 전달받은 CID를 추가합니다.
-        pay_method: "card",
-        merchant_uid: "pro_" + Date.now(), // 주문번호는 항상 고유하게 생성해야 합니다.
-        name: "오후의 식물 Pro 구독",      // <-- 변경: '(테스트)' 문구를 제거합니다.
-        amount: 100,                    // <-- 변경: 실제 테스트를 위해 우선 100원 같은 최소 금액으로 테스트하는 것을 권장합니다.
-        
-        // 구매자 정보는 실제 값으로 채워야 합니다.
-        // 실제 서비스에서는 로그인한 사용자 정보를 동적으로 가져와야 합니다.
-        buyer_email: "gohigher_dev@example.com", // <-- 변경: 테스트를 진행할 실제 이메일
-        buyer_name: "박해진",                   // <-- 변경: 테스트용 실명
-        buyer_tel: "010-1234-5678",          // <-- 변경: 테스트용 실제 연락처
-        m_redirect_url: "https://plantnoon.com/payment.html" // 결제 완료 후 이동할 URL
-    }, function (rsp) {
-    if (rsp.success) {
-        // 기존 코드: fetch("/api/payments/verify", { ... })
-        // 수정된 코드: body에 userUid를 추가합니다.
-        fetch("/api/payments/verify", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-                imp_uid: rsp.imp_uid,
-                merchant_uid: rsp.merchant_uid,
-                user_uid: userUid // <-- 로그인한 사용자의 UID 추가
-            })
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.status === "success") {
-                alert("결제 및 Pro 플랜 적용이 완료되었습니다!");
-            } else {
-                alert("서버 검증에 실패했습니다. 관리자에게 문의하세요.");
-            }
-        });
-    } else {
-            console.log("결제 실패 응답:", rsp);
-            alert("결제에 실패했습니다. 에러 메시지: " + rsp.error_msg);
+    // Firebase 인증 상태 변경을 감지하는 리스너
+    firebase.auth().onAuthStateChanged(function(user) {
+        if (user) {
+            // 사용자가 로그인한 경우
+            console.log(user.uid, "사용자 로그인 상태");
+            checkSubscriptionStatus(user.uid);
+        } else {
+            // 사용자가 로그아웃한 경우
+            console.log("사용자 로그아웃 상태");
+            updateUI(false); // 로그아웃 시 기본 UI (업그레이드 버튼 활성화)
         }
     });
-  });
-});
 
+    // Firestore에서 구독 상태 확인하는 함수
+    function checkSubscriptionStatus(uid) {
+        const db = firebase.firestore();
+        const userDocRef = db.collection('users').doc(uid);
+
+        userDocRef.get().then((doc) => {
+            if (doc.exists) {
+                const isPro = doc.data().proPlan === true;
+                updateUI(isPro);
+            } else {
+                console.log("사용자 문서를 찾을 수 없습니다.");
+                updateUI(false);
+            }
+        }).catch((error) => {
+            console.error("사용자 정보 조회 중 오류 발생: ", error);
+            updateUI(false);
+        });
+    }
+
+    // 구독 상태에 따라 UI를 업데이트하는 함수
+    function updateUI(isPro) {
+        const proButton = document.getElementById('pro-plan-button');
+        
+        if (isPro) {
+            // Pro 구독자인 경우
+            proButton.textContent = "현재 구독 중인 플랜";
+            proButton.classList.add('disabled'); // 비활성화 스타일 적용
+            proButton.style.pointerEvents = 'none'; // 클릭 불가 처리
+            proButton.href = '#'; // 링크 제거
+        } else {
+            // Pro 구독자가 아닌 경우 (기본 상태)
+            proButton.textContent = "Pro로 업그레이드";
+            proButton.classList.remove('disabled');
+            proButton.style.pointerEvents = 'auto';
+            // 결제 이벤트 리스너는 여기에 두거나, 초기화 시 한 번만 설정
+        }
+    }
+    
+    // --- 결제 로직 ---
+    proPlanButton.addEventListener('click', function (e) {
+        e.preventDefault();
+        
+        const user = firebase.auth().currentUser;
+        if (!user) {
+            alert("로그인이 필요합니다.");
+            // 로그인 모달 띄우기
+            return;
+        }
+
+        // 이미 Pro 구독자라면 결제 진행 안함
+        if (proPlanButton.classList.contains('disabled')) {
+            return;
+        }
+
+        // ... (기존 window.IMP.request_pay 로직) ...
+        const userUid = user.uid; 
+        window.IMP.request_pay({
+            // ... 파라미터들 ...
+            pg: "kakaopay.CA61377641",
+            amount: 100, // 실제 서비스 금액으로 변경
+            // ...
+        }, function (rsp) {
+            if (rsp.success) {
+                fetch("/api/payments/verify", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        imp_uid: rsp.imp_uid,
+                        merchant_uid: rsp.merchant_uid,
+                        user_uid: userUid
+                    })
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        alert("결제 및 Pro 플랜 적용이 완료되었습니다!");
+                        updateUI(true); // 결제 성공 후 UI 즉시 업데이트
+                    } else {
+                        alert("서버 검증 실패: " + data.message);
+                    }
+                });
+            } else {
+                alert("결제 실패: " + rsp.error_msg);
+            }
+        });
+    });
+});
 </script>
 
 </body>
