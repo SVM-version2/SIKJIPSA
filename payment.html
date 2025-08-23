@@ -698,6 +698,26 @@ const firebaseConfig = {
 </nav>
 
 
+
+<div id="user-status-modal" style="display:none; position:fixed; z-index:9999; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.5); align-items:center; justify-content:center;">
+    <div style="background:#fff; border-radius:16px; max-width:380px; width:90%; margin:auto; box-shadow:0 10px 40px rgba(0,0,0,0.12); position:relative; text-align:center; padding: 30px;">
+        
+        <button id="close-status-modal" style="position:absolute; top:12px; right:15px; font-size:2rem; color:#aaa; background:none; border:none; cursor:pointer; line-height:1;">&times;</button>
+        
+        <div style="margin-bottom:20px;">
+            <h3 style="font-family: 'Playfair Display', serif; font-size:1.8rem; margin:10px 0 8px 0; color:#3a593b;">내 구독 정보</h3>
+            <p style="font-size:1rem; color:#777;">현재 구독 중인 플랜의 정보입니다.</p>
+        </div>
+
+        <div id="subscription-info" style="background-color:#f8f7f4; border-radius:10px; padding:25px; margin-bottom:25px; text-align:left;">
+            <p style="margin:0; text-align:center;">구독 정보를 불러오는 중...</p>
+        </div>
+        
+        <button id="logout-button" style="width:100%; padding:14px; border:none; background-color:#e0e0e0; color:#333; border-radius:8px; font-size:1rem; font-weight:700; cursor:pointer;">로그아웃</button>
+    </div>
+</div>
+
+
     <script type="module" src="navigation.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function () {
@@ -827,6 +847,89 @@ proPlanButton.addEventListener('click', function (e) {
             } else {
                 alert("결제 실패: " + rsp.error_msg);
             }
+        });
+    });
+});
+
+
+
+
+
+
+// ==========================================================
+// 📍 2단계: ~~집사님 버튼에 대한 모달 띄우는 거임. 네비게이션.js에 넣으니깐 오류 나서 따로 넣음
+// ==========================================================
+
+document.addEventListener('DOMContentLoaded', function () {
+    const db = firebase.firestore();
+    const auth = firebase.auth();
+
+    // 네비게이션의 로그인/내 정보 버튼
+    // ❗️주의: 실제 프로젝트의 로그인 버튼 선택자(selector)로 변경해야 합니다.
+    const userStatusButton = document.querySelector('header nav a.cta-button'); 
+
+    // '내 정보' 모달 관련 요소들
+    const userStatusModal = document.getElementById('user-status-modal');
+    const closeStatusModal = document.getElementById('close-status-modal');
+    const subscriptionInfoDiv = document.getElementById('subscription-info');
+    const logoutButton = document.getElementById('logout-button');
+
+    // 인증 상태 변경 감지
+    auth.onAuthStateChanged(user => {
+        if (user) {
+            // --- 로그인 상태일 때 ---
+            
+            userStatusButton.addEventListener('click', e => {
+                e.preventDefault(); // 기본 링크 이동 방지
+                
+                // Firestore에서 사용자 구독 정보 가져오기
+                db.collection('users').doc(user.uid).get().then(doc => {
+                    if (doc.exists && doc.data().proPlan) {
+                        // Pro 구독자일 경우
+                        const subData = doc.data();
+                        
+                        // Firestore Timestamp를 JavaScript Date 객체로 변환
+                        const expiresAtDate = subData.subscriptionExpiresAt.toDate();
+                        
+                        // 날짜를 'YYYY년 MM월 DD일' 형식으로 포맷팅
+                        const formattedDate = `${expiresAtDate.getFullYear()}년 ${expiresAtDate.getMonth() + 1}월 ${expiresAtDate.getDate()}일`;
+
+                        // 모달에 정보 표시
+                        subscriptionInfoDiv.innerHTML = `
+                            <div style="font-size: 1rem; color: #555;">
+                                <p style="margin:0 0 15px 0;"><strong>플랜:</strong> <span style="color:#3a593b; font-weight:bold;">Pro</span></p>
+                                <p style="margin:0;"><strong>다음 결제 예정일:</strong> <span style="color:#3a593b; font-weight:bold;">${formattedDate}</span></p>
+                            </div>
+                        `;
+                    } else {
+                        // 무료 이용자일 경우
+                        subscriptionInfoDiv.innerHTML = '<p style="margin:0;"><strong>플랜:</strong> Free</p>';
+                    }
+                }).catch(error => {
+                    console.error("사용자 정보 조회 실패:", error);
+                    subscriptionInfoDiv.innerHTML = '<p>정보를 불러오는 데 실패했습니다.</p>';
+                });
+
+                userStatusModal.style.display = 'flex'; // 모달 열기
+            });
+
+        } else {
+            // --- 로그아웃 상태일 때 ---
+            userStatusButton.textContent = "Login";
+            // 여기에 기존 로그인 모달을 여는 이벤트를 다시 연결해야 할 수 있습니다.
+        }
+    });
+
+    // '내 정보' 모달 닫기
+    closeStatusModal.addEventListener('click', () => {
+        userStatusModal.style.display = 'none';
+    });
+
+    // 모달 내 로그아웃 버튼
+    logoutButton.addEventListener('click', () => {
+        auth.signOut().then(() => {
+            alert('로그아웃 되었습니다.');
+            window.location.reload();
         });
     });
 });

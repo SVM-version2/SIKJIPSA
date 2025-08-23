@@ -8,7 +8,8 @@ import {
     createUserWithEmailAndPassword, 
     signInWithEmailAndPassword, 
     onAuthStateChanged,
-    signOut
+    signOut,
+    sendEmailVerification // [추가] 이메일 인증 함수 import
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import { 
     getFirestore, 
@@ -18,7 +19,6 @@ import {
     serverTimestamp 
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
-
 
 
 // Your web app's Firebase configuration
@@ -35,16 +35,27 @@ const firebaseConfig = {
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 
-// ▼▼▼ [수정] const 앞에 export를 추가하고, storage를 생성합니다. ▼▼▼
 export const auth = getAuth(app);
 export const db = getFirestore(app);
 export const storage = getStorage(app, "gs://sik-jip-sa.firebasestorage.app");
-// 아래 함수들도 export
 export { ref, uploadBytes, getDownloadURL };
-// 스크롤에 반응하는 헤더 스타일 변경
+
+// -------------------------------------------------------------------
+// DOM 요소 선택 및 이벤트 리스너 (기존과 동일)
+// -------------------------------------------------------------------
+const header = document.getElementById('main-header');
+const modalWrapper = document.getElementById('modal-wrapper');
+const loginNavButton = document.querySelector('header nav .cta-button');
+const closeButton = document.querySelector('#modal-wrapper .close-button');
+const loginForm = document.getElementById('login-form');
+const signupForm = document.getElementById('signup-form');
+const loginFormElement = loginForm.querySelector('form');
+const signupFormElement = signupForm.querySelector('form');
+const showSignupLink = document.getElementById('show-signup');
+const showLoginLink = document.getElementById('show-login');
+const modalRight = document.querySelector('.modal-right');
 
 window.addEventListener('scroll', () => {
-    // window.scrollY 값이 50px보다 크면 'scrolled' 클래스 추가
     if (window.scrollY > 50) {
         header.classList.add('scrolled');
     } else {
@@ -52,37 +63,15 @@ window.addEventListener('scroll', () => {
     }
 });
 
-
-// -------------------------------------------------------------------
-// DOM 요소 선택
-// -------------------------------------------------------------------
-const header = document.getElementById('main-header');
-const modalWrapper = document.getElementById('modal-wrapper');
-const loginNavButton = document.querySelector('header nav .cta-button');
-const closeButton = document.querySelector('#modal-wrapper .close-button');
-
-const loginForm = document.getElementById('login-form');
-const signupForm = document.getElementById('signup-form');
-const loginFormElement = loginForm.querySelector('form');
-const signupFormElement = signupForm.querySelector('form');
-
-const showSignupLink = document.getElementById('show-signup');
-const showLoginLink = document.getElementById('show-login');
-const modalRight = document.querySelector('.modal-right');
-
-
-// 모달 열기 함수
 const openLoginModal = (event) => {
     event.preventDefault();
     modalWrapper.classList.add('open');
 };
 
-// 모달 닫기 함수
 const closeModal = () => {
     modalWrapper.classList.remove('open');
 };
 
-// 폼 전환 함수 (로그인/회원가입)
 const switchForms = (hideForm, showForm) => {
     modalRight.style.opacity = '0';
     setTimeout(() => {
@@ -92,7 +81,6 @@ const switchForms = (hideForm, showForm) => {
     }, 300);
 };
 
-// 모달 관련 이벤트 리스너
 closeButton.addEventListener('click', closeModal);
 window.addEventListener('click', (event) => {
     if (event.target === modalWrapper) closeModal();
@@ -109,17 +97,15 @@ showLoginLink.addEventListener('click', (event) => {
     switchForms(signupForm, loginForm);
 });
 
-// .modal-right에 transition 효과 추가 (스타일 주입)
 const style = document.createElement('style');
 style.innerHTML = `.modal-right { transition: opacity 0.3s ease-in-out; }`;
 document.head.appendChild(style);
-
 
 // -------------------------------------------------------------------
 // Firebase Form 제출 로직 (로그인/회원가입)
 // -------------------------------------------------------------------
 
-// 1. 회원가입 폼 제출
+// 1. 회원가입 폼 제출 [수정]
 signupFormElement.addEventListener('submit', async (event) => {
     event.preventDefault();
     const name = document.getElementById('signup-name').value;
@@ -134,13 +120,24 @@ signupFormElement.addEventListener('submit', async (event) => {
     try {
         const userCredential = await createUserWithEmailAndPassword(auth, email, password);
         const user = userCredential.user;
+
+        // [추가] 인증 이메일 발송
+        await sendEmailVerification(auth.currentUser);
+
+        // Firestore에 사용자 정보 저장
         await setDoc(doc(db, "users", user.uid), {
             name: name,
             email: email,
             createdAt: serverTimestamp()
         });
-        alert('🎉 회원가입이 완료되었습니다! 로그인 페이지로 이동합니다.');
-        switchForms(signupForm, loginForm);
+
+        // [추가] 인증 메일 발송 후 바로 로그아웃 처리
+        await signOut(auth);
+        
+        // [수정] 사용자에게 안내 후 모달 닫기
+        alert('가입 신청이 완료되었습니다.\n입력하신 이메일로 인증 링크를 보냈으니, 확인 후 로그인해주세요.\n(받은편지함 또는 스팸함을 확인하세요)');
+        closeModal();
+
     } catch (error) {
         console.error("❌ 회원가입 에러:", error);
         if (error.code === 'auth/email-already-in-use') alert('이미 사용 중인 이메일입니다.');
@@ -149,7 +146,7 @@ signupFormElement.addEventListener('submit', async (event) => {
     }
 });
 
-// 2. 로그인 폼 제출 (⭐ 새로 추가된 부분)
+// 2. 로그인 폼 제출 [수정]
 loginFormElement.addEventListener('submit', async (event) => {
     event.preventDefault();
     const email = document.getElementById('login-email').value;
@@ -161,23 +158,32 @@ loginFormElement.addEventListener('submit', async (event) => {
     }
 
     try {
-        await signInWithEmailAndPassword(auth, email, password);
-        // 로그인이 성공하면 onAuthStateChanged가 감지하여 UI를 변경하고 모달을 닫습니다.
-        closeModal();
+        const userCredential = await signInWithEmailAndPassword(auth, email, password);
+        const user = userCredential.user;
+
+        // [추가] 이메일 인증 여부 확인
+        if (user.emailVerified) {
+            // 인증 완료 사용자: 로그인 성공 처리
+            closeModal();
+        } else {
+            // 인증 미완료 사용자: 로그인 차단 및 안내
+            await signOut(auth); // 다시 로그아웃 처리
+            alert('이메일 인증이 완료되지 않았습니다.\n발송된 인증 메일을 확인해주세요.');
+        }
     } catch (error) {
         console.error("❌ 로그인 에러:", error);
+        // 로그인 실패 시 일관된 메시지 제공
         alert('이메일 또는 비밀번호가 올바르지 않습니다.');
     }
 });
 
 
 // -------------------------------------------------------------------
-// 🚀 Firebase 인증 상태 변경 리스너 (⭐ 핵심 로직)
+// Firebase 인증 상태 변경 리스너 (기존과 동일)
 // -------------------------------------------------------------------
 
 let isLogoutListenerAttached = false;
 
-// 로그아웃 핸들러
 const handleLogout = async () => {
     try {
         await signOut(auth);
@@ -189,36 +195,29 @@ const handleLogout = async () => {
 };
 
 onAuthStateChanged(auth, async (user) => {
-    // 이전에 추가된 로그아웃 리스너가 있다면 제거
     if (isLogoutListenerAttached) {
         loginNavButton.removeEventListener('click', handleLogout);
         isLogoutListenerAttached = false;
     }
     
-    // 이전에 추가된 모달 열기 리스너가 있다면 제거
     loginNavButton.removeEventListener('click', openLoginModal);
 
-    if (user) {
-        // --- 👤 사용자가 로그인한 경우 ---
+    if (user && user.emailVerified) { // [수정] user.emailVerified 조건 추가
+        // --- 👤 사용자가 로그인한 경우 (그리고 이메일 인증이 완료된 경우) ---
         const userDocRef = doc(db, "users", user.uid);
         const userDoc = await getDoc(userDocRef);
 
         if (userDoc.exists()) {
             const userName = userDoc.data().name;
             loginNavButton.textContent = `${userName} 집사님`;
-            // 이제 이 버튼은 로그아웃 기능을 합니다.
-            loginNavButton.addEventListener('click', handleLogout);
-            isLogoutListenerAttached = true;
+            // loginNavButton.addEventListener('click', handleLogout);
+            // isLogoutListenerAttached = true;
         } else {
-            // Firestore에 데이터가 없는 경우 (오류 상황)
             loginNavButton.textContent = '정보 없음';
         }
     } else {
-        // --- 🚪 사용자가 로그아웃한 경우 ---
+        // --- 🚪 사용자가 로그아웃했거나 이메일 인증이 안 된 경우 ---
         loginNavButton.textContent = 'Login';
-        // 이제 이 버튼은 로그인 모달을 엽니다.
         loginNavButton.addEventListener('click', openLoginModal);
     }
 });
-
-
