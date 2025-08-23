@@ -28,7 +28,7 @@ module.exports = async (req, res) => {
 
   try {
     const { imp_uid, merchant_uid, user_uid } = req.body;
-    const expectedAmount = 100; // 실제 서비스 시 2900으로 변경해야 할 금액
+    const expectedAmount = 2900; // 실제 서비스 시 2900으로 변경해야 할 금액
 
     // 1. 포트원 API 엑세스 토큰 발급받기
     const tokenResponse = await axios({
