@@ -739,20 +739,39 @@ document.addEventListener('DOMContentLoaded', function () {
     function updateUI(isPro) {
         const proButton = document.getElementById('pro-plan-button');
         
-        if (isPro) {
-            // Pro 구독자인 경우
-            proButton.textContent = "현재 구독 중인 플랜";
-            proButton.classList.add('disabled'); // 비활성화 스타일 적용
-            proButton.style.pointerEvents = 'none'; // 클릭 불가 처리
-            proButton.href = '#'; // 링크 제거
-        } else {
-            // Pro 구독자가 아닌 경우 (기본 상태)
-            proButton.textContent = "Pro로 업그레이드";
-            proButton.classList.remove('disabled');
-            proButton.style.pointerEvents = 'auto';
-            // 결제 이벤트 리스너는 여기에 두거나, 초기화 시 한 번만 설정
-        }
+    if (isPro) {
+        // --- Pro 구독자인 경우 ---
+        
+        // Free 버튼: '현재 플랜 유지하기'에서 'Free 플랜'으로 텍스트 변경하고, 비활성화 클래스 제거
+        freeButton.textContent = "Free 플랜"; // 또는 '다운그레이드' 등
+        freeButton.classList.remove('disabled');
+        freeButton.style.pointerEvents = 'auto'; 
+        freeButton.removeAttribute('aria-disabled');
+        freeButton.setAttribute('href', '#'); // 다운그레이드 페이지로 연결 가능
+
+        // Pro 버튼: '현재 구독 중'으로 텍스트 변경하고 비활성화
+        proButton.textContent = "현재 구독 중인 플랜";
+        proButton.classList.add('disabled');
+        proButton.style.pointerEvents = 'none';
+        proButton.setAttribute('aria-disabled', 'true');
+        proButton.setAttribute('href', '#');
+
+    } else {
+        // --- Free 이용자 또는 비로그인 상태인 경우 ---
+
+        // Free 버튼: '현재 구독 중'으로 텍스트 변경하고 비활성화
+        freeButton.textContent = "현재 구독 중인 플랜";
+        freeButton.classList.add('disabled');
+        freeButton.style.pointerEvents = 'none';
+        freeButton.setAttribute('aria-disabled', 'true');
+        
+        // Pro 버튼: '업그레이드' 텍스트를 보여주고 활성화
+        proButton.textContent = "Pro로 업그레이드";
+        proButton.classList.remove('disabled');
+        proButton.style.pointerEvents = 'auto';
+        proButton.removeAttribute('aria-disabled');
     }
+}
     
     // --- 결제 로직 ---
 proPlanButton.addEventListener('click', function (e) {
