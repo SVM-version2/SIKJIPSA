@@ -1,7 +1,7 @@
 // /api/payments/verify.js
 
-import axios from 'axios';
-import admin from 'firebase-admin';
+const axios = require('axios');
+const admin = require('firebase-admin');
 
 // Firebase Admin SDK 초기화
 // Vercel 환경변수에서 서비스 계정 정보 가져오기
@@ -19,8 +19,8 @@ if (!admin.apps.length) {
 
 const db = admin.firestore();
 
-// Vercel의 서버리스 함수 핸들러
-export default async function handler(req, res) {
+  // Vercel의 서버리스 함수 핸들러
+module.exports = async (req, res) => {
   // POST 요청이 아니면 에러 처리
   if (req.method !== 'POST') {
     return res.status(405).json({ message: 'Method Not Allowed' });
