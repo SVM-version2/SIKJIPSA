@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -724,27 +723,30 @@ document.addEventListener('DOMContentLoaded', function () {
     const merchantUid = "pro_" + Date.now();
 
     window.IMP.request_pay({
-      pg: "kakaopay",    // ✅ 테스트 CID 명시
-      pay_method: "card",
-      merchant_uid: merchantUid,
-      name: "오후의 식물 Pro 구독(테스트)",
-      amount: 2900,
-      buyer_email: "test@plantnoon.com",
-      buyer_name: "테스트 유저",
-      buyer_tel: "010-0000-0000",
-      m_redirect_url: "https://plantnoon.com/payment-complete.html?oid=" + merchantUid
+        pg: "kakaopay.CA61377641",      // <-- 변경: 'kakaopay' 뒤에 '.'과 함께 전달받은 CID를 추가합니다.
+        pay_method: "card",
+        merchant_uid: "pro_" + Date.now(), // 주문번호는 항상 고유하게 생성해야 합니다.
+        name: "오후의 식물 Pro 구독",      // <-- 변경: '(테스트)' 문구를 제거합니다.
+        amount: 100,                    // <-- 변경: 실제 테스트를 위해 우선 100원 같은 최소 금액으로 테스트하는 것을 권장합니다.
+        
+        // 구매자 정보는 실제 값으로 채워야 합니다.
+        // 실제 서비스에서는 로그인한 사용자 정보를 동적으로 가져와야 합니다.
+        buyer_email: "gohigher_dev@example.com", // <-- 변경: 테스트를 진행할 실제 이메일
+        buyer_name: "박해진",                   // <-- 변경: 테스트용 실명
+        buyer_tel: "010-1234-5678",          // <-- 변경: 테스트용 실제 연락처
+        m_redirect_url: "https://plantnoon.com/payment-complete.html" // 결제 완료 후 이동할 URL
     }, function (rsp) {
-      if (rsp.success) {
-        fetch("/api/payments/verify", {
-          method: "POST",
-          headers: {"Content-Type":"application/json"},
-          body: JSON.stringify({ imp_uid: rsp.imp_uid, merchant_uid: rsp.merchant_uid })
-        })
-        .then(()=> alert("테스트 결제 성공! (서버 검증 호출)"))
-        .catch(()=> alert("서버 검증 호출 실패"));
-      } else {
-        alert("결제 실패: " + rsp.error_msg);
-      }
+        if (rsp.success) {
+            console.log("결제 성공 응답:", rsp);
+            // TODO: 서버로 imp_uid, merchant_uid를 보내 결제 위변조 검증을 요청합니다.
+            // fetch("/api/payments/verify", { ... });
+            alert("실 결제 테스트에 성공했습니다!");
+            // 성공 시 결제 완료 페이지로 이동시키거나 UI를 업데이트합니다.
+            // window.location.href = "/payment-complete.html?imp_uid=" + rsp.imp_uid;
+        } else {
+            console.log("결제 실패 응답:", rsp);
+            alert("결제에 실패했습니다. 에러 메시지: " + rsp.error_msg);
+        }
     });
   });
 });
