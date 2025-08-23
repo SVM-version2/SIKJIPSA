@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -24,6 +23,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="navigation.css">
 
+
         <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
@@ -42,7 +42,6 @@ const firebaseConfig = {
   firebase.initializeApp(firebaseConfig);
  }
 </script>
-
 
 <style>
 /* 변수 설정 */
@@ -493,14 +492,14 @@ main {
 /* 화면이 작아질 때 캐릭터 위치 및 크기 조정 */
 @media (max-width: 820px) {
  .plant-character {
- left: auto; /* 기존 left 속성 무효화 */
- right: 20px; /* 오른쪽에서 20px 위치 */
- bottom: 80px; /* 아래에서 20px 위치 */
- transform: scale(0.8); /* 크기를 80%로 축소 */
+  left: auto; /* 기존 left 속성 무효화 */
+  right: 20px; /* 오른쪽에서 20px 위치 */
+  bottom: 80px; /* 아래에서 20px 위치 */
+  transform: scale(0.8); /* 크기를 80%로 축소 */
         transform-origin: bottom right; /* 오른쪽 아래를 기준으로 작아지도록 설정 */
- }
+  }
 
-   main {
+    main {
     padding-bottom: 90px !important; /* 네비게이션 높이+여유 */
   }
   .chat-container {
@@ -641,7 +640,7 @@ main {
     
     
     <header id="main-header">
-                        <a href="index.html" class="logo">
+                            <a href="index.html" class="logo">
             <img src="logo.png" alt="오후의 식물 로고">
             <span>오후의 식물</span>
         </a>
@@ -682,8 +681,7 @@ main {
       </div>
     </main>
 
-        <!-- 식물모달 -->
-<div id="plant-modal-wrapper" class="modal-wrapper">
+        <div id="plant-modal-wrapper" class="modal-wrapper">
     <div id="plant-modal-content" class="plant-modal">
         <button class="close-button">&times;</button>
         <img id="plant-modal-img" src="" alt="추천 식물 이미지">
@@ -700,12 +698,28 @@ main {
     </div>
 </div>
 
+    <div class="modal-wrapper" id="limit-modal">
+        <div class="plant-modal" style="max-width: 450px; text-align: center;">
+            <button class="close-button" id="close-limit-modal">&times;</button>
+            <div class="plant-info">
+                <h2 style="font-size: 1.6rem;">📸 월간 사용량 초과</h2>
+                <p style="font-size: 1.1rem; color: var(--text-dark); line-height: 1.7;">
+                    무료 플랜의 사진 분석 기능(이름 찾기, 진단)을 모두 사용했어요.<br>
+                    <strong>'오후의 식물 Pro'</strong>를 구독하고 모든 기능을 무제한으로 이용해보세요!
+                </p>
+                 <div class="modal-actions" style="justify-content: center; margin-top: 1rem; gap: 1rem;">
+                    <button class="modal-btn secondary" id="cancel-limit-modal">다음에 할게요</button>
+                    <button class="modal-btn primary" id="confirm-limit-modal">Pro 플랜 보기</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div id="modal-wrapper" class="modal-wrapper">
         <div class="modal">
             <div class="modal-left"></div>
             <div class="modal-right">
                 <button class="close-button">&times;</button>
-                <!-- Login Form -->
                 <div id="login-form" class="form-container">
                     <div class="form-header">
                         <a href="index.html" class="logo">오후의 식물</a>
@@ -727,7 +741,6 @@ main {
                     </p>
                 </div>
 
-                <!-- Signup Form -->
                 <div id="signup-form" class="form-container" style="display: none;">
                     <div class="form-header">
                         <a href="index.html" class="logo">오후의 식물</a>
@@ -823,7 +836,6 @@ main {
   </a>
 </nav>
 
-
 <div id="user-status-modal" style="display:none; position:fixed; z-index:9999; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.5); align-items:center; justify-content:center;">
     <div style="background:#fff; border-radius:16px; max-width:380px; width:90%; margin:auto; box-shadow:0 10px 40px rgba(0,0,0,0.12); position:relative; text-align:center; padding: 30px;">
         
@@ -845,9 +857,11 @@ main {
     <script type="module" src="navigation.js"></script>
 
 <script type="module">
-    // navigation.js에서 auth 객체를 가져옵니다.
-    import { auth } from './navigation.js';
+    // navigation.js에서 auth, db 객체 가져오기
+    import { auth, db } from './navigation.js';
     import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+    import { doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
 
 document.addEventListener('DOMContentLoaded', () => {
     const plantModalWrapper = document.getElementById('plant-modal-wrapper');
@@ -864,13 +878,38 @@ document.addEventListener('DOMContentLoaded', () => {
     let currentStep = 0;
     const userAnswers = {};
     
-    // ▼▼▼ 1. 로그인 상태를 저장할 변수 및 리스너 추가 ▼▼▼
+    // 👈 [NEW] Pro 플랜 및 사용량 관련 변수 추가
     let currentUser = null;
-    onAuthStateChanged(auth, (user) => {
-    currentUser = user; // 로그인 상태가 변경될 때마다 currentUser 업데이트
+    let isProUser = false;
+    let photoUsageCount = 0;
+    let usageMonth = '';
+
+    onAuthStateChanged(auth, async (user) => {
+        currentUser = user; 
+        if (user) {
+            // Firestore에서 사용자 프로필(proPlan 및 사용량 포함) 가져오기
+            const userDocRef = doc(db, "users", user.uid);
+            const userDocSnap = await getDoc(userDocRef);
+
+            if (userDocSnap.exists()) {
+                const userData = userDocSnap.data();
+                isProUser = userData.proPlan === true;
+                photoUsageCount = userData.photoUsageCount || 0;
+                usageMonth = userData.usageMonth || '';
+            } else {
+                console.log("사용자 문서를 찾을 수 없습니다. 무료 플랜으로 간주합니다.");
+                isProUser = false;
+                photoUsageCount = 0;
+                usageMonth = '';
+            }
+        } else {
+            // 로그아웃 시 상태 초기화
+            isProUser = false;
+            photoUsageCount = 0;
+            usageMonth = '';
+        }
     });
 
-    // ▼▼▼ '사진으로 식물 이름 찾기' 옵션 추가 ▼▼▼
     const questions = [
         { 
             key: 'intro', 
@@ -932,8 +971,7 @@ document.addEventListener('DOMContentLoaded', () => {
             options: null 
         }
     ];
-    // ▲▲▲▲▲ 여기까지 수정 ▲▲▲▲▲
-
+    
     const plants = [
         { name: '산세베리아', light: 'low', watering_style: 'low', size: 'medium', pet_friendly: false, purpose: ['air_purification', 'beginner'], difficulty: 1, image: 'findPlant/산세베리아.webp', description: '공기 정화 능력이 탁월하며 건조에 강해 초보자에게 좋아요.', tip: '물을 너무 자주 주면 뿌리가 썩을 수 있어요. 흙이 완전히 마른 것을 확인한 후에 물을 주세요.' },
         { name: '스킨답서스', light: 'low', watering_style: 'medium', size: 'small', pet_friendly: false, purpose: ['beginner', 'air_purification'], difficulty: 1, image: 'findPlant/스킨답서스.webp', description: '생명력이 강해 어디서든 잘 자라는 덩굴 식물이에요.', tip: '잎 끝이 노랗게 변하면 과습의 신호일 수 있어요.' },
@@ -951,20 +989,33 @@ document.addEventListener('DOMContentLoaded', () => {
         { name: '고무나무', light: 'medium', watering_style: 'low', size: 'large', pet_friendly: false, purpose: ['air_purification', 'beginner'], difficulty: 2, image: 'findPlant/고무나무.webp', description: '광택 있는 짙은 잎이 고급스러우며, 환경 적응력이 뛰어나요.', tip: '잎에 먼지가 쌓이면 젖은 천으로 닦아주면 광합성에 도움이 됩니다.' }
     ];
 
-   // ▼▼▼ 2. AI 답변 줄 바꿈 처리를 위해 수정된 함수 ▼▼▼
     function addMessage(text, sender, contentHTML = null) {
         const bubble = document.createElement('div');
         bubble.className = `message-bubble ${sender}-message`;
         if (contentHTML) {
             bubble.innerHTML = contentHTML;
         } else {
-            // 마크다운(**)과 줄바꿈(\n)을 모두 HTML 태그로 변환
             bubble.innerHTML = text.replace(/\*\*(.*?)\*\*/g, '<b>$1</b>').replace(/\n/g, '<br>');
         }
         messageArea.appendChild(bubble);
         messageArea.scrollTop = messageArea.scrollHeight;
         return bubble;
     }
+
+    // ... (이하 모든 기존 함수들은 여기에 그대로 존재합니다) ...
+
+    const footer = document.querySelector('.main-footer');
+    const observerOptions = { root: null, rootMargin: '0px', threshold: 0.1 };
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                plantCharacter.classList.add('hidden');
+            } else {
+                plantCharacter.classList.remove('hidden');
+            }
+        });
+    }, observerOptions);
+    observer.observe(footer);
 
     function showTypingIndicator() {
         plantCharacter.className = 'plant-character thinking';
@@ -976,45 +1027,15 @@ document.addEventListener('DOMContentLoaded', () => {
         return indicator;
     }
 
-    /* ⬇️ 아래 내용을 <script> 태그의 DOMContentLoaded 이벤트 리스너 안에 추가하세요 ⬇️ */
-
-// 푸터 감지를 위한 코드 시작
-const footer = document.querySelector('.main-footer');
-
-const observerOptions = {
-    root: null, // 뷰포트(화면 전체)를 기준으로 감시
-    rootMargin: '0px',
-    threshold: 0.1 // 푸터가 10% 정도 보이면 감지
-};
-
-const observer = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-        // entry.isIntersecting이 true이면 푸터가 화면에 보인다는 의미
-        if (entry.isIntersecting) {
-            plantCharacter.classList.add('hidden'); // 푸터가 보이면 캐릭터에 hidden 클래스 추가
-        } else {
-            plantCharacter.classList.remove('hidden'); // 푸터가 안 보이면 hidden 클래스 제거
-        }
-    });
-}, observerOptions);
-
-// 푸터 감시 시작
-observer.observe(footer);
-// 푸터 감지를 위한 코드 끝
-
-
     function askQuestion() {
         const question = questions[currentStep];
         const indicator = showTypingIndicator();
-
         setTimeout(() => {
             messageArea.removeChild(indicator);
             addMessage(question.text, 'plant');
-            
             if (question.key !== 'result') {
                 plantCharacter.className = 'plant-character idle';
             }
-
             if (question.key === 'result') {
                 showResults();
             } else {
@@ -1034,14 +1055,23 @@ observer.observe(footer);
             optionButtonsContainer.appendChild(button);
         });
     }
+    
+    // 👈 [CHANGED] handleOptionClick을 async 함수로 변경하고 사용량 체크 로직 추가
+    async function handleOptionClick(option) {
+        if (currentStep === 0 && !currentUser) {
+            document.querySelector('.cta-button').click();
+            return;
+        }
 
-        // ▼▼▼ 2. 함수 시작 부분에 로그인 확인 로직 추가 ▼▼▼
-        function handleOptionClick(option) {
-            // 대화의 첫 단계(currentStep === 0)이고, 로그인이 되어있지 않다면
-            if (currentStep === 0 && !currentUser) {
-                document.querySelector('.cta-button').click(); // 헤더의 로그인 버튼 클릭
-                return; // 함수 실행 중단
+        const isPhotoFeature = option.value === 'start_identification' || option.value === 'start_diagnosis';
+
+        if (isPhotoFeature) {
+            const canProceed = await checkAndIncrementUsage();
+            if (!canProceed) {
+                openLimitModal();
+                return;
             }
+        }
 
         addMessage(option.text, 'user');
         userAnswers[questions[currentStep].key] = option.value;
@@ -1050,12 +1080,11 @@ observer.observe(footer);
         if (option.value === 'start_identification') {
             startImageIdentification();
             return;
-        } else if (option.value === 'start_diagnosis') { // <-- 분기 추가
-            startImageDiagnosis(); // <-- 새로운 진단 시작 함수 호출
+        } else if (option.value === 'start_diagnosis') {
+            startImageDiagnosis();
             return;
         }
         
-        // 기존 추천 로직
         const currentKey = questions[currentStep].key;
         const reactions = {
             light: "빛은 식물에게 정말 중요하지! 알았어. ☀️",
@@ -1075,6 +1104,64 @@ observer.observe(footer);
         }
     }
 
+    // 👈 [NEW] 사용량 체크 및 DB 업데이트 함수
+    async function checkAndIncrementUsage() {
+        if (isProUser) return true; // Pro 유저는 항상 통과
+
+        const currentMonthStr = new Date().toISOString().slice(0, 7); // "YYYY-MM" 형식
+
+        if (usageMonth === currentMonthStr) {
+            // 같은 달이면 사용량 체크
+            if (photoUsageCount >= 3) {
+                console.log("이번 달 사진 분석 사용량을 모두 소진했습니다.");
+                return false; // 제한 도달
+            }
+            // 아직 사용 가능하면 카운트 증가
+            const newCount = photoUsageCount + 1;
+            await updateUserUsageInFirestore(newCount, currentMonthStr);
+            photoUsageCount = newCount; // 로컬 상태 업데이트
+            return true;
+        } else {
+            // 새로운 달이면 사용량 초기화
+            console.log("새로운 달이 되어 사용량을 초기화합니다.");
+            const newCount = 1;
+            await updateUserUsageInFirestore(newCount, currentMonthStr);
+            photoUsageCount = newCount; // 로컬 상태 업데이트
+            usageMonth = currentMonthStr; // 로컬 상태 업데이트
+            return true;
+        }
+    }
+
+    // 👈 [NEW] Firestore에 사용량 업데이트하는 헬퍼 함수
+    async function updateUserUsageInFirestore(count, month) {
+        if (!currentUser) return;
+        try {
+            const userDocRef = doc(db, "users", currentUser.uid);
+            await updateDoc(userDocRef, {
+                photoUsageCount: count,
+                usageMonth: month
+            });
+            console.log(`Firestore 사용량 업데이트 완료: ${count}회, ${month}`);
+        } catch (error) {
+            console.error("Firestore 사용량 업데이트 실패:", error);
+        }
+    }
+
+    // 👈 [NEW] 사용량 제한 모달 관련 함수
+    const limitModal = document.getElementById('limit-modal');
+    function openLimitModal() {
+        limitModal.classList.add('visible');
+    }
+    function closeLimitModal() {
+        limitModal.classList.remove('visible');
+    }
+    document.getElementById('close-limit-modal').addEventListener('click', closeLimitModal);
+    document.getElementById('cancel-limit-modal').addEventListener('click', closeLimitModal);
+    document.getElementById('confirm-limit-modal').addEventListener('click', () => {
+        window.location.href = 'payment.html';
+    });
+
+
     function proceedToNextStep() {
         currentStep++;
         if (currentStep < questions.length) {
@@ -1082,91 +1169,111 @@ observer.observe(footer);
         }
     }
     
-    
-        // ▼▼▼ 사진으로 찾기 관련 함수들 추가 ▼▼▼
-    
-    // 1. 사진 업로드 안내 및 버튼 생성
     function startImageIdentification() {
         addMessage("좋아! 궁금한 식물 사진을 올려줘.", 'plant');
-        
+        createImageUploadButton(handleImageUpload);
+    }
+
+    function startImageDiagnosis() {
+        addMessage("좋아! 진단이 필요한 식물 사진을 올려줘.", 'plant');
+        createImageUploadButton(handleImageUploadForDiagnosis);
+    }
+    
+    function createImageUploadButton(handler) {
         const fileInput = document.createElement('input');
         fileInput.type = 'file';
         fileInput.accept = 'image/*';
         fileInput.style.display = 'none';
-        
-        fileInput.addEventListener('change', handleImageUpload);
+        fileInput.addEventListener('change', handler);
         
         const uploadButton = document.createElement('button');
         uploadButton.textContent = '여기를 눌러 사진 선택하기';
         uploadButton.onclick = () => fileInput.click();
         
+        optionButtonsContainer.innerHTML = '';
         optionButtonsContainer.appendChild(uploadButton);
-        document.body.appendChild(fileInput);
+        document.body.appendChild(fileInput); // DOM에 추가해야 클릭 이벤트가 동작
     }
-
-    // 2. 이미지 업로드 처리 및 API 호출
+    
     async function handleImageUpload(event) {
         const file = event.target.files[0];
         if (!file) return;
-
         optionButtonsContainer.innerHTML = '';
         addMessage("사진을 분석하고 있어. 잠시만 기다려줘! 🌱", 'plant');
-
-        setTimeout(() => {
-            addMessage("음... 잠깐만! 거의 다 됐어! 🧐", 'plant');
-            
-            const indicator = showTypingIndicator();
-
-            resizeImage(file).then(compressedBlob => {
-                const reader = new FileReader();
-                reader.readAsDataURL(compressedBlob);
-                reader.onloadend = async () => {
-                    const base64Image = reader.result.split(',')[1];
-                    try {
-                        // ▼▼▼ fetch 대신 fetchWithRetry 사용 ▼▼▼
-                        const response = await fetchWithRetry('/api/identify', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ image: base64Image, mimeType: compressedBlob.type })
-                        });
-                        // ▲▲▲ fetch 대신 fetchWithRetry 사용 ▲▲▲
-
-                        indicator.remove();
-                        if (!response.ok) {
-                            const errorData = await response.json();
-                            throw new Error(errorData.error || `서버 응답 오류: ${response.statusText}`);
-                        }
-                        const data = await response.json();
-                        addMessage(data.identification, 'plant');
-                    } catch (apiError) {
-                        console.error("API 호출 오류:", apiError);
-                        indicator.remove();
-                        addMessage(`이런, 사진을 분석하는 중에 오류가 발생했어.\n(${apiError.message})`, 'plant');
-                    } finally {
-                        showRestartButton();
-                    }
-                };
-            }).catch(resizeError => {
-                console.error("이미지 처리 오류:", resizeError);
-                indicator.remove();
-                addMessage("사진 파일을 처리하는 중 문제가 발생했어. 다시 시도해 줄래?", 'plant');
-                showRestartButton();
+        const indicator = showTypingIndicator();
+        try {
+            const compressedBlob = await resizeImage(file);
+            const base64Image = await blobToBase64(compressedBlob);
+            const response = await fetchWithRetry('/api/identify', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ image: base64Image, mimeType: compressedBlob.type })
             });
-        }, 1500);
+            indicator.remove();
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || `서버 응답 오류: ${response.statusText}`);
+            }
+            const data = await response.json();
+            addMessage(data.identification, 'plant');
+        } catch (apiError) {
+            console.error("API 호출 오류:", apiError);
+            indicator.remove();
+            addMessage(`이런, 사진을 분석하는 중에 오류가 발생했어.\n(${apiError.message})`, 'plant');
+        } finally {
+            showRestartButton();
+        }
+    }
+    
+    async function handleImageUploadForDiagnosis(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+        optionButtonsContainer.innerHTML = '';
+        addMessage("사진을 정밀 분석하고 있어. 잠시만 기다려줘! 🩺", 'plant');
+        const indicator = showTypingIndicator();
+        try {
+            const compressedBlob = await resizeImage(file);
+            const base64Image = await blobToBase64(compressedBlob);
+            const response = await fetchWithRetry('/api/diagnose', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ image: base64Image, mimeType: compressedBlob.type })
+            });
+            indicator.remove();
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || `서버 응답 오류: ${response.statusText}`);
+            }
+            const data = await response.json();
+            addMessage(data.diagnosis, 'plant');
+        } catch (apiError) {
+            console.error("API 호출 오류:", apiError);
+            indicator.remove();
+            addMessage(`이런, 진단하는 중에 오류가 발생했어.\n(${apiError.message})`, 'plant');
+        } finally {
+            showRestartButton();
+        }
+    }
+    
+    function blobToBase64(blob) {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.readAsDataURL(blob);
+            reader.onloadend = () => resolve(reader.result.split(',')[1]);
+            reader.onerror = error => reject(error);
+        });
     }
 
-    // ▼▼▼ 새로 추가할 자동 재시도 함수 ▼▼▼
     function fetchWithRetry(url, options, retries = 3, delay = 1500) {
         return new Promise((resolve, reject) => {
             const attemptFetch = (n) => {
                 fetch(url, options)
                     .then(response => {
-                        // 503 서버 과부하 오류이고 재시도 횟수가 남았을 경우
                         if (response.status === 503 && n > 0) {
                             console.log(`서버 과부하 감지. ${delay/1000}초 후 다시 시도합니다... (남은 횟수: ${n-1})`);
                             setTimeout(() => attemptFetch(n - 1), delay);
                         } else {
-                            resolve(response); // 성공 또는 다른 오류는 즉시 반환
+                            resolve(response);
                         }
                     })
                     .catch(error => {
@@ -1181,103 +1288,35 @@ observer.observe(footer);
         });
     }
 
-    // ▼▼▼▼▼ 새로 추가할 이미지 리사이징 함수 ▼▼▼▼▼
     function resizeImage(file) {
-        return new Promise(resolve => {
-            const MAX_WIDTH = 800; // 이미지의 최대 가로 크기를 800px로 제한
+        return new Promise((resolve, reject) => {
+            const MAX_WIDTH = 800;
             const reader = new FileReader();
             reader.readAsDataURL(file);
+            reader.onerror = reject;
             reader.onload = (event) => {
                 const img = new Image();
                 img.src = event.target.result;
+                img.onerror = reject;
                 img.onload = () => {
+                    if (img.width <= MAX_WIDTH) {
+                        return resolve(file); // 리사이즈 불필요
+                    }
                     const canvas = document.createElement('canvas');
                     const scale = MAX_WIDTH / img.width;
                     canvas.width = MAX_WIDTH;
                     canvas.height = img.height * scale;
                     const ctx = canvas.getContext('2d');
                     ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-                    // 캔버스의 이미지를 80% 품질의 JPEG Blob으로 변환
                     canvas.toBlob((blob) => {
-                        resolve(blob);
+                        if(blob) resolve(blob);
+                        else reject(new Error('Canvas to Blob conversion failed'));
                     }, 'image/jpeg', 0.8);
                 };
             };
         });
     }
 
-       // 1. 식물 진단 시작 및 업로드 버튼 생성
-    function startImageDiagnosis() {
-        addMessage("좋아! 진단이 필요한 식물 사진을 올려줘.", 'plant');
-        
-        const fileInput = document.createElement('input');
-        fileInput.type = 'file';
-        fileInput.accept = 'image/*';
-        fileInput.style.display = 'none';
-        
-        // 진단용 업로드 핸들러를 연결
-        fileInput.addEventListener('change', handleImageUploadForDiagnosis);
-        
-        const uploadButton = document.createElement('button');
-        uploadButton.textContent = '여기를 눌러 진단 사진 선택하기';
-        uploadButton.onclick = () => fileInput.click();
-        
-        optionButtonsContainer.appendChild(uploadButton);
-        document.body.appendChild(fileInput);
-    }
-
-    // 2. 진단용 이미지 업로드 처리 및 /api/diagnose 호출
-    async function handleImageUploadForDiagnosis(event) {
-        const file = event.target.files[0];
-        if (!file) return;
-
-        optionButtonsContainer.innerHTML = '';
-        addMessage("사진을 정밀 분석하고 있어. 잠시만 기다려줘! 🩺", 'plant');
-
-        setTimeout(() => {
-            addMessage("음... 꼼꼼히 살펴볼게! 거의 다 됐어! 🧐", 'plant');
-            
-            const indicator = showTypingIndicator();
-
-            resizeImage(file).then(compressedBlob => {
-                const reader = new FileReader();
-                reader.readAsDataURL(compressedBlob);
-                reader.onloadend = async () => {
-                    const base64Image = reader.result.split(',')[1];
-                    try {
-                        // ▼▼▼ fetch 대신 fetchWithRetry 사용 ▼▼▼
-                        const response = await fetchWithRetry('/api/diagnose', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ image: base64Image, mimeType: compressedBlob.type })
-                        });
-                        // ▲▲▲ fetch 대신 fetchWithRetry 사용 ▲▲▲
-                        
-                        indicator.remove();
-                        if (!response.ok) {
-                            const errorData = await response.json();
-                            throw new Error(errorData.error || `서버 응답 오류: ${response.statusText}`);
-                        }
-                        const data = await response.json();
-                        addMessage(data.diagnosis, 'plant');
-                    } catch (apiError) {
-                        console.error("API 호출 오류:", apiError);
-                        indicator.remove();
-                        addMessage(`이런, 진단하는 중에 오류가 발생했어.\n(${apiError.message})`, 'plant');
-                    } finally {
-                        showRestartButton();
-                    }
-                };
-            }).catch(resizeError => {
-                console.error("이미지 처리 오류:", resizeError);
-                indicator.remove();
-                addMessage("사진 파일을 처리하는 중 문제가 발생했어. 다시 시도해 줄래?", 'plant');
-                showRestartButton();
-            });
-        }, 1500);
-    }
-    
-    // 3. 다시하기 버튼 표시 (공통 사용)
     function showRestartButton() {
         setTimeout(() => {
             const restartButton = document.createElement('button');
