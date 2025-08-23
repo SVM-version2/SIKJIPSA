@@ -1099,7 +1099,21 @@
             .business-info {
         font-size: 0.75rem; /* 모바일에서 글자 크기 살짝 줄임 */
     }
-    
+    .button-wrapper {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    width: 100%;
+}
+
+.add-plant-btn, .custom-plant-btn {
+    flex: 1; /* 버튼이 공간을 균등하게 차지 */
+    margin: 0; /* 기존 마진 제거 */
+    padding: 12px 8px;
+    border-radius: 0.8rem;
+    font-size: 0.9rem;
+    max-width: 180px; /* 버튼 최대 너비 설정 */
+}
     }
     </style>
 </head>
