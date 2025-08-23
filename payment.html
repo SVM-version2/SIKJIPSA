@@ -737,6 +737,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // 구독 상태에 따라 UI를 업데이트하는 함수
     function updateUI(isPro) {
+        // 각 플랜의 버튼 요소를 가져옵니다.
+        const freeButton = document.getElementById('free-plan-button');
         const proButton = document.getElementById('pro-plan-button');
         
     if (isPro) {
