@@ -3,7 +3,7 @@
 const axios = require('axios');
 const admin = require('firebase-admin');
 
-// Firebase Admin SDK 초기화 (verify.js와 동일)
+// Firebase Admin SDK 초기화 (기존과 동일)
 const serviceAccount = {
   projectId: process.env.FIREBASE_PROJECT_ID,
   clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
@@ -21,12 +21,18 @@ const db = admin.firestore();
 // Vercel Cron Job이 호출할 함수
 module.exports = async (req, res) => {
   try {
-    // 1. 재결제가 필요한 사용자 조회
-    // 구독 상태가 'active'이고, 만료일이 '지금'보다 이전인 사용자들을 찾습니다.
-    const now = admin.firestore.Timestamp.now();
+    // ✨ 1. 재결제가 필요한 사용자 조회 (로직 수정)
+    // "만료일이 오늘"이고, "취소 예약을 하지 않은" 활성 사용자만 찾습니다.
+    const todayStart = new Date();
+    todayStart.setHours(0, 0, 0, 0);
+    const todayEnd = new Date();
+    todayEnd.setHours(23, 59, 59, 999);
+
     const usersToCharge = await db.collection('users')
       .where('subscriptionStatus', '==', 'active')
-      .where('subscriptionExpiresAt', '<=', now)
+      .where('cancelAtPeriodEnd', '!=', true) // ✨ 핵심: 취소 예약 사용자는 제외
+      .where('subscriptionExpiresAt', '>=', admin.firestore.Timestamp.fromDate(todayStart))
+      .where('subscriptionExpiresAt', '<=', admin.firestore.Timestamp.fromDate(todayEnd))
       .get();
 
     if (usersToCharge.empty) {
@@ -34,7 +40,7 @@ module.exports = async (req, res) => {
       return res.status(200).json({ status: "success", message: "재결제 대상 사용자가 없습니다." });
     }
 
-    // 2. 포트원 API 엑세스 토큰 발급 (재사용 가능)
+    // 2. 포트원 API 엑세스 토큰 발급 (기존과 동일)
     const tokenResponse = await axios({
       url: "https://api.iamport.kr/users/getToken",
       method: "post",
@@ -46,44 +52,43 @@ module.exports = async (req, res) => {
     });
     const { access_token } = tokenResponse.data.response;
 
-    // 3. 각 사용자에 대해 재결제 요청
+    // 3. 각 사용자에 대해 재결제 요청 (기존과 동일)
     const chargePromises = usersToCharge.docs.map(async (doc) => {
       const user = doc.data();
       const user_uid = doc.id;
-      const expectedAmount = 2900; // ⚠️ 실제 서비스 금액
+      const expectedAmount = 2900;
 
-      // 고유한 주문번호를 새로 생성합니다.
       const newMerchantUid = `pro_monthly_${user_uid}_${new Date().getTime()}`;
 
       try {
-        // 4. 아임포트 재결제 API 호출
+        // 4. 아임포트 재결제 API 호출 (기존과 동일)
         await axios({
           url: `https://api.iamport.kr/subscribe/payments/again`,
           method: "post",
           headers: { "Authorization": access_token },
           data: {
-            customer_uid: user_uid, // 저장해둔 고객의 고유번호
-            merchant_uid: newMerchantUid, // 새로 생성한 주문번호
+            customer_uid: user.customer_uid, // ✨ DB에 저장된 customer_uid 사용
+            merchant_uid: newMerchantUid,
             amount: expectedAmount,
             name: "오후의 식물 Pro 월간 구독",
           },
         });
 
-        // 5. 결제 성공 시, DB에 다음 만료일 업데이트
-        const nextMonth = new Date();
+        // 5. 결제 성공 시, DB에 다음 만료일 업데이트 (기존과 동일)
+        const currentExpiry = user.subscriptionExpiresAt.toDate();
+        const nextMonth = new Date(currentExpiry);
         nextMonth.setMonth(nextMonth.getMonth() + 1);
         
         await db.collection('users').doc(user_uid).update({
           subscriptionExpiresAt: admin.firestore.Timestamp.fromDate(nextMonth),
-          // 필요하다면 마지막 결제 정보도 업데이트
         });
         console.log(`${user_uid} 사용자 재결제 성공`);
 
       } catch (error) {
-        // 6. 결제 실패 시, 구독 상태 변경 및 알림 등 처리
+        // 6. 결제 실패 시 처리 (기존과 동일)
         console.error(`${user_uid} 사용자 재결제 실패:`, error.response?.data);
         await db.collection('users').doc(user_uid).update({
-          subscriptionStatus: 'payment_failed', // 실패 상태로 변경
+          subscriptionStatus: 'payment_failed',
         });
       }
     });
