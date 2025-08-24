@@ -1349,14 +1349,16 @@ async function handleImageUpload(event) {
     const file = event.target.files[0];
     if (!file) return;
 
-    // 공유를 위한 Data URL을 미리 생성합니다.
-    const dataUrl = await fileToDataURL(file); 
-    
     optionButtonsContainer.innerHTML = '';
     addMessage("사진을 분석하고 있어. 잠시만 기다려줘! 🌱", 'plant');
     const indicator = showTypingIndicator();
     try {
+        // 1. 이미지를 먼저 압축합니다.
         const compressedBlob = await resizeImage(file);
+        
+        // 2. ✅ 압축된 이미지로 Data URL을 생성합니다. (용량 감소)
+        const dataUrl = await fileToDataURL(compressedBlob); 
+
         const base64Image = await blobToBase64(compressedBlob);
         const response = await fetchWithRetry('/api/identify', {
             method: 'POST',
@@ -1371,7 +1373,7 @@ async function handleImageUpload(event) {
         const data = await response.json();
         const resultMessage = addMessage(data.identification, 'plant');
         
-        // Blob URL 대신 Data URL을 공유 데이터로 전달합니다.
+        // 3. ✅ 작아진 Data URL을 공유 데이터로 전달합니다.
         showRestartAndShareButtons({ text: resultMessage.innerText, image: dataUrl });
     } catch (apiError) {
         console.error("API 호출 오류:", apiError);
@@ -1386,14 +1388,16 @@ async function handleImageUploadForDiagnosis(event) {
     const file = event.target.files[0];
     if (!file) return;
 
-    // 공유를 위한 Data URL을 미리 생성합니다.
-    const dataUrl = await fileToDataURL(file);
-    
     optionButtonsContainer.innerHTML = '';
     addMessage("사진을 정밀 분석하고 있어. 잠시만 기다려줘! 🩺", 'plant');
     const indicator = showTypingIndicator();
     try {
+        // 1. 이미지를 먼저 압축합니다.
         const compressedBlob = await resizeImage(file);
+
+        // 2. ✅ 압축된 이미지로 Data URL을 생성합니다.
+        const dataUrl = await fileToDataURL(compressedBlob);
+
         const base64Image = await blobToBase64(compressedBlob);
         const response = await fetchWithRetry('/api/diagnose', {
             method: 'POST',
@@ -1408,7 +1412,7 @@ async function handleImageUploadForDiagnosis(event) {
         const data = await response.json();
         const resultMessage = addMessage(data.diagnosis, 'plant');
         
-        // Blob URL 대신 Data URL을 공유 데이터로 전달합니다.
+        // 3. ✅ 작아진 Data URL을 공유 데이터로 전달합니다.
         showRestartAndShareButtons({ text: resultMessage.innerText, image: dataUrl });
     } catch (apiError) {
         console.error("API 호출 오류:", apiError);
