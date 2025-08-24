@@ -23,26 +23,6 @@
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="navigation.css">
 
-
-        <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
-<script>
-const firebaseConfig = {
-  apiKey: "AIzaSyC7mA9xLOFb98i5hKNWjKW_fORWNHvPx2s",
-  authDomain: "sik-jip-sa.firebaseapp.com",
-  projectId: "sik-jip-sa",
-  storageBucket: "sik-jip-sa.firebasestorage.app",
-  messagingSenderId: "401707534850",
-  appId: "1:401707534850:web:e15b2f67e2d4484a07351b",
-  measurementId: "G-HX50P6C0NT"
-};
- // Firebase 앱 초기화
- if (!firebase.apps.length) {
-  firebase.initializeApp(firebaseConfig);
- }
-</script>
-
 <style>
 /* 변수 설정 */
 :root {
@@ -836,23 +816,7 @@ main {
   </a>
 </nav>
 
-<div id="user-status-modal" style="display:none; position:fixed; z-index:9999; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.5); align-items:center; justify-content:center;">
-    <div style="background:#fff; border-radius:16px; max-width:380px; width:90%; margin:auto; box-shadow:0 10px 40px rgba(0,0,0,0.12); position:relative; text-align:center; padding: 30px;">
-        
-        <button id="close-status-modal" style="position:absolute; top:12px; right:15px; font-size:2rem; color:#aaa; background:none; border:none; cursor:pointer; line-height:1;">&times;</button>
-        
-        <div style="margin-bottom:20px;">
-            <h3 style="font-family: 'Playfair Display', serif; font-size:1.8rem; margin:10px 0 8px 0; color:#3a593b;">내 구독 정보</h3>
-            <p style="font-size:1rem; color:#777;">현재 구독 중인 플랜의 정보입니다.</p>
-        </div>
 
-        <div id="subscription-info" style="background-color:#f8f7f4; border-radius:10px; padding:25px; margin-bottom:25px; text-align:left;">
-            <p style="margin:0; text-align:center;">구독 정보를 불러오는 중...</p>
-        </div>
-        
-        <button id="logout-button" style="width:100%; padding:14px; border:none; background-color:#e0e0e0; color:#333; border-radius:8px; font-size:1rem; font-weight:700; cursor:pointer;">로그아웃</button>
-    </div>
-</div>
 
     <script type="module" src="navigation.js"></script>
 
@@ -878,7 +842,6 @@ document.addEventListener('DOMContentLoaded', () => {
     let currentStep = 0;
     const userAnswers = {};
     
-    // 👈 [NEW] Pro 플랜 및 사용량 관련 변수 추가
     let currentUser = null;
     let isProUser = false;
     let photoUsageCount = 0;
@@ -887,7 +850,6 @@ document.addEventListener('DOMContentLoaded', () => {
     onAuthStateChanged(auth, async (user) => {
         currentUser = user; 
         if (user) {
-            // Firestore에서 사용자 프로필(proPlan 및 사용량 포함) 가져오기
             const userDocRef = doc(db, "users", user.uid);
             const userDocSnap = await getDoc(userDocRef);
 
@@ -903,7 +865,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 usageMonth = '';
             }
         } else {
-            // 로그아웃 시 상태 초기화
             isProUser = false;
             photoUsageCount = 0;
             usageMonth = '';
@@ -1002,8 +963,6 @@ document.addEventListener('DOMContentLoaded', () => {
         return bubble;
     }
 
-    // ... (이하 모든 기존 함수들은 여기에 그대로 존재합니다) ...
-
     const footer = document.querySelector('.main-footer');
     const observerOptions = { root: null, rootMargin: '0px', threshold: 0.1 };
     const observer = new IntersectionObserver((entries) => {
@@ -1056,7 +1015,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
     
-    // 👈 [CHANGED] handleOptionClick을 async 함수로 변경하고 사용량 체크 로직 추가
     async function handleOptionClick(option) {
         if (currentStep === 0 && !currentUser) {
             document.querySelector('.cta-button').click();
@@ -1104,35 +1062,30 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // 👈 [NEW] 사용량 체크 및 DB 업데이트 함수
     async function checkAndIncrementUsage() {
-        if (isProUser) return true; // Pro 유저는 항상 통과
+        if (isProUser) return true;
 
-        const currentMonthStr = new Date().toISOString().slice(0, 7); // "YYYY-MM" 형식
+        const currentMonthStr = new Date().toISOString().slice(0, 7); 
 
         if (usageMonth === currentMonthStr) {
-            // 같은 달이면 사용량 체크
             if (photoUsageCount >= 3) {
                 console.log("이번 달 사진 분석 사용량을 모두 소진했습니다.");
-                return false; // 제한 도달
+                return false; 
             }
-            // 아직 사용 가능하면 카운트 증가
             const newCount = photoUsageCount + 1;
             await updateUserUsageInFirestore(newCount, currentMonthStr);
-            photoUsageCount = newCount; // 로컬 상태 업데이트
+            photoUsageCount = newCount; 
             return true;
         } else {
-            // 새로운 달이면 사용량 초기화
             console.log("새로운 달이 되어 사용량을 초기화합니다.");
             const newCount = 1;
             await updateUserUsageInFirestore(newCount, currentMonthStr);
-            photoUsageCount = newCount; // 로컬 상태 업데이트
-            usageMonth = currentMonthStr; // 로컬 상태 업데이트
+            photoUsageCount = newCount;
+            usageMonth = currentMonthStr; 
             return true;
         }
     }
 
-    // 👈 [NEW] Firestore에 사용량 업데이트하는 헬퍼 함수
     async function updateUserUsageInFirestore(count, month) {
         if (!currentUser) return;
         try {
@@ -1147,7 +1100,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // 👈 [NEW] 사용량 제한 모달 관련 함수
     const limitModal = document.getElementById('limit-modal');
     function openLimitModal() {
         limitModal.classList.add('visible');
@@ -1192,12 +1144,13 @@ document.addEventListener('DOMContentLoaded', () => {
         
         optionButtonsContainer.innerHTML = '';
         optionButtonsContainer.appendChild(uploadButton);
-        document.body.appendChild(fileInput); // DOM에 추가해야 클릭 이벤트가 동작
+        document.body.appendChild(fileInput); 
     }
     
     async function handleImageUpload(event) {
         const file = event.target.files[0];
         if (!file) return;
+        const imageUrl = URL.createObjectURL(file);
         optionButtonsContainer.innerHTML = '';
         addMessage("사진을 분석하고 있어. 잠시만 기다려줘! 🌱", 'plant');
         const indicator = showTypingIndicator();
@@ -1215,12 +1168,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 throw new Error(errorData.error || `서버 응답 오류: ${response.statusText}`);
             }
             const data = await response.json();
-            addMessage(data.identification, 'plant');
+            const resultMessage = addMessage(data.identification, 'plant');
+            showRestartAndShareButtons({ text: resultMessage.innerText, image: imageUrl });
         } catch (apiError) {
             console.error("API 호출 오류:", apiError);
             indicator.remove();
             addMessage(`이런, 사진을 분석하는 중에 오류가 발생했어.\n(${apiError.message})`, 'plant');
-        } finally {
             showRestartButton();
         }
     }
@@ -1228,6 +1181,7 @@ document.addEventListener('DOMContentLoaded', () => {
     async function handleImageUploadForDiagnosis(event) {
         const file = event.target.files[0];
         if (!file) return;
+        const imageUrl = URL.createObjectURL(file);
         optionButtonsContainer.innerHTML = '';
         addMessage("사진을 정밀 분석하고 있어. 잠시만 기다려줘! 🩺", 'plant');
         const indicator = showTypingIndicator();
@@ -1245,12 +1199,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 throw new Error(errorData.error || `서버 응답 오류: ${response.statusText}`);
             }
             const data = await response.json();
-            addMessage(data.diagnosis, 'plant');
+            const resultMessage = addMessage(data.diagnosis, 'plant');
+            showRestartAndShareButtons({ text: resultMessage.innerText, image: imageUrl });
         } catch (apiError) {
             console.error("API 호출 오류:", apiError);
             indicator.remove();
             addMessage(`이런, 진단하는 중에 오류가 발생했어.\n(${apiError.message})`, 'plant');
-        } finally {
             showRestartButton();
         }
     }
@@ -1300,7 +1254,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 img.onerror = reject;
                 img.onload = () => {
                     if (img.width <= MAX_WIDTH) {
-                        return resolve(file); // 리사이즈 불필요
+                        return resolve(file);
                     }
                     const canvas = document.createElement('canvas');
                     const scale = MAX_WIDTH / img.width;
@@ -1318,21 +1272,45 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function showRestartButton() {
-        setTimeout(() => {
-            const restartButton = document.createElement('button');
-            restartButton.textContent = '처음으로 돌아가기';
-            restartButton.addEventListener('click', () => {
-                messageArea.innerHTML = '';
-                currentStep = 0;
-                Object.keys(userAnswers).forEach(k => delete userAnswers[k]);
-                plantCharacter.className = 'plant-character idle';
-                askQuestion();
-            });
-            optionButtonsContainer.innerHTML = '';
-            optionButtonsContainer.appendChild(restartButton);
-        }, 1000);
+        const button = createRestartButton();
+        optionButtonsContainer.innerHTML = '';
+        optionButtonsContainer.appendChild(button);
     }
 
+    function createRestartButton() {
+        const restartButton = document.createElement('button');
+        restartButton.textContent = '처음으로 돌아가기';
+        restartButton.addEventListener('click', () => {
+            messageArea.innerHTML = '';
+            currentStep = 0;
+            Object.keys(userAnswers).forEach(k => delete userAnswers[k]);
+            plantCharacter.className = 'plant-character idle';
+            askQuestion();
+        });
+        return restartButton;
+    }
+
+    // NEW: Function to add a share button
+    function addShareButton(shareData) {
+        const shareButton = document.createElement('button');
+        shareButton.textContent = '결과 공유하기 🚀';
+        shareButton.style.backgroundColor = 'var(--user-bubble-bg)'; // Style to stand out
+        shareButton.style.color = '#fff';
+        shareButton.addEventListener('click', () => {
+            sessionStorage.setItem('sharedPostData', JSON.stringify(shareData));
+            window.location.href = 'story.html';
+        });
+        optionButtonsContainer.appendChild(shareButton);
+    }
+    
+    // NEW: Function to show both restart and share buttons
+    function showRestartAndShareButtons(shareData) {
+        setTimeout(() => {
+            optionButtonsContainer.innerHTML = '';
+            optionButtonsContainer.appendChild(createRestartButton());
+            addShareButton(shareData);
+        }, 1000);
+    }
 
     function showResults() {
         const filteredByPet = userAnswers.pet === 'yes' ? plants.filter(plant => plant.pet_friendly) : plants;
@@ -1351,6 +1329,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (topPlants.length === 0 || topPlants[0].score < 1) { 
             plantCharacter.className = 'plant-character idle';
             addMessage("아쉽게도 모든 조건에 딱 맞는 친구를 찾지 못했어. 조건을 조금 바꿔서 다시 시도해볼래?", 'plant');
+            showRestartButton();
         } else {
             plantCharacter.className = 'plant-character happy';
             addMessage("너에게 어울리는 식물 친구들을 찾았어!", 'plant');
@@ -1366,8 +1345,12 @@ document.addEventListener('DOMContentLoaded', () => {
                     openPlantDetailModal(p);
                 });
             });
+            const shareData = {
+                text: `저에게 어울리는 식물로 **${topPlants[0].name}**을(를) 추천받았어요! ${topPlants[0].description}`,
+                image: new URL(topPlants[0].image, window.location.href).href 
+            };
+            showRestartAndShareButtons(shareData);
         }
-        showRestartButton();
     }
 
 
@@ -1422,85 +1405,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     askQuestion();
-});
-
-
-// ==========================================================
-// 📍 2단계: ~~집사님 버튼에 대한 모달 띄우는 거임. 네비게이션.js에 넣으니깐 오류 나서 따로 넣음
-// ==========================================================
-
-document.addEventListener('DOMContentLoaded', function () {
-    const db = firebase.firestore();
-    const auth = firebase.auth();
-
-    // 네비게이션의 로그인/내 정보 버튼
-    // ❗️주의: 실제 프로젝트의 로그인 버튼 선택자(selector)로 변경해야 합니다.
-    const userStatusButton = document.querySelector('header nav a.cta-button'); 
-
-    // '내 정보' 모달 관련 요소들
-    const userStatusModal = document.getElementById('user-status-modal');
-    const closeStatusModal = document.getElementById('close-status-modal');
-    const subscriptionInfoDiv = document.getElementById('subscription-info');
-    const logoutButton = document.getElementById('logout-button');
-
-    // 인증 상태 변경 감지
-    auth.onAuthStateChanged(user => {
-        if (user) {
-            // --- 로그인 상태일 때 ---
-            
-            userStatusButton.addEventListener('click', e => {
-                e.preventDefault(); // 기본 링크 이동 방지
-                
-                // Firestore에서 사용자 구독 정보 가져오기
-                db.collection('users').doc(user.uid).get().then(doc => {
-                    if (doc.exists && doc.data().proPlan) {
-                        // Pro 구독자일 경우
-                        const subData = doc.data();
-                        
-                        // Firestore Timestamp를 JavaScript Date 객체로 변환
-                        const expiresAtDate = subData.subscriptionExpiresAt.toDate();
-                        
-                        // 날짜를 'YYYY년 MM월 DD일' 형식으로 포맷팅
-                        const formattedDate = `${expiresAtDate.getFullYear()}년 ${expiresAtDate.getMonth() + 1}월 ${expiresAtDate.getDate()}일`;
-
-                        // 모달에 정보 표시
-                        subscriptionInfoDiv.innerHTML = `
-                            <div style="font-size: 1rem; color: #555;">
-                                <p style="margin:0 0 15px 0;"><strong>플랜:</strong> <span style="color:#3a593b; font-weight:bold;">Pro</span></p>
-                                <p style="margin:0;"><strong>다음 결제 예정일:</strong> <span style="color:#3a593b; font-weight:bold;">${formattedDate}</span></p>
-                            </div>
-                        `;
-                    } else {
-                        // 무료 이용자일 경우
-                        subscriptionInfoDiv.innerHTML = '<p style="margin:0;"><strong>플랜:</strong> Free</p>';
-                    }
-                }).catch(error => {
-                    console.error("사용자 정보 조회 실패:", error);
-                    subscriptionInfoDiv.innerHTML = '<p>정보를 불러오는 데 실패했습니다.</p>';
-                });
-
-                userStatusModal.style.display = 'flex'; // 모달 열기
-            });
-
-        } else {
-            // --- 로그아웃 상태일 때 ---
-            userStatusButton.textContent = "Login";
-            // 여기에 기존 로그인 모달을 여는 이벤트를 다시 연결해야 할 수 있습니다.
-        }
-    });
-
-    // '내 정보' 모달 닫기
-    closeStatusModal.addEventListener('click', () => {
-        userStatusModal.style.display = 'none';
-    });
-
-    // 모달 내 로그아웃 버튼
-    logoutButton.addEventListener('click', () => {
-        auth.signOut().then(() => {
-            alert('로그아웃 되었습니다.');
-            window.location.reload();
-        });
-    });
 });
 </script>
 </body>

@@ -1,3 +1,5 @@
+
+
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -866,7 +868,6 @@ const firebaseConfig = {
   </a>
 </nav>
 
-
 <div id="user-status-modal" style="display:none; position:fixed; z-index:9999; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.5); align-items:center; justify-content:center;">
     <div style="background:#fff; border-radius:16px; max-width:380px; width:90%; margin:auto; box-shadow:0 10px 40px rgba(0,0,0,0.12); position:relative; text-align:center; padding: 30px;">
         
@@ -889,676 +890,509 @@ const firebaseConfig = {
 
         <!-- ====== JS: 이 페이지 전용 스크립트 ====== -->
     <script type="module">
+    // === Firebase SDK import ===
+    import { auth, db, storage } from './navigation.js'; 
+    import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+    import { 
+        collection, addDoc, query, orderBy, serverTimestamp, 
+        doc, getDoc, updateDoc, increment, arrayUnion, arrayRemove,
+        getDocs, limit, startAfter 
+    } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+    import { ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
 
-        console.log("스토리지 객체:", storage);
-    // === Firebase SDK import(이미 navigation.js에서 했으니 import 재사용) ===
-// 1. navigation.js로부터 auth, db, storage 변수를 직접 import 합니다.
-import { auth, db, storage } from './navigation.js'; 
-import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-// 스크립트 최상단 import 문을 수정하세요.
-import { 
-    collection, addDoc, query, orderBy, serverTimestamp, 
-    doc, getDoc, updateDoc, increment, arrayUnion, arrayRemove,
-    getDocs, limit, startAfter  // <--- 이 3개를 추가해야 합니다.
-} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-import { ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
+    // ====== DOM Elements ======
+    const openBtn = document.getElementById('open-story-modal');
+    const modalWrapper = document.getElementById('story-modal-wrapper');
+    const closeBtn = document.getElementById('close-story-modal');
+    const storyForm = document.getElementById('story-form');
+    const storyContent = document.getElementById('story-content');
+    const charCounter = document.getElementById('char-counter');
+    const submitBtn = document.getElementById('submit-story-btn');
+    const feed = document.getElementById('post-feed');
+    const storyImageInput = document.getElementById('story-image-input');
+    const imagePreview = document.getElementById('image-preview');
+    const loadMoreBtn = document.getElementById('load-more-btn');
 
-// ====== DOM Elements ======
-const openBtn = document.getElementById('open-story-modal');
-const modalWrapper = document.getElementById('story-modal-wrapper');
-const closeBtn = document.getElementById('close-story-modal');
-const storyForm = document.getElementById('story-form');
-const storyContent = document.getElementById('story-content');
-const charCounter = document.getElementById('char-counter');
-const submitBtn = document.getElementById('submit-story-btn');
-const feed = document.getElementById('post-feed');
-const storyImageInput = document.getElementById('story-image-input');
-const imagePreview = document.getElementById('image-preview');
-const loadMoreBtn = document.getElementById('load-more-btn');
+    // ====== State Variables ======
+    let lastVisible = null;
+    const POSTS_PER_PAGE = 10;
+    let currentUser = null;
+    let currentUserName = "익명";
 
-// ====== Pagination State ======
-let lastVisible = null; // 마지막으로 불러온 문서를 저장
-const POSTS_PER_PAGE = 10; // 한 번에 불러올 게시물 수
-
-// ====== User State ======
-let currentUser = null;
-let currentUserName = "익명";
-
-// onAuthStateChanged는 로드 시 항상 한 번 실행됩니다. (로그인 또는 로그아웃 상태)
-// 이 함수가 사용자 상태를 확인한 후, loadStories()를 호출하는 것이 가장 안정적입니다.
-onAuthStateChanged(auth, async (user) => {
-    currentUser = user;
-    if (user) {
-        const userDocRef = doc(db, "users", user.uid);
-        const userDoc = await getDoc(userDocRef);
-        currentUserName = userDoc.exists() ? userDoc.data().name : "익명";
-    } else {
-        currentUserName = "익명";
-    }
-    // 사용자 정보가 확정된 후에 게시물 렌더링 시작
-    loadStories(); 
-});
-
-
-// ====== Modal & Form Logic ======
-openBtn.addEventListener('click', () => {
-    if (!currentUser) {
-        document.querySelector('.cta-button').click();
-        return;
-    }
-    storyForm.reset(); 
-    charCounter.textContent = "0 / 2000";
-    modalWrapper.classList.add('open');
-    setTimeout(() => storyContent.focus(), 250);
-});
-closeBtn.addEventListener('click', () => modalWrapper.classList.remove('open'));
-modalWrapper.addEventListener('click', (e) => {
-    if (e.target === modalWrapper) modalWrapper.classList.remove('open');
-});
-storyContent.addEventListener('input', () => {
-    charCounter.textContent = `${storyContent.value.length} / 2000`;
-});
-
-// 글 작성 시 likes와 comments 필드를 빈 배열로 초기화
-
-
-// ====== Time Formatting Function ======
-function timeForToday(value) {
-    if (!value) return "";
-    // Firestore Timestamp 객체와 JS Date 객체 모두 처리
-    const timeValue = value.toDate ? value.toDate() : value;
-    const today = new Date();
-    const betweenTime = Math.floor((today.getTime() - timeValue.getTime()) / 1000 / 60);
-
-    if (betweenTime < 1) return '방금 전';
-    if (betweenTime < 60) return `${betweenTime}분 전`;
-    
-    const betweenTimeHour = Math.floor(betweenTime / 60);
-    if (betweenTimeHour < 24) return `${betweenTimeHour}시간 전`;
-
-    const betweenTimeDay = Math.floor(betweenTime / 60 / 24);
-    if (betweenTimeDay < 365) return `${betweenTimeDay}일 전`;
-
-    return `${Math.floor(betweenTimeDay / 365)}년 전`;
-}
-
-
-// ====== Display Stories & Comments ======
-// ====== Display Stories & Comments ======
-async function loadStories() {
-    feed.innerHTML = ""; // 피드를 비웁니다.
-    lastVisible = null;  // 페이지네이션 상태 초기화
-    loadMoreBtn.style.display = 'none'; // 버튼 숨기기
-
-    const firstBatch = query(
-        collection(db, "stories"), 
-        orderBy("createdAt", "desc"), 
-        limit(POSTS_PER_PAGE)
-    );
-
-    const documentSnapshots = await getDocs(firstBatch);
-
-    if (documentSnapshots.empty) {
-        feed.innerHTML = `<div style="color:#888;padding:30px;text-align:center;">아직 작성된 이야기가 없어요. 첫 번째 이야기를 남겨주세요!</div>`;
-        return;
-    }
-
-    // 마지막 문서를 저장
-    lastVisible = documentSnapshots.docs[documentSnapshots.docs.length - 1];
-
-    // 가져온 문서들을 화면에 렌더링
-    documentSnapshots.forEach(doc => {
-        renderPost(doc); // 게시물 하나를 렌더링하는 함수 (아래에서 만듦)
+    // ====== Initialize Page ======
+    onAuthStateChanged(auth, async (user) => {
+        currentUser = user;
+        if (user) {
+            const userDocRef = doc(db, "users", user.uid);
+            const userDoc = await getDoc(userDocRef);
+            currentUserName = userDoc.exists() ? userDoc.data().name : "익명";
+        } else {
+            currentUserName = "익명";
+        }
+        await loadStories(); 
+        
+        checkForSharedData();
     });
-    
-    // 불러온 게시물 수가 페이지당 게시물 수와 같으면 '더 불러오기' 버튼 표시
-    if (documentSnapshots.docs.length === POSTS_PER_PAGE) {
-        loadMoreBtn.style.display = 'inline-block';
+
+    // ====== Check for and handle shared data ======
+    function checkForSharedData() {
+        const sharedDataString = sessionStorage.getItem('sharedPostData');
+        if (sharedDataString) {
+            try {
+                const sharedData = JSON.parse(sharedDataString);
+
+                openBtn.click();
+                storyContent.value = sharedData.text || '';
+                
+                if (sharedData.image) {
+                    imagePreview.src = sharedData.image;
+                    imagePreview.style.display = 'block';
+                }
+                
+                storyContent.dispatchEvent(new Event('input'));
+
+            } catch (error) {
+                console.error("공유된 데이터 파싱 오류:", error);
+            } finally {
+                sessionStorage.removeItem('sharedPostData');
+            }
+        }
     }
-}
-
-function renderPost(doc) {
-    const story = doc.data();
-    const storyId = doc.id;
     
-    const isLiked = currentUser ? story.likes?.includes(currentUser.uid) : false;
-    const authorName = story.author || "익명";
-    const dateStr = story.createdAt ? timeForToday(story.createdAt) : "";
-    const userInitial = (currentUserName?.charAt(0) || 'P').toUpperCase();
-    const isLoggedIn = !!currentUser;
-
-    let imageHtml = '';
-    if (story.imageUrl) {
-        // 이미지는 카드의 맨 위에 위치해야 radius가 예쁘게 적용됩니다.
-        imageHtml = `<img src="${story.imageUrl}" alt="스토리 이미지" class="post-image"/>`;
+    // ====== Modal & Form Logic ======
+    function closeModal() {
+        modalWrapper.classList.remove('open');
+        storyForm.reset();
+        imagePreview.src = '';
+        imagePreview.style.display = 'none';
+        storyImageInput.value = ''; // Reset file input
+        charCounter.textContent = "0 / 2000";
     }
 
-    let commentsHtml = '';
-    if (story.comments && story.comments.length > 0) {
-        const reversedComments = [...story.comments].reverse();
-        reversedComments.forEach(comment => {
-            commentsHtml += `
+    openBtn.addEventListener('click', () => {
+        if (!currentUser) {
+            document.querySelector('.cta-button').click();
+            return;
+        }
+        modalWrapper.classList.add('open');
+        setTimeout(() => storyContent.focus(), 250);
+    });
+
+    closeBtn.addEventListener('click', closeModal);
+    modalWrapper.addEventListener('click', (e) => {
+        if (e.target === modalWrapper) closeModal();
+    });
+    storyContent.addEventListener('input', () => {
+        charCounter.textContent = `${storyContent.value.length} / 2000`;
+    });
+
+    storyImageInput.addEventListener('change', function () {
+        const file = this.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                imagePreview.src = e.target.result;
+                imagePreview.style.display = 'block';
+            };
+            reader.readAsDataURL(file);
+        } else {
+            imagePreview.src = '';
+            imagePreview.style.display = 'none';
+        }
+    });
+
+    storyForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        if (!currentUser) {
+            alert("로그인 후 작성할 수 있습니다.");
+            return;
+        }
+        const content = storyContent.value.trim();
+        if (!content) return;
+
+        submitBtn.disabled = true;
+        submitBtn.classList.add('loading');
+        submitBtn.textContent = '올리는 중...';
+
+        const file = storyImageInput.files[0];
+        let imageUrl = "";
+
+        try {
+            if (file) {
+                const storageRef = ref(storage, `stories/${currentUser.uid}_${Date.now()}_${file.name}`);
+                const snapshot = await uploadBytes(storageRef, file);
+                imageUrl = await getDownloadURL(snapshot.ref);
+            } else if (imagePreview.src && imagePreview.src.startsWith('blob:')) {
+                const response = await fetch(imagePreview.src);
+                const blob = await response.blob();
+                const storageRef = ref(storage, `stories/${currentUser.uid}_${Date.now()}_shared.jpg`);
+                const snapshot = await uploadBytes(storageRef, blob);
+                imageUrl = await getDownloadURL(snapshot.ref);
+            } else if (imagePreview.src) {
+                imageUrl = imagePreview.src;
+            }
+            
+            await addDoc(collection(db, "stories"), {
+                content,
+                author: currentUserName,
+                uid: currentUser.uid,
+                createdAt: serverTimestamp(),
+                likesCount: 0,
+                likes: [],
+                comments: [],
+                imageUrl: imageUrl 
+            });
+
+            closeModal();
+            await loadStories(); 
+        } catch (err) {
+            alert("글 저장 중 오류가 발생했습니다: " + err.message);
+        } finally {
+            submitBtn.disabled = false;
+            submitBtn.classList.remove('loading');
+            submitBtn.textContent = '올리기';
+        }
+    });
+
+    // ====== Time Formatting Function ======
+    function timeForToday(value) {
+        if (!value) return "";
+        const timeValue = value.toDate ? value.toDate() : value;
+        const today = new Date();
+        const betweenTime = Math.floor((today.getTime() - timeValue.getTime()) / 1000 / 60);
+
+        if (betweenTime < 1) return '방금 전';
+        if (betweenTime < 60) return `${betweenTime}분 전`;
+        
+        const betweenTimeHour = Math.floor(betweenTime / 60);
+        if (betweenTimeHour < 24) return `${betweenTimeHour}시간 전`;
+
+        const betweenTimeDay = Math.floor(betweenTime / 60 / 24);
+        if (betweenTimeDay < 365) return `${betweenTimeDay}일 전`;
+
+        return `${Math.floor(betweenTimeDay / 365)}년 전`;
+    }
+
+    // ====== Display Stories & Comments ======
+    async function loadStories() {
+        feed.innerHTML = "";
+        lastVisible = null;
+        loadMoreBtn.style.display = 'none';
+
+        const firstBatch = query(
+            collection(db, "stories"), 
+            orderBy("createdAt", "desc"), 
+            limit(POSTS_PER_PAGE)
+        );
+
+        const documentSnapshots = await getDocs(firstBatch);
+
+        if (documentSnapshots.empty) {
+            feed.innerHTML = `<div style="color:#888;padding:30px;text-align:center;">아직 작성된 이야기가 없어요. 첫 번째 이야기를 남겨주세요!</div>`;
+            return;
+        }
+
+        lastVisible = documentSnapshots.docs[documentSnapshots.docs.length - 1];
+        documentSnapshots.forEach(renderPost);
+        
+        if (documentSnapshots.docs.length === POSTS_PER_PAGE) {
+            loadMoreBtn.style.display = 'inline-block';
+        }
+    }
+
+    function renderPost(doc) {
+        const story = doc.data();
+        const storyId = doc.id;
+        
+        const isLiked = currentUser ? story.likes?.includes(currentUser.uid) : false;
+        const authorName = story.author || "익명";
+        const dateStr = story.createdAt ? timeForToday(story.createdAt) : "";
+        const userInitial = (currentUserName?.charAt(0) || 'P').toUpperCase();
+        const isLoggedIn = !!currentUser;
+
+        let imageHtml = story.imageUrl ? `<img src="${story.imageUrl}" alt="스토리 이미지" class="post-image"/>` : '';
+
+        let commentsHtml = '';
+        if (story.comments && story.comments.length > 0) {
+            commentsHtml = [...story.comments].reverse().map(comment => `
                 <div class="comment">
                     <strong class="comment-author">${comment.author}</strong>
                     <span class="comment-text">${comment.text}</span>
                     <span class="comment-date">${timeForToday(comment.createdAt)}</span>
                 </div>
-            `;
-        });
-    }
+            `).join('');
+        }
 
-    const card = document.createElement('div');
-    card.className = 'post-card';
-    card.dataset.postId = storyId;
-    card.innerHTML = `
-        ${imageHtml}
-        <div class="post-card-content">
-            <div class="post-header">
-                <div class="post-author-avatar">${authorName.charAt(0).toUpperCase()}</div>
-                <div class="post-author-info">
-                    <span class="post-author">${authorName}</span>
-                    <span class="post-date">${dateStr}</span>
+        const card = document.createElement('div');
+        card.className = 'post-card';
+        card.dataset.postId = storyId;
+        card.innerHTML = `
+            ${imageHtml}
+            <div class="post-card-content">
+                <div class="post-header">
+                    <div class="post-author-avatar">${authorName.charAt(0).toUpperCase()}</div>
+                    <div class="post-author-info">
+                        <span class="post-author">${authorName}</span>
+                        <span class="post-date">${dateStr}</span>
+                    </div>
+                </div>
+                <p class="post-content">${story.content}</p>
+            </div>
+            <div class="post-actions">
+                <button class="action-btn like-btn ${isLiked ? 'liked' : ''}">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+                    <span class="like-count">${story.likesCount || 0}</span>
+                </button>
+                <button class="action-btn comment-btn">
+                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+                    <span class="comment-count-text">댓글 ${story.comments?.length || 0}</span>
+                </button>
+            </div>
+            <div class="comments-section">
+                <div class="comments-list">${commentsHtml}</div>
+                <div class="comment-input-area">
+                    <div class="comment-user-avatar ${isLoggedIn ? '' : 'disabled'}">${isLoggedIn ? userInitial : '?'}</div>
+                    <div class="comment-input-wrapper">
+                        <form class="comment-form">
+                            <textarea name="comment" placeholder="${isLoggedIn ? '댓글을 남겨주세요...' : '로그인 후 댓글을 달 수 있습니다.'}" ${isLoggedIn ? '' : 'disabled'} required></textarea>
+                            <button type="submit" ${isLoggedIn ? '' : 'disabled'}>
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+                            </button>
+                        </form>
+                    </div>
                 </div>
             </div>
-            <p class="post-content">${story.content}</p>
-        </div>
-        <div class="post-actions">
-            <button class="action-btn like-btn ${isLiked ? 'liked' : ''}">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
-                <span class="like-count">${story.likesCount || 0}</span>
-            </button>
-            <button class="action-btn comment-btn">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
-                <span class="comment-count-text">댓글 ${story.comments?.length || 0}</span>
-            </button>
-        </div>
-        <div class="comments-section">
-            <div class="comments-list">${commentsHtml}</div>
-            <div class="comment-input-area">
-                <div class="comment-user-avatar ${isLoggedIn ? '' : 'disabled'}">${isLoggedIn ? userInitial : '?'}</div>
-                <div class="comment-input-wrapper">
-                    <form class="comment-form">
-                        <textarea name="comment" placeholder="${isLoggedIn ? '댓글을 남겨주세요...' : '로그인 후 댓글을 달 수 있습니다.'}" ${isLoggedIn ? '' : 'disabled'} required></textarea>
-                        <button type="submit" ${isLoggedIn ? '' : 'disabled'}>
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
-                        </button>
-                    </form>
-                </div>
-            </div>
-        </div>
-    `;
-    feed.appendChild(card);
-}
-
-// ====== Event Delegation for Likes and Comments ======
-feed.addEventListener('click', async (e) => {
-    // --- Like Button Click ---
-    const likeBtn = e.target.closest('.like-btn');
-    if (likeBtn) {
-        if (!currentUser) {
-            document.querySelector('.cta-button').click();
-            return;
-        }
-        const card = likeBtn.closest('.post-card');
-        const storyId = card.dataset.postId;
-        const storyRef = doc(db, "stories", storyId);
-
-        // arrayUnion/arrayRemove을 사용하여 동시성 문제를 해결합니다.
-        if (likeBtn.classList.contains('liked')) {
-            // Unlike
-            await updateDoc(storyRef, {
-                likes: arrayRemove(currentUser.uid),
-                likesCount: increment(-1)
-            });
-        } else {
-            // Like
-            await updateDoc(storyRef, {
-                likes: arrayUnion(currentUser.uid),
-                likesCount: increment(1)
-            });
-        }
+        `;
+        feed.appendChild(card);
     }
     
-    // --- Comment Button Click (to focus textarea) ---
-    const commentBtn = e.target.closest('.comment-btn');
-    if (commentBtn) {
-        const card = commentBtn.closest('.post-card');
-        card.querySelector('.comment-form textarea').focus();
-    }
-});
+    // ====== Event Delegation for Likes and Comments ======
+    feed.addEventListener('click', async (e) => {
+        // --- Like Button Click ---
+        const likeBtn = e.target.closest('.like-btn');
+        if (likeBtn) {
+            if (!currentUser) {
+                document.querySelector('.cta-button').click();
+                return;
+            }
+            const card = likeBtn.closest('.post-card');
+            const storyId = card.dataset.postId;
+            const storyRef = doc(db, "stories", storyId);
+            const likeCountSpan = likeBtn.querySelector('.like-count');
+            const currentCount = parseInt(likeCountSpan.textContent);
 
-feed.addEventListener('submit', async (e) => {
-    // --- Comment Form Submission ---
-    if (e.target.classList.contains('comment-form')) {
-        e.preventDefault();
-        if (!currentUser) {
-            alert("댓글을 작성하려면 로그인이 필요합니다.");
-            return;
-        }
+            likeBtn.classList.toggle('liked'); 
 
-        const form = e.target;
-        const textarea = form.querySelector('textarea');
-        const text = textarea.value.trim();
-        if (!text) return;
-
-        const card = form.closest('.post-card');
-        const storyId = card.dataset.postId;
-        const storyRef = doc(db, "stories", storyId);
-        
-        const newComment = {
-            text: text,
-            author: currentUserName,
-            uid: currentUser.uid,
-            createdAt: new Date() 
-        };
-
-        // DB 업데이트
-        await updateDoc(storyRef, {
-            comments: arrayUnion(newComment)
-        });
-        
-        // ▼▼▼ UI 수동 업데이트 로직 추가 ▼▼▼
-        const commentsList = card.querySelector('.comments-list');
-        const commentCountText = card.querySelector('.comment-count-text');
-
-        // 1. 새 댓글 엘리먼트 생성
-        const newCommentEl = document.createElement('div');
-        newCommentEl.className = 'comment';
-        newCommentEl.innerHTML = `
-            <strong class="comment-author">${newComment.author}</strong>
-            <span class="comment-text">${newComment.text}</span>
-            <span class="comment-date">방금 전</span>`;
-        
-        // 2. 목록 맨 위에 새 댓글 추가 (최신순)
-        commentsList.prepend(newCommentEl);
-
-        // 3. 댓글 개수 업데이트
-        const newCount = card.querySelectorAll('.comment').length;
-        commentCountText.textContent = `댓글 ${newCount}`;
-        
-        // 4. 입력창 초기화
-        form.reset();
-    }
-});
-
-// loadMoreStories 함수 생성
-async function loadMoreStories() {
-    if (!lastVisible) { // 더 이상 불러올 문서가 없으면 중단
-        return;
-    }
-
-    loadMoreBtn.classList.add('loading');
-    loadMoreBtn.disabled = true;
-
-    const nextBatch = query(
-        collection(db, "stories"),
-        orderBy("createdAt", "desc"),
-        startAfter(lastVisible), // 마지막으로 본 문서 다음부터
-        limit(POSTS_PER_PAGE)
-    );
-
-    const documentSnapshots = await getDocs(nextBatch);
-    
-    if (documentSnapshots.empty) {
-        loadMoreBtn.style.display = 'none'; // 더 이상 문서가 없으면 버튼 숨기기
-        return;
-    }
-
-    lastVisible = documentSnapshots.docs[documentSnapshots.docs.length - 1];
-    
-    documentSnapshots.forEach(doc => {
-        renderPost(doc);
-    });
-
-    if (documentSnapshots.docs.length < POSTS_PER_PAGE) {
-        loadMoreBtn.style.display = 'none'; // 마지막 페이지이면 버튼 숨기기
-    }
-    
-    loadMoreBtn.classList.remove('loading');
-    loadMoreBtn.disabled = false;
-}
-
-// '더 불러오기' 버튼에 클릭 리스너 추가
-loadMoreBtn.addEventListener('click', loadMoreStories);
-
-// ====== 오늘의 퀴즈 로직 ======
-
-const quizData = [
-    {
-        question: "식물의 잎이 노랗게 변하는 가장 흔한 원인은 무엇일까요?",
-        options: ["물 부족", "과습", "햇빛 과다", "병충해"],
-        correctAnswer: "과습",
-        explanation: "뿌리가 과도한 물에 잠겨 숨을 쉬지 못하면, 잎으로 가는 영양 공급이 중단되어 잎이 노랗게 변하게 됩니다."
-    },
-    {
-        question: "NASA가 선정한 공기정화식물 1위로 알려진 식물은 무엇일까요?",
-        options: ["스투키", "아레카야자", "관음죽", "스파티필룸"],
-        correctAnswer: "아레카야자",
-        explanation: "아레카야자는 포름알데히드와 같은 유해물질 제거 능력이 뛰어나고, 가습 효과도 있어 실내 식물로 인기가 많습니다."
-    },
-    {
-        question: "식물의 '광합성'에 꼭 필요한 3가지 요소가 아닌 것은 무엇일까요?",
-        options: ["햇빛", "물", "산소", "이산화탄소"],
-        correctAnswer: "산소",
-        explanation: "광합성은 햇빛, 물, 이산화탄소를 이용해 포도당(양분)과 '산소'를 만들어내는 과정입니다. 산소는 결과물이지, 필요 요소는 아니에요."
-    },
-    {
-        question: "식물의 줄기나 잎을 잘라 새로운 개체를 만드는 번식 방법을 무엇이라고 할까요?",
-        options: ["파종", "분갈이", "꺾꽂이(삽목)", "물꽂이"],
-        correctAnswer: "꺾꽂이(삽목)",
-        explanation: "꺾꽂이(삽목)는 식물의 영양생식 방법 중 하나로, 부모 식물과 동일한 유전자를 가진 새로운 식물을 쉽게 얻을 수 있습니다."
-    },
-    {
-        question: "다육식물에 물을 너무 자주 주면 안 되는 주된 이유는 무엇일까요?",
-        options: ["잎이 너무 커져서", "뿌리가 썩기 쉬워서", "색이 옅어져서", "가시가 무뎌져서"],
-        correctAnswer: "뿌리가 썩기 쉬워서",
-        explanation: "다육식물은 건조한 환경에 적응하여 잎에 물을 저장합니다. 물을 너무 자주 주면 뿌리가 계속 젖어있어 썩기 쉽습니다."
-    },
-    {
-        question: "몬스테라 잎에 구멍이 뚫려있는 자연적인 이유는 무엇일까요?",
-        options: ["벌레가 파먹어서", "스스로 무게를 줄이기 위해", "아래쪽 잎까지 빛을 보내기 위해", "물을 더 잘 흡수하기 위해"],
-        correctAnswer: "아래쪽 잎까지 빛을 보내기 위해",
-        explanation: "몬스테라는 큰 잎을 가진 덩굴성 식물입니다. 잎에 구멍이 있으면 위쪽 잎이 아래쪽 잎의 햇빛을 가리는 것을 최소화할 수 있습니다."
-    },
-    {
-        question: "반려동물에게 독성이 있어 키울 때 주의해야 하는 식물이 아닌 것은?",
-        options: ["백합", "아이비", "알로에 베라", "캣닢"],
-        correctAnswer: "캣닢",
-        explanation: "백합, 아이비, 알로에 베라는 반려동물에게 중독 증상을 일으킬 수 있어 주의가 필요합니다. 캣닢은 고양이에게 안전하고 오히려 즐거움을 줍니다."
-    }
-];
-
-function displayDailyQuiz() {
-    const today = new Date();
-    // 기준일로부터 며칠이 지났는지 계산하여 매일 다른 퀴즈가 나오도록 수정
-    const startDate = new Date('2025-01-01');
-    const diffTime = Math.abs(today - startDate);
-    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24)); 
-    const quizIndex = diffDays % quizData.length;
-    const dailyQuiz = quizData[quizIndex];
-    
-    const questionEl = document.getElementById('quiz-question');
-    const optionsEl = document.getElementById('quiz-options');
-    const feedbackEl = document.getElementById('quiz-feedback');
-
-    questionEl.textContent = dailyQuiz.question;
-    optionsEl.innerHTML = ""; // 이전 옵션 초기화
-    feedbackEl.style.display = 'none';
-
-    // 로컬 스토리지에서 오늘 퀴즈를 풀었는지 확인
-    const lastQuizDate = localStorage.getItem('lastQuizDate');
-    const hasAnsweredToday = lastQuizDate === today.toDateString();
-
-    dailyQuiz.options.forEach(optionText => {
-        const optionBtn = document.createElement('button');
-        optionBtn.className = 'option';
-        optionBtn.textContent = optionText;
-        optionsEl.appendChild(optionBtn);
-
-        if (hasAnsweredToday) {
-            showResult(optionBtn, dailyQuiz, feedbackEl);
-        } else {
-             optionBtn.addEventListener('click', () => handleOptionClick(optionBtn, dailyQuiz));
-        }
-    });
-}
-
-function handleOptionClick(selectedBtn, quiz) {
-     const today = new Date();
-     localStorage.setItem('lastQuizDate', today.toDateString()); // 오늘 날짜로 기록
-
-    const optionsContainer = document.getElementById('quiz-options');
-    const allOptions = optionsContainer.querySelectorAll('.option');
-
-    allOptions.forEach(optionBtn => {
-        showResult(optionBtn, quiz, document.getElementById('quiz-feedback'));
-    });
-}
-
-function showResult(optionBtn, quiz, feedbackEl) {
-    const optionText = optionBtn.textContent;
-    optionBtn.classList.add('disabled'); // 모든 버튼 비활성화
-
-    if (optionText === quiz.correctAnswer) {
-        optionBtn.classList.add('correct');
-    } else {
-        optionBtn.classList.add('incorrect');
-    }
-    
-    feedbackEl.textContent = quiz.explanation;
-    feedbackEl.style.display = 'block';
-}
-
-
-// 퀴즈 기능 실행
-displayDailyQuiz();
-
-
-storyImageInput.addEventListener('change', function () {
-    const file = this.files[0];
-    if (file) {
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            imagePreview.src = e.target.result;
-            imagePreview.style.display = 'block';
-        };
-        reader.readAsDataURL(file);
-    } else {
-        imagePreview.src = '';
-        imagePreview.style.display = 'none';
-    }
-});
-
-storyForm.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    if (!currentUser) {
-        alert("로그인 후 작성할 수 있습니다.");
-        return;
-    }
-    const content = storyContent.value.trim();
-    if (!content) return;
-
-    submitBtn.disabled = true;
-    submitBtn.classList.add('loading');
-    submitBtn.textContent = '올리는 중...';
-
-    // 1. 이미지 파일 체크
-    const file = storyImageInput.files[0];
-    let imageUrl = "";
-
-    try {
-        // 2. 이미지가 첨부됐으면 Storage에 업로드
-        if (file) {
-            const storageRef = ref(storage, `stories/${currentUser.uid}_${Date.now()}_${file.name}`);
-            const snapshot = await uploadBytes(storageRef, file);
-            imageUrl = await getDownloadURL(snapshot.ref);
-        }
-        // 3. Firestore에 저장 (imageUrl 포함)
-        await addDoc(collection(db, "stories"), {
-            content,
-            author: currentUserName,
-            uid: currentUser.uid,
-            createdAt: serverTimestamp(),
-            likesCount: 0,
-            likes: [],
-            comments: [],
-            imageUrl: imageUrl // 이미지 없으면 빈 문자열
-        });
-
-        modalWrapper.classList.remove('open');
-        // 초기화
-        storyImageInput.value = '';
-        imagePreview.src = '';
-        imagePreview.style.display = 'none';
-
-        // ▼ 이 한 줄을 추가하여 피드를 새로고침합니다.
-        loadStories(); 
-    } catch (err) {
-        alert("글 저장 중 오류가 발생했습니다: " + err.message);
-    } finally {
-        submitBtn.disabled = false;
-        submitBtn.classList.remove('loading');
-        submitBtn.textContent = '올리기';
-    }
-});
-
-// ====== Modal & Form Logic ======
-
-// 모달을 닫는 공통 함수를 만듭니다.
-function closeModal() {
-    modalWrapper.classList.remove('open');
-    storyForm.reset();
-    imagePreview.src = '';
-    imagePreview.style.display = 'none';
-    charCounter.textContent = "0 / 2000";
-}
-
-openBtn.addEventListener('click', () => {
-    if (!currentUser) {
-        document.querySelector('.cta-button').click();
-        return;
-    }
-    // storyForm.reset() 등은 closeModal 함수가 처리하므로 여기선 제거
-    modalWrapper.classList.add('open');
-    setTimeout(() => storyContent.focus(), 250);
-});
-
-// 기존 리스너들을 closeModal 함수 호출로 변경
-closeBtn.addEventListener('click', closeModal);
-modalWrapper.addEventListener('click', (e) => {
-    if (e.target === modalWrapper) {
-        closeModal();
-    }
-});
-
-storyContent.addEventListener('input', () => {
-    charCounter.textContent = `${storyContent.value.length} / 2000`;
-});
-
-
-// ====== Event Delegation for Likes and Comments ======
-feed.addEventListener('click', async (e) => {
-    // --- Like Button Click ---
-    const likeBtn = e.target.closest('.like-btn');
-    if (likeBtn) {
-        if (!currentUser) {
-            document.querySelector('.cta-button').click();
-            return;
-        }
-        const card = likeBtn.closest('.post-card');
-        const storyId = card.dataset.postId;
-        const storyRef = doc(db, "stories", storyId);
-        const likeCountSpan = likeBtn.querySelector('.like-count');
-        const currentCount = parseInt(likeCountSpan.textContent);
-
-        // UI를 먼저 업데이트하고 DB에 요청을 보낼 수도 있습니다 (낙관적 업데이트).
-        likeBtn.classList.toggle('liked'); 
-
-        if (likeBtn.classList.contains('liked')) {
-            // UI 업데이트
-            likeCountSpan.textContent = currentCount + 1;
-            // DB 업데이트
-            await updateDoc(storyRef, {
-                likes: arrayUnion(currentUser.uid),
-                likesCount: increment(1)
-            });
-        } else {
-            // UI 업데이트
-            likeCountSpan.textContent = currentCount - 1;
-            // DB 업데이트
-            await updateDoc(storyRef, {
-                likes: arrayRemove(currentUser.uid),
-                likesCount: increment(-1)
-            });
-        }
-    }
-    
-    // --- Comment Button Click (to focus textarea) ---
-    const commentBtn = e.target.closest('.comment-btn');
-    if (commentBtn) {
-        const card = commentBtn.closest('.post-card');
-        card.querySelector('.comment-form textarea').focus();
-    }
-});
-
-
-// ==========================================================
-// 📍 2단계: ~~집사님 버튼에 대한 모달 띄우는 거임. 네비게이션.js에 넣으니깐 오류 나서 따로 넣음
-// ==========================================================
-
-document.addEventListener('DOMContentLoaded', function () {
-    const db = firebase.firestore();
-    const auth = firebase.auth();
-
-    // 네비게이션의 로그인/내 정보 버튼
-    // ❗️주의: 실제 프로젝트의 로그인 버튼 선택자(selector)로 변경해야 합니다.
-    const userStatusButton = document.querySelector('header nav a.cta-button'); 
-
-    // '내 정보' 모달 관련 요소들
-    const userStatusModal = document.getElementById('user-status-modal');
-    const closeStatusModal = document.getElementById('close-status-modal');
-    const subscriptionInfoDiv = document.getElementById('subscription-info');
-    const logoutButton = document.getElementById('logout-button');
-
-    // 인증 상태 변경 감지
-    auth.onAuthStateChanged(user => {
-        if (user) {
-            // --- 로그인 상태일 때 ---
-            
-            userStatusButton.addEventListener('click', e => {
-                e.preventDefault(); // 기본 링크 이동 방지
-                
-                // Firestore에서 사용자 구독 정보 가져오기
-                db.collection('users').doc(user.uid).get().then(doc => {
-                    if (doc.exists && doc.data().proPlan) {
-                        // Pro 구독자일 경우
-                        const subData = doc.data();
-                        
-                        // Firestore Timestamp를 JavaScript Date 객체로 변환
-                        const expiresAtDate = subData.subscriptionExpiresAt.toDate();
-                        
-                        // 날짜를 'YYYY년 MM월 DD일' 형식으로 포맷팅
-                        const formattedDate = `${expiresAtDate.getFullYear()}년 ${expiresAtDate.getMonth() + 1}월 ${expiresAtDate.getDate()}일`;
-
-                        // 모달에 정보 표시
-                        subscriptionInfoDiv.innerHTML = `
-                            <div style="font-size: 1rem; color: #555;">
-                                <p style="margin:0 0 15px 0;"><strong>플랜:</strong> <span style="color:#3a593b; font-weight:bold;">Pro</span></p>
-                                <p style="margin:0;"><strong>다음 결제 예정일:</strong> <span style="color:#3a593b; font-weight:bold;">${formattedDate}</span></p>
-                            </div>
-                        `;
-                    } else {
-                        // 무료 이용자일 경우
-                        subscriptionInfoDiv.innerHTML = '<p style="margin:0;"><strong>플랜:</strong> Free</p>';
-                    }
-                }).catch(error => {
-                    console.error("사용자 정보 조회 실패:", error);
-                    subscriptionInfoDiv.innerHTML = '<p>정보를 불러오는 데 실패했습니다.</p>';
+            if (likeBtn.classList.contains('liked')) {
+                likeCountSpan.textContent = currentCount + 1;
+                await updateDoc(storyRef, {
+                    likes: arrayUnion(currentUser.uid),
+                    likesCount: increment(1)
                 });
-
-                userStatusModal.style.display = 'flex'; // 모달 열기
-            });
-
-        } else {
-            // --- 로그아웃 상태일 때 ---
-            userStatusButton.textContent = "Login";
-            // 여기에 기존 로그인 모달을 여는 이벤트를 다시 연결해야 할 수 있습니다.
+            } else {
+                likeCountSpan.textContent = currentCount - 1;
+                await updateDoc(storyRef, {
+                    likes: arrayRemove(currentUser.uid),
+                    likesCount: increment(-1)
+                });
+            }
+        }
+        
+        // --- Comment Button Click (to focus textarea) ---
+        const commentBtn = e.target.closest('.comment-btn');
+        if (commentBtn) {
+            const card = commentBtn.closest('.post-card');
+            card.querySelector('.comment-form textarea').focus();
         }
     });
 
-    // '내 정보' 모달 닫기
-    closeStatusModal.addEventListener('click', () => {
-        userStatusModal.style.display = 'none';
+    feed.addEventListener('submit', async (e) => {
+        if (e.target.classList.contains('comment-form')) {
+            e.preventDefault();
+            if (!currentUser) {
+                alert("댓글을 작성하려면 로그인이 필요합니다.");
+                return;
+            }
+
+            const form = e.target;
+            const textarea = form.querySelector('textarea');
+            const text = textarea.value.trim();
+            if (!text) return;
+
+            const card = form.closest('.post-card');
+            const storyId = card.dataset.postId;
+            const storyRef = doc(db, "stories", storyId);
+            
+            const newComment = {
+                text: text,
+                author: currentUserName,
+                uid: currentUser.uid,
+                createdAt: new Date() 
+            };
+
+            await updateDoc(storyRef, {
+                comments: arrayUnion(newComment)
+            });
+            
+            const commentsList = card.querySelector('.comments-list');
+            const commentCountText = card.querySelector('.comment-count-text');
+
+            const newCommentEl = document.createElement('div');
+            newCommentEl.className = 'comment';
+            newCommentEl.innerHTML = `
+                <strong class="comment-author">${newComment.author}</strong>
+                <span class="comment-text">${newComment.text}</span>
+                <span class="comment-date">방금 전</span>`;
+            
+            commentsList.prepend(newCommentEl);
+
+            const newCount = card.querySelectorAll('.comment').length;
+            commentCountText.textContent = `댓글 ${newCount}`;
+            
+            form.reset();
+        }
     });
 
-    // 모달 내 로그아웃 버튼
-    logoutButton.addEventListener('click', () => {
-        auth.signOut().then(() => {
-            alert('로그아웃 되었습니다.');
-            window.location.reload();
+    async function loadMoreStories() {
+        if (!lastVisible) return;
+
+        loadMoreBtn.classList.add('loading');
+        loadMoreBtn.disabled = true;
+
+        const nextBatch = query(
+            collection(db, "stories"),
+            orderBy("createdAt", "desc"),
+            startAfter(lastVisible),
+            limit(POSTS_PER_PAGE)
+        );
+
+        const documentSnapshots = await getDocs(nextBatch);
+        
+        if (documentSnapshots.empty) {
+            loadMoreBtn.style.display = 'none';
+            return;
+        }
+
+        lastVisible = documentSnapshots.docs[documentSnapshots.docs.length - 1];
+        
+        documentSnapshots.forEach(renderPost);
+
+        if (documentSnapshots.docs.length < POSTS_PER_PAGE) {
+            loadMoreBtn.style.display = 'none';
+        }
+        
+        loadMoreBtn.classList.remove('loading');
+        loadMoreBtn.disabled = false;
+    }
+
+    loadMoreBtn.addEventListener('click', loadMoreStories);
+
+    // ====== 오늘의 퀴즈 로직 ======
+    const quizData = [
+        {
+            question: "식물의 잎이 노랗게 변하는 가장 흔한 원인은 무엇일까요?",
+            options: ["물 부족", "과습", "햇빛 과다", "병충해"],
+            correctAnswer: "과습",
+            explanation: "뿌리가 과도한 물에 잠겨 숨을 쉬지 못하면, 잎으로 가는 영양 공급이 중단되어 잎이 노랗게 변하게 됩니다."
+        },
+        {
+            question: "NASA가 선정한 공기정화식물 1위로 알려진 식물은 무엇일까요?",
+            options: ["스투키", "아레카야자", "관음죽", "스파티필룸"],
+            correctAnswer: "아레카야자",
+            explanation: "아레카야자는 포름알데히드와 같은 유해물질 제거 능력이 뛰어나고, 가습 효과도 있어 실내 식물로 인기가 많습니다."
+        },
+        {
+            question: "식물의 '광합성'에 꼭 필요한 3가지 요소가 아닌 것은 무엇일까요?",
+            options: ["햇빛", "물", "산소", "이산화탄소"],
+            correctAnswer: "산소",
+            explanation: "광합성은 햇빛, 물, 이산화탄소를 이용해 포도당(양분)과 '산소'를 만들어내는 과정입니다. 산소는 결과물이지, 필요 요소는 아니에요."
+        },
+        {
+            question: "식물의 줄기나 잎을 잘라 새로운 개체를 만드는 번식 방법을 무엇이라고 할까요?",
+            options: ["파종", "분갈이", "꺾꽂이(삽목)", "물꽂이"],
+            correctAnswer: "꺾꽂이(삽목)",
+            explanation: "꺾꽂이(삽목)는 식물의 영양생식 방법 중 하나로, 부모 식물과 동일한 유전자를 가진 새로운 식물을 쉽게 얻을 수 있습니다."
+        },
+        {
+            question: "다육식물에 물을 너무 자주 주면 안 되는 주된 이유는 무엇일까요?",
+            options: ["잎이 너무 커져서", "뿌리가 썩기 쉬워서", "색이 옅어져서", "가시가 무뎌져서"],
+            correctAnswer: "뿌리가 썩기 쉬워서",
+            explanation: "다육식물은 건조한 환경에 적응하여 잎에 물을 저장합니다. 물을 너무 자주 주면 뿌리가 계속 젖어있어 썩기 쉽습니다."
+        },
+        {
+            question: "몬스테라 잎에 구멍이 뚫려있는 자연적인 이유는 무엇일까요?",
+            options: ["벌레가 파먹어서", "스스로 무게를 줄이기 위해", "아래쪽 잎까지 빛을 보내기 위해", "물을 더 잘 흡수하기 위해"],
+            correctAnswer: "아래쪽 잎까지 빛을 보내기 위해",
+            explanation: "몬스테라는 큰 잎을 가진 덩굴성 식물입니다. 잎에 구멍이 있으면 위쪽 잎이 아래쪽 잎의 햇빛을 가리는 것을 최소화할 수 있습니다."
+        },
+        {
+            question: "반려동물에게 독성이 있어 키울 때 주의해야 하는 식물이 아닌 것은?",
+            options: ["백합", "아이비", "알로에 베라", "캣닢"],
+            correctAnswer: "캣닢",
+            explanation: "백합, 아이비, 알로에 베라는 반려동물에게 중독 증상을 일으킬 수 있어 주의가 필요합니다. 캣닢은 고양이에게 안전하고 오히려 즐거움을 줍니다."
+        }
+    ];
+
+    function displayDailyQuiz() {
+        const today = new Date();
+        const startDate = new Date('2025-01-01');
+        const diffTime = Math.abs(today - startDate);
+        const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24)); 
+        const quizIndex = diffDays % quizData.length;
+        const dailyQuiz = quizData[quizIndex];
+        
+        const questionEl = document.getElementById('quiz-question');
+        const optionsEl = document.getElementById('quiz-options');
+        const feedbackEl = document.getElementById('quiz-feedback');
+
+        questionEl.textContent = dailyQuiz.question;
+        optionsEl.innerHTML = "";
+        feedbackEl.style.display = 'none';
+
+        const lastQuizDate = localStorage.getItem('lastQuizDate');
+        const hasAnsweredToday = lastQuizDate === today.toDateString();
+
+        dailyQuiz.options.forEach(optionText => {
+            const optionBtn = document.createElement('button');
+            optionBtn.className = 'option';
+            optionBtn.textContent = optionText;
+            optionsEl.appendChild(optionBtn);
+
+            if (hasAnsweredToday) {
+                showResult(optionBtn, dailyQuiz, feedbackEl);
+            } else {
+                optionBtn.addEventListener('click', () => handleOptionClick(optionBtn, dailyQuiz));
+            }
         });
-    });
-});
-    </script>
+    }
+
+    function handleOptionClick(selectedBtn, quiz) {
+        const today = new Date();
+        localStorage.setItem('lastQuizDate', today.toDateString());
+
+        const optionsContainer = document.getElementById('quiz-options');
+        const allOptions = optionsContainer.querySelectorAll('.option');
+
+        allOptions.forEach(optionBtn => {
+            showResult(optionBtn, quiz, document.getElementById('quiz-feedback'));
+        });
+    }
+
+    function showResult(optionBtn, quiz, feedbackEl) {
+        const optionText = optionBtn.textContent;
+        optionBtn.classList.add('disabled');
+
+        if (optionText === quiz.correctAnswer) {
+            optionBtn.classList.add('correct');
+        } else {
+            optionBtn.classList.add('incorrect');
+        }
+        
+        feedbackEl.textContent = quiz.explanation;
+        feedbackEl.style.display = 'block';
+    }
+
+    displayDailyQuiz();
+</script>
 </body>
 </html>
