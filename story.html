@@ -882,10 +882,16 @@ const firebaseConfig = {
             <p style="margin:0; text-align:center;">구독 정보를 불러오는 중...</p>
         </div>
         
-        <button id="logout-button" style="width:100%; padding:14px; border:none; background-color:#e0e0e0; color:#333; border-radius:8px; font-size:1rem; font-weight:700; cursor:pointer;">로그아웃</button>
+        <div id="modal-actions" style="display: flex; gap: 10px; width: 100%;">
+            <button id="cancel-subscription-button" style="flex: 1; padding: 14px; border: 1px solid #d32f2f; background-color: #fff; color: #d32f2f; border-radius: 8px; font-size: 1rem; font-weight: 700; cursor: pointer; display: none;">
+                구독 취소
+            </button>
+            <button id="logout-button" style="flex: 1; padding: 14px; border: none; background-color: #e0e0e0; color: #333; border-radius: 8px; font-size: 1rem; font-weight: 700; cursor: pointer;">
+                로그아웃
+            </button>
+        </div>
     </div>
 </div>
-
     <script type="module" src="navigation.js"></script>
 
         <!-- ====== JS: 이 페이지 전용 스크립트 ====== -->
@@ -900,83 +906,7 @@ const firebaseConfig = {
     } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
     import { ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
 
-    // ==========================================================
-// 📍 2단계: ~~집사님 버튼에 대한 모달 띄우는 거임. 네비게이션.js에 넣으니깐 오류 나서 따로 넣음
-// ==========================================================
 
-document.addEventListener('DOMContentLoaded', function () {
-    const db = firebase.firestore();
-    const auth = firebase.auth();
-
-    // 네비게이션의 로그인/내 정보 버튼
-    // ❗️주의: 실제 프로젝트의 로그인 버튼 선택자(selector)로 변경해야 합니다.
-    const userStatusButton = document.querySelector('header nav a.cta-button'); 
-
-    // '내 정보' 모달 관련 요소들
-    const userStatusModal = document.getElementById('user-status-modal');
-    const closeStatusModal = document.getElementById('close-status-modal');
-    const subscriptionInfoDiv = document.getElementById('subscription-info');
-    const logoutButton = document.getElementById('logout-button');
-
-    // 인증 상태 변경 감지
-    auth.onAuthStateChanged(user => {
-        if (user) {
-            // --- 로그인 상태일 때 ---
-            
-            userStatusButton.addEventListener('click', e => {
-                e.preventDefault(); // 기본 링크 이동 방지
-                
-                // Firestore에서 사용자 구독 정보 가져오기
-                db.collection('users').doc(user.uid).get().then(doc => {
-                    if (doc.exists && doc.data().proPlan) {
-                        // Pro 구독자일 경우
-                        const subData = doc.data();
-                        
-                        // Firestore Timestamp를 JavaScript Date 객체로 변환
-                        const expiresAtDate = subData.subscriptionExpiresAt.toDate();
-                        
-                        // 날짜를 'YYYY년 MM월 DD일' 형식으로 포맷팅
-                        const formattedDate = `${expiresAtDate.getFullYear()}년 ${expiresAtDate.getMonth() + 1}월 ${expiresAtDate.getDate()}일`;
-
-                        // 모달에 정보 표시
-                        subscriptionInfoDiv.innerHTML = `
-                            <div style="font-size: 1rem; color: #555;">
-                                <p style="margin:0 0 15px 0;"><strong>플랜:</strong> <span style="color:#3a593b; font-weight:bold;">Pro</span></p>
-                                <p style="margin:0;"><strong>다음 결제 예정일:</strong> <span style="color:#3a593b; font-weight:bold;">${formattedDate}</span></p>
-                            </div>
-                        `;
-                    } else {
-                        // 무료 이용자일 경우
-                        subscriptionInfoDiv.innerHTML = '<p style="margin:0;"><strong>플랜:</strong> Free</p>';
-                    }
-                }).catch(error => {
-                    console.error("사용자 정보 조회 실패:", error);
-                    subscriptionInfoDiv.innerHTML = '<p>정보를 불러오는 데 실패했습니다.</p>';
-                });
-
-                userStatusModal.style.display = 'flex'; // 모달 열기
-            });
-
-        } else {
-            // --- 로그아웃 상태일 때 ---
-            userStatusButton.textContent = "Login";
-            // 여기에 기존 로그인 모달을 여는 이벤트를 다시 연결해야 할 수 있습니다.
-        }
-    });
-
-    // '내 정보' 모달 닫기
-    closeStatusModal.addEventListener('click', () => {
-        userStatusModal.style.display = 'none';
-    });
-
-    // 모달 내 로그아웃 버튼
-    logoutButton.addEventListener('click', () => {
-        auth.signOut().then(() => {
-            alert('로그아웃 되었습니다.');
-            window.location.reload();
-        });
-    });
-});
 
     // ====== DOM Elements ======
     const openBtn = document.getElementById('open-story-modal');
@@ -1471,6 +1401,152 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     displayDailyQuiz();
+
+
+    // ==========================================================
+// 📍 2단계: ~~집사님 버튼에 대한 모달 띄우는 거임. 네비게이션.js에 넣으니깐 오류 나서 따로 넣음
+// ==========================================================
+
+document.addEventListener('DOMContentLoaded', function () {
+    const db = firebase.firestore();
+    const auth = firebase.auth();
+
+    // 네비게이션의 로그인/내 정보 버튼
+    const userStatusButton = document.querySelector('header nav a.cta-button'); 
+
+    // 모달 관련 요소들
+    const userStatusModal = document.getElementById('user-status-modal');
+    const closeStatusModal = document.getElementById('close-status-modal');
+    const subscriptionInfoDiv = document.getElementById('subscription-info');
+    const logoutButton = document.getElementById('logout-button');
+    const cancelSubscriptionButton = document.getElementById('cancel-subscription-button');
+
+    // 인증 상태 변경 감지
+    auth.onAuthStateChanged(user => {
+        if (user) {
+            // --- 로그인 상태일 때 ---
+
+            // ✨ (추가) 로그인 시, 만료일이 지난 '취소 예약' 건을 찾아 실제 플랜을 강등시킵니다.
+            const userDocRef = db.collection('users').doc(user.uid);
+            userDocRef.get().then(doc => {
+                if (doc.exists) {
+                    const data = doc.data();
+                    const now = new Date();
+                    
+                    // '취소 예약' 상태이고, 구독 만료일이 이미 지났는지 확인
+                    if (data.cancelAtPeriodEnd === true && data.subscriptionExpiresAt.toDate() < now) {
+                        // 만료되었으므로 Free 플랜으로 최종 변경
+                        userDocRef.update({
+                            proPlan: false,
+                            cancelAtPeriodEnd: false, // 플래그 초기화
+                            subscriptionExpiresAt: firebase.firestore.FieldValue.delete()
+                        }).then(() => {
+                            console.log("Subscription has expired. User plan downgraded to Free.");
+                        });
+                    }
+                }
+            });
+            
+            userStatusButton.addEventListener('click', e => {
+                e.preventDefault();
+                
+                // Firestore에서 최신 사용자 구독 정보 가져오기
+                db.collection('users').doc(user.uid).get().then(doc => {
+                    if (doc.exists) {
+                        const data = doc.data();
+
+                        if (data.proPlan) { // 1. Pro 플랜 구독자인 경우
+                            const expiresAtDate = data.subscriptionExpiresAt.toDate();
+                            const formattedDate = `${expiresAtDate.getFullYear()}년 ${expiresAtDate.getMonth() + 1}월 ${expiresAtDate.getDate()}일`;
+
+                            if (data.cancelAtPeriodEnd === true) {
+                                // 1a. Pro 플랜 + '취소 예약' 상태인 경우
+                                subscriptionInfoDiv.innerHTML = `
+                                    <div style="font-size: 1rem; color: #555;">
+                                        <p style="margin:0 0 15px 0;"><strong>플랜:</strong> <span style="color:#d32f2f; font-weight:bold;">Pro (취소 예약됨)</span></p>
+                                        <p style="margin:0;"><strong>플랜 만료일:</strong> <span style="color:#3a593b; font-weight:bold;">${formattedDate}</span></p>
+                                    </div>
+                                `;
+                                // ✨ (수정) 버튼 텍스트를 바꾸고, 재활성화 기능은 추후 구현 필요
+                                cancelSubscriptionButton.textContent = "구독 재활성화"; 
+                                cancelSubscriptionButton.style.display = 'block';
+
+                            } else {
+                                // 1b. 순수 Pro 플랜 상태인 경우
+                                subscriptionInfoDiv.innerHTML = `
+                                    <div style="font-size: 1rem; color: #555;">
+                                        <p style="margin:0 0 15px 0;"><strong>플랜:</strong> <span style="color:#3a593b; font-weight:bold;">Pro</span></p>
+                                        <p style="margin:0;"><strong>다음 결제 예정일:</strong> <span style="color:#3a593b; font-weight:bold;">${formattedDate}</span></p>
+                                    </div>
+                                `;
+                                cancelSubscriptionButton.textContent = "구독 취소";
+                                cancelSubscriptionButton.style.display = 'block';
+                            }
+                        } else {
+                            // 2. 무료 이용자인 경우
+                            subscriptionInfoDiv.innerHTML = '<p style="margin:0;"><strong>플랜:</strong> Free</p>';
+                            cancelSubscriptionButton.style.display = 'none';
+                        }
+                    }
+                }).catch(error => {
+                    console.error("사용자 정보 조회 실패:", error);
+                    subscriptionInfoDiv.innerHTML = '<p>정보를 불러오는 데 실패했습니다.</p>';
+                });
+
+                userStatusModal.style.display = 'flex'; // 모달 열기
+            });
+
+        } else {
+            // --- 로그아웃 상태일 때 ---
+            userStatusButton.textContent = "Login";
+        }
+    });
+
+    // '내 정보' 모달 닫기
+    closeStatusModal.addEventListener('click', () => {
+        userStatusModal.style.display = 'none';
+    });
+    
+    // ✨ (수정) 구독 취소 버튼 클릭 이벤트: 이제 '취소 예약' 플래그만 설정합니다.
+    cancelSubscriptionButton.addEventListener('click', () => {
+        const user = auth.currentUser;
+        if (!user) {
+            alert("오류: 로그인 상태가 아닙니다.");
+            return;
+        }
+
+        // 여기에 '구독 재활성화' 로직도 추가할 수 있습니다. (현재는 취소 로직만 구현)
+        if (cancelSubscriptionButton.textContent === "구독 재활성화") {
+            // 예: db.collection('users').doc(user.uid).update({ cancelAtPeriodEnd: false })...
+            alert("구독 재활성화 기능은 현재 준비 중입니다.");
+            return;
+        }
+
+        if (confirm("다음 결제일부터 구독을 갱신하지 않습니다. 남은 기간 동안 Pro 플랜을 계속 이용할 수 있습니다. 정말 취소하시겠습니까?")) {
+            db.collection('users').doc(user.uid).update({
+                cancelAtPeriodEnd: true // '취소 예약' 플래그 설정
+            })
+            .then(() => {
+                alert("구독 취소 예약이 완료되었습니다. 현재 플랜은 만료일까지 유지됩니다.");
+                window.location.reload(); // UI 갱신을 위해 새로고침
+            })
+            .catch((error) => {
+                console.error("구독 취소 예약 중 오류 발생: ", error);
+                alert("처리 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.");
+            });
+        }
+    });
+
+    // 모달 내 로그아웃 버튼
+    logoutButton.addEventListener('click', () => {
+        auth.signOut().then(() => {
+            alert('로그아웃 되었습니다.');
+            window.location.reload();
+        });
+    });
+});
+
+
 </script>
 </body>
 </html>
