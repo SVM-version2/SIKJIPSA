@@ -8,6 +8,25 @@
 
     <meta name="keywords" content="식물, 테라리움, 화분, 미니식물, 식물 추천, 식물상담, 식집사, 플랜테리어">
 
+        <!--메타 픽셀 코드-->
+    <!-- Meta Pixel Code -->
+<script>
+  !function(f,b,e,v,n,t,s)
+  {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+  n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+  if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+  n.queue=[];t=b.createElement(e);t.async=!0;
+  t.src=v;s=b.getElementsByTagName(e)[0];
+  s.parentNode.insertBefore(t,s)}(window, document,'script',
+  'https://connect.facebook.net/en_US/fbevents.js');
+   fbq('init', '1306603984306825'); 
+   fbq('track', 'PageView');
+</script>
+<noscript><img height="1" width="1" style="display:none"
+  src="https://www.facebook.com/tr?id=1306603984306825&ev=PageView&noscript=1"
+/></noscript>
+<!-- End Meta Pixel Code -->
+
     <!-- OG 메타태그 (SNS 공유용) -->
     <meta property="og:type" content="website">
     <meta property="og:title" content="오후의 식물 | 식물 이름 찾기와 식집사 기능">
@@ -806,12 +825,22 @@ document.addEventListener('DOMContentLoaded', function () {
 proPlanButton.addEventListener('click', function (e) {
     e.preventDefault();
     
+
     const user = firebase.auth().currentUser;
     if (!user) {
         alert("로그인이 필요합니다.");
         return;
     }
 
+          // 🔔 퍼널 시작 신호(선택 권장) 이게 메타임 **********************************************
+  if (window.fbq) {
+    fbq('track', 'InitiateCheckout', {
+      content_name: 'PlantNoon Pro',
+      value: 2900,
+      currency: 'KRW'
+    });
+  }
+  
     if (proPlanButton.classList.contains('disabled')) {
         return;
     }
@@ -843,14 +872,25 @@ proPlanButton.addEventListener('click', function (e) {
                 })
                 })
                 .then(res => res.json())
-                .then(data => {
-                    if (data.status === 'success') {
-                        alert("결제 및 Pro 플랜 적용이 완료되었습니다!");
-                        updateUI(true); // 결제 성공 후 UI 즉시 업데이트
-                    } else {
-                        alert("서버 검증 실패: " + data.message);
-                    }
-                });
+.then(data => {
+  if (data.status === 'success') {
+    // ✅ 서버 검증 성공 → 실제 구독 완료 신호 **********이것도 메타임****************88
+    if (window.fbq) {
+      fbq('track', 'Subscribe', {
+        value: 2900,
+        currency: 'KRW',
+        plan: 'monthly',
+   subscription_id: merchantUid,  // ← 주문/구독 식별자
+    user_uid: userUid              // ← 내부 사용자 식별자(커스텀)
+  });
+    }
+
+    alert("결제 및 Pro 플랜 적용이 완료되었습니다!");
+    updateUI(true); // 결제 성공 후 UI 즉시 업데이트
+  } else {
+    alert("서버 검증 실패: " + data.message);
+  }
+});
             } else {
                 alert("결제 실패: " + rsp.error_msg);
             }
