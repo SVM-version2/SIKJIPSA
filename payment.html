@@ -470,6 +470,63 @@ const firebaseConfig = {
       font-size: 1rem;
   }
 }
+/* --- Mobile Optimization (768px 이하) --- */
+@media (max-width: 768px) {
+
+    /* [1. 전체 컨테이너 여백 조정] */
+    .payment-container {
+        margin: 20px auto; /* 상하 여백 줄이기 */
+        padding: 10px;      /* 좌우 여백 줄이기 */
+    }
+
+    /* [2. 메인 헤드라인 섹션 최적화] */
+    .page-header-animated {
+        padding: 0 10px; /* 텍스트가 화면 가장자리에 붙지 않도록 패딩 추가 */
+    }
+
+    .page-header-animated h1 {
+        font-size: 2.2rem;   /* 제목 폰트 크기 줄이기 */
+        margin-top: 3rem;    /* 상단 여백 줄이기 */
+        line-height: 1.3;    /* 줄 간격 조정 */
+    }
+
+    .page-header-animated p {
+        font-size: 1rem;     /* 설명 폰트 크기 줄이기 */
+    }
+
+    /* 모바일에서는 강제 줄바꿈(<br>)을 숨겨서 자연스럽게 텍스트가 흐르도록 함 */
+    .page-header-animated p br {
+        display: none;
+    }
+
+    /* [3. 플랜 카드 레이아웃 변경] */
+    .plans-wrapper {
+        flex-direction: column; /* 카드를 세로로 쌓기 */
+        align-items: center;    /* 중앙 정렬 */
+        gap: 20px;              /* 카드 사이 간격 줄이기 */
+    }
+
+    .plan-card {
+        width: 100%;            /* 카드가 화면 너비에 꽉 차도록 설정 */
+        max-width: 380px;       /* 너무 넓어지지 않도록 최대 너비 유지 */
+        padding: 25px;          /* 내부 여백 살짝 조정 */
+    }
+    
+    /* [4. 결제 확인 모달 최적화] */
+    #payment-modal div:first-child {
+        padding: 20px 15px; /* 모달 내부 여백 줄이기 */
+        width: 95%;         /* 모달 너비 살짝 키우기 */
+    }
+
+    #payment-modal h3 {
+        font-size: 1.5rem; /* 모달 제목 폰트 크기 줄이기 */
+    }
+
+    #payment-modal p {
+        font-size: 0.95rem; /* 모달 설명 폰트 크기 줄이기 */
+    }
+}
+
     </style>
 </head>
 <body>
