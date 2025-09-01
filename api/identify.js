@@ -9,7 +9,7 @@ export default async function handler(request, response) {
   const { image, mimeType } = request.body;
 
   try {
-    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" }); 
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" }); 
 
     // ▼▼▼▼▼ 챗봇의 말투와 형식에 맞춘 새로운 프롬프트 ▼▼▼▼▼
 const prompt = `
