@@ -1,5 +1,3 @@
-
-
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -21,8 +19,8 @@
   t.src=v;s=b.getElementsByTagName(e)[0];
   s.parentNode.insertBefore(t,s)}(window, document,'script',
   'https://connect.facebook.net/en_US/fbevents.js');
-   fbq('init', '1306603984306825'); 
-   fbq('track', 'PageView');
+    fbq('init', '1306603984306825'); 
+    fbq('track', 'PageView');
 </script>
 <noscript><img height="1" width="1" style="display:none"
   src="https://www.facebook.com/tr?id=1306603984306825&ev=PageView&noscript=1"
@@ -58,7 +56,7 @@ const firebaseConfig = {
   apiKey: "AIzaSyC7mA9xLOFb98i5hKNWjKW_fORWNHvPx2s",
   authDomain: "sik-jip-sa.firebaseapp.com",
   projectId: "sik-jip-sa",
-  storageBucket: "sik-jip-sa.firebasestorage.app",
+  storageBucket: "sik-jip-sa.appspot.com",
   messagingSenderId: "401707534850",
   appId: "1:401707534850:web:e15b2f67e2d4484a07351b",
   measurementId: "G-HX50P6C0NT"
@@ -177,7 +175,7 @@ const firebaseConfig = {
     }
 }
 .story-container {
-    max-width: 480px;
+    max-width: 880px;
     margin: 100px auto 40px;
     padding: 0 8px;
     background: transparent;
@@ -699,12 +697,31 @@ const firebaseConfig = {
         font-size: 0.75rem; /* 모바일에서 글자 크기 살짝 줄임 */
     }
     }
+
+    /* ✨ [수정] '더보기' 버튼 스타일 수정 */
+.read-more-wrapper {
+    text-align: right; /* 컨테이너를 오른쪽 정렬 */
+    margin-top: 8px; /* 텍스트와 버튼 사이의 간격 */
+}
+.read-more-btn {
+    background: none;
+    border: none;
+    color: #888;
+    font-weight: 700;
+    cursor: pointer;
+    padding: 4px 0; 
+    font-size: 1rem;
+    font-family: inherit;
+}
+.read-more-btn:hover {
+    color: var(--primary-green);
+}
 </style>
 </head>
 <body>
 
     <header id="main-header">
-                       <a href="index.html" class="logo">
+                               <a href="index.html" class="logo">
             <img src="logo.png" alt="오후의 식물 로고">
             <span>오후의 식물</span>
         </a>
@@ -1137,8 +1154,28 @@ const firebaseConfig = {
         const userInitial = (currentUserName?.charAt(0) || 'P').toUpperCase();
         const isLoggedIn = !!currentUser;
 
+        // ✨ [수정] '더보기' 버튼 로직 수정
+        const TRUNCATE_LIMIT = 250;
+        let contentHtml;
+        const fullText = story.content;
+        
+        if (fullText.length > TRUNCATE_LIMIT) {
+            let cutOff = fullText.lastIndexOf(' ', TRUNCATE_LIMIT);
+            if (cutOff === -1) cutOff = TRUNCATE_LIMIT;
+            const truncatedText = fullText.substring(0, cutOff);
+            contentHtml = `
+                <div class="post-content-wrapper">
+                    <p class="post-content">${truncatedText}...</p>
+                    <div class="read-more-wrapper">
+                        <button class="read-more-btn">더보기</button>
+                    </div>
+                </div>`;
+        } else {
+            contentHtml = `<p class="post-content">${fullText}</p>`;
+        }
+        
         let imageHtml = story.imageUrl ? `<img src="${story.imageUrl}" alt="스토리 이미지" class="post-image"/>` : '';
-
+        
         let commentsHtml = '';
         if (story.comments && story.comments.length > 0) {
             commentsHtml = [...story.comments].reverse().map(comment => `
@@ -1153,6 +1190,8 @@ const firebaseConfig = {
         const card = document.createElement('div');
         card.className = 'post-card';
         card.dataset.postId = storyId;
+        card.dataset.fullText = fullText; // 전체 텍스트를 카드 자체에 저장
+
         card.innerHTML = `
             ${imageHtml}
             <div class="post-card-content">
@@ -1163,7 +1202,7 @@ const firebaseConfig = {
                         <span class="post-date">${dateStr}</span>
                     </div>
                 </div>
-                <p class="post-content">${story.content}</p>
+                ${contentHtml}
             </div>
             <div class="post-actions">
                 <button class="action-btn like-btn ${isLiked ? 'liked' : ''}">
@@ -1195,7 +1234,18 @@ const firebaseConfig = {
     
     // ====== Event Delegation for Likes and Comments ======
     feed.addEventListener('click', async (e) => {
-        // --- Like Button Click ---
+        // ✨ [수정] '더보기' 버튼 클릭 로직 수정
+        const readMoreBtn = e.target.closest('.read-more-btn');
+        if (readMoreBtn) {
+            const card = readMoreBtn.closest('.post-card');
+            const contentWrapper = card.querySelector('.post-content-wrapper');
+            if (card && contentWrapper && card.dataset.fullText) {
+                // wrapper를 전체 텍스트를 담은 p 태그로 교체
+                contentWrapper.outerHTML = `<p class="post-content">${card.dataset.fullText}</p>`;
+            }
+            return;
+        }
+        
         const likeBtn = e.target.closest('.like-btn');
         if (likeBtn) {
             if (!currentUser) {
@@ -1225,7 +1275,6 @@ const firebaseConfig = {
             }
         }
         
-        // --- Comment Button Click (to focus textarea) ---
         const commentBtn = e.target.closest('.comment-btn');
         if (commentBtn) {
             const card = commentBtn.closest('.post-card');
@@ -1569,3 +1618,4 @@ document.addEventListener('DOMContentLoaded', function () {
 </script>
 </body>
 </html>
+
