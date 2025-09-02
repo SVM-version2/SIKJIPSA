@@ -5,7 +5,7 @@ const { GoogleGenerativeAI } = require("@google/generative-ai");
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
 /**
- * 식물 독성 정보를 확인하는 서버리스 함수 (안정성 강화 버전)
+ * 식물 독성 정보를 확인하는 서버리스 함수 (안정성 및 정확도 강화 버전)
  */
 export default async function handler(request, response) {
   if (request.method !== 'POST') {
@@ -27,38 +27,39 @@ export default async function handler(request, response) {
   try {
     const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
+    // [개선: Few-Shot 예시 추가] AI가 따라할 수 있는 모범 답안을 제공하여 정확도를 높입니다.
     const prompt = `
-      당신은 식물의 유해성 정보를 정확하게 분류하는 식물 독성학자입니다.
+      당신은 식물의 유해성 정보를 정확하게 분류하는 식물 독성학자입니다. 주어진 [규칙]과 [모범 예시]를 완벽하게 학습한 후, 마지막의 [실제 요청]에 대해 답변해주세요.
 
-      [1단계: 입력값 분석]
-      입력된 텍스트인 '${trimmedPlantName}'이(가) 일반적인 식물의 이름인지 먼저 판단합니다. 만약 식물이 아니라면, 2단계 B규칙에 따라 즉시 답변합니다.
+      [규칙]
+      1.  입력값이 식물이 맞는지 먼저 판단합니다.
+      2.  식물이 맞다면, 어린 아이, 강아지, 고양이에게 미치는 영향을 기준으로 독성 등급을 [무독성], [경미한 독성], [보통 독성], [치명적] 중 하나로 '반드시' 분류합니다.
+      3.  분류된 등급 뒤에 1~2 문장으로 간결한 설명을 덧붙입니다.
+      4.  입력값이 식물이 아니라면, [판단 불가]로 분류하고 정해진 문구로만 답변합니다.
+      5.  답변은 반드시 대괄호로 묶인 등급으로 시작하며, 서론이나 인사 없이 즉시 핵심 답변만 제공합니다.
 
-      [2단계: 독성 등급 분류 및 설명]
-      A. 만약 식물이 맞다면:
-      어린 아이, 강아지, 고양이에게 미치는 영향을 기준으로 독성 등급을 다음 4가지 중 하나로 '반드시' 분류하고, 그에 맞는 설명을 1~2 문장으로 간결하게 덧붙여주세요. 단순히 '독성이 있다'는 정보만으로 섣불리 판단하지 말고, 실제 위험도를 기준으로 신중하게 분류해야 합니다.
-      - [무독성]: 일반적으로 사람이나 반려동물에게 해가 없는 것으로 알려진 경우.
-      - [경미한 독성]: 섭취 시 가벼운 소화불량, 구토, 피부 자극 등을 유발할 수 있는 경우.
-      - [보통 독성]: 섭취 시 더 심한 위장 장애나 건강 이상을 초래할 수 있어 주의가 필요한 경우.
-      - [치명적]: 소량만 섭취해도 심각한 중독 증상이나 생명의 위협을 줄 수 있는 경우.
+      [모범 예시]
+      - 실제 요청: '몬스테라'
+      - 당신의 답변: [경미한 독성]: 몬스테라는 칼슘 옥살레이트 결정을 포함하고 있어, 반려동물이 섭취 시 구강 자극이나 구토 등을 유발할 수 있습니다.
+      
+      - 실제 요청: '장미'
+      - 당신의 답변: [무독성]: 장미는 일반적으로 고양이나 개에게 독성이 없는 것으로 알려져 있으나, 가시는 물리적인 상처를 입힐 수 있으니 주의해야 합니다.
 
-      B. 만약 식물이 아니라면:
-      "[판단 불가]: 입력하신 '${trimmedPlantName}'은(는) 식물이 아닌 것 같습니다. 식물의 정확한 이름으로 다시 시도해주세요." 라고만 답변합니다.
+      - 실제 요청: '컴퓨터'
+      - 당신의 답변: [판단 불가]: 입력하신 '컴퓨터'은(는) 식물이 아닌 것 같습니다. 식물의 정확한 이름으로 다시 시도해주세요.
 
-      [출력 형식]
-      - 답변은 반드시 대괄호로 묶인 등급(예: [무독성])으로 시작해야 합니다.
-      - 서론이나 인사 없이, 지정된 형식으로만 즉시 답변을 시작해야 합니다.
+      [실제 요청]
+      '${trimmedPlantName}'
     `;
     
     const result = await model.generateContent(prompt);
     const geminiResponse = await result.response;
     const text = geminiResponse.text();
 
-    // [개선 1: 강력한 안전장치] AI 응답이 유효한 문자열이고, 지정된 형식을 따르는지 먼저 확인합니다.
     if (typeof text === 'string' && text.startsWith("[") && text.includes("]:")) {
-      // 형식이 올바를 때만 등급과 설명을 분리합니다.
       const parts = text.split("]: ");
-      const classification = parts[0].substring(1); // '[' 제거
-      const description = parts[1] || ""; // 설명이 없는 경우 대비
+      const classification = parts[0].substring(1);
+      const description = parts[1] || "";
 
       return response.status(200).json({ 
         toxicityInfo: text,
@@ -66,7 +67,6 @@ export default async function handler(request, response) {
         description: description
       });
     } else {
-      // [개선 2: 예외 처리] 형식이 잘못되었거나, 응답이 비정상적일 경우 기본 응답을 보냅니다.
       const fallbackText = `[정보 없음]: '${trimmedPlantName}'에 대한 명확한 독성 정보를 찾기 어렵습니다. 학명이나 다른 이름으로 시도해보세요.`;
       return response.status(200).json({
           toxicityInfo: fallbackText,
