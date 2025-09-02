@@ -19,8 +19,8 @@
   t.src=v;s=b.getElementsByTagName(e)[0];
   s.parentNode.insertBefore(t,s)}(window, document,'script',
   'https://connect.facebook.net/en_US/fbevents.js');
-   fbq('init', '1306603984306825'); 
-   fbq('track', 'PageView');
+  fbq('init', '1306603984306825'); 
+  fbq('track', 'PageView');
 </script>
 <noscript><img height="1" width="1" style="display:none"
   src="https://www.facebook.com/tr?id=1306603984306825&ev=PageView&noscript=1"
@@ -138,7 +138,6 @@ a:hover {
 }
 
 
-/* === 1. 새로운 히어로 타이핑 섹션 === */
 /* === 1. 새로운 히어로 타이핑 섹션 === */
 #hero {
     height: 100vh;
@@ -321,7 +320,7 @@ a:hover {
 .chapter-container {
     height: 80vh;
     position: sticky;
-     top: 15vh; 
+    top: 15vh; 
     display: grid;
     grid-template-columns: 1fr 1fr;
     align-items: center;
@@ -363,7 +362,7 @@ padding: 0 10%;
 display: flex;
 align-items: center; 
 position: relative; /* 👈 자식 요소의 위치 기준으로 설정 */
-    height: 100%;     /* 👈 부모 높이에 맞게 설정 */
+    height: 100%;      /* 👈 부모 높이에 맞게 설정 */
 }
 
 .story-chapter {
@@ -398,7 +397,88 @@ opacity: 1; /* 활성 챕터만 보이게 */
     line-height: 1.8;
 }
 
+/* === 4. 새로운 유튜브 콘텐츠 섹션 === */
+#youtube-content {
+    background-color: #fff; /* 다른 섹션과 구분 */
+}
 
+.video-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 30px;
+    margin-top: 50px;
+}
+
+.video-card {
+    background-color: var(--secondary-color);
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    display: block; /* a 태그를 블록 요소로 */
+    color: var(--text-color); /* 링크 색상 기본값으로 변경 */
+}
+
+.video-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+    color: var(--primary-color); /* 호버 시 텍스트 색상 변경 */
+}
+
+.video-thumbnail {
+    position: relative;
+}
+
+.video-thumbnail img {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+    display: block;
+}
+
+.play-icon {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 60px;
+    height: 60px;
+    background-color: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(5px);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--primary-color);
+    font-size: 1.5rem;
+    transition: background-color 0.3s ease, transform 0.3s ease;
+}
+
+.video-card:hover .play-icon {
+    transform: translate(-50%, -50%) scale(1.1);
+    background-color: rgba(255, 255, 255, 1);
+}
+
+.video-info {
+    padding: 20px;
+}
+
+.video-info h4 {
+    margin-top: 0;
+    font-size: 1.2rem;
+    color: var(--primary-color);
+}
+
+.video-info p {
+    font-size: 0.95rem;
+    color: #555;
+    margin-bottom: 0;
+}
+
+.youtube-cta {
+    text-align: center;
+    margin-top: 60px;
+}
 
 
 
@@ -742,6 +822,17 @@ opacity: 1; /* 활성 챕터만 보이게 */
         padding: 8px 18px;
     }
 
+    /* --- 4. 유튜브 콘텐츠 섹션 --- */
+    .video-grid {
+        gap: 20px;
+    }
+    .video-thumbnail img {
+        height: 180px;
+    }
+    .youtube-cta {
+        margin-top: 40px;
+    }
+
 
  /* --- 3. Green Chapter 섹션 (수정안) --- */
 
@@ -875,8 +966,6 @@ opacity: 1; /* 활성 챕터만 보이게 */
         color: #fff !important;                /* 로고 글씨도 흰색 */
     }
 }
-
-/* 기존 ===== 정보 모달 스타일 (팀소개, FAQ 등) ===== 부분을 이 코드로 교체하세요. */
 
 /* ===== 정보 모달 스타일 (개선안) ===== */
 .info-modal-wrapper {
@@ -1100,7 +1189,7 @@ opacity: 1; /* 활성 챕터만 보이게 */
 /* 푸터 사업자 정보 스타일 */
 .business-info {
     margin-bottom: 15px; /* 저작권 정보와의 간격 */
-    line-height: 1.8;    /* 줄 간격 조정 */
+    line-height: 1.8;      /* 줄 간격 조정 */
 }
 
 /* 독성검사 */
@@ -1184,7 +1273,7 @@ font-size: 1.1rem;
 <body>
 
     <header id="main-header">
-                <a href="index.html" class="logo">
+        <a href="index.html" class="logo">
             <img src="logo.png" alt="오후의 식물 로고">
             <span>오후의 식물</span>
         </a>
@@ -1212,7 +1301,7 @@ font-size: 1.1rem;
  <div class="section-container">
  <h2 class="section-title">혹시, 알고 계셨나요?</h2>
  <p class="section-subtitle" style="max-width: 600px; margin: -40px auto 40px;">
-     아름다운 식물 중 일부는 자녀나 반려동물에게 독성이 있을 수 있습니다.<br>
+    아름다운 식물 중 일부는 자녀나 반려동물에게 독성이 있을 수 있습니다.<br>
   궁금한 식물의 이름을 검색하여 안전성을 확인해 보세요.
 </p>
  <div class="search-form">
@@ -1270,6 +1359,57 @@ font-size: 1.1rem;
         </div>
     </div>
 </section>
+
+<!-- === 새로운 유튜브 콘텐츠 섹션 === -->
+<section id="youtube-content" class="content-section">
+    <div class="section-container">
+        <h2 class="section-title">영상으로 만나는 초록 이야기</h2>
+        <p class="section-subtitle">초보 식집사를 위한 꿀팁부터 전문가의 관리 노하우까지,<br>유튜브에서 더 많은 이야기를 만나보세요.</p>
+        
+        <div class="video-grid">
+            <!-- Video Card 1 -->
+            <a href="https://youtube.com/shorts/jbxRQ11SBPo?si=V_Yo_UTGhaHoxNA5" target="_blank" class="video-card">
+                <div class="video-thumbnail">
+                    <img src="https://placehold.co/600x400/2c5d4f/f4f2ed?text=Shorts+%231" alt="유튜브 영상 썸네일 1">
+                    <div class="play-icon">▶</div>
+                </div>
+                <div class="video-info">
+                    <h4>식물 초보를 위한 물주기 3원칙</h4>
+                    <p>과습 걱정 끝! 가장 기본이지만 가장 중요한 물주기 비법을 알려드려요.</p>
+                </div>
+            </a>
+            <!-- Video Card 2 -->
+            <a href="https://youtube.com/shorts/kO1__qzuWzo?si=HJSfYIm4EXYcOp8n" target="_blank" class="video-card">
+                <div class="video-thumbnail">
+                    <img src="https://placehold.co/600x400/c7a17a/333333?text=Shorts+%232" alt="유튜브 영상 썸네일 2">
+                    <div class="play-icon">▶</div>
+                </div>
+                <div class="video-info">
+                    <h4>5분만에 뚝딱! 나만의 테라리움 만들기</h4>
+                    <p>유리병 속 작은 정원, 테라리움. 누구나 쉽게 따라할 수 있는 가이드.</p>
+                </div>
+            </a>
+            <!-- Video Card 3 -->
+            <a href="https://youtube.com/shorts/f8nx-v6T3Go?si=RbStxN1wdM3JWK9m" target="_blank" class="video-card">
+                <div class="video-thumbnail">
+                    <img src="https://placehold.co/600x400/f4f2ed/2c5d4f?text=Shorts+%233" alt="유튜브 영상 썸네일 3">
+                    <div class="play-icon">▶</div>
+                </div>
+                <div class="video-info">
+                    <h4>벌레와의 전쟁, 친환경 해충 방제법</h4>
+                    <p>징그러운 벌레들, 이제 안녕! 식물도 사람도 안전한 방제 꿀팁.</p>
+                </div>
+            </a>
+        </div>
+
+        <div class="youtube-cta">
+            <a href="https://www.youtube.com/@plantnoon" target="_blank" class="cta-button">
+                '오후의 식물' 채널 구독하기
+            </a>
+        </div>
+    </div>
+</section>
+<!-- === 유튜브 섹션 끝 === -->
 
  
 <section id="green-chapter">
