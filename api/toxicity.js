@@ -1,3 +1,5 @@
+// 재배포를 위한 주석 추가
+
 // Node.js용 Gemini API 라이브러리를 가져옵니다.
 const { GoogleGenerativeAI } = require("@google-generative-ai");
 
