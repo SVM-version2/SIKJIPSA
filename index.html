@@ -1009,12 +1009,30 @@ border-radius: 8px;
 font-size: 1.1rem;
  color: var(--text-color);
 }
-
+/* Hero 서브문구: JS 없이 자동 페이드인 */
+.hero-subtext{
+  max-width: 950px;
+  margin: 16px auto 0;
+  padding: 0 24px;
+  text-align: center;
+  font-family: var(--font-body);
+  font-size: 1.1rem;
+  line-height: 1.7;
+  color: rgba(255,255,255,0.95);
+  opacity: 0;
+  transform: translateY(8px);
+  /* 로드 후 자동 등장 */
+  animation: heroSubFade .2s ease  5s forwards;
+}
 
 @keyframes heroSubFade {
   to { opacity: 1; transform: none; }
 }
 
+/* 모바일 폰트 보정 */
+@media (max-width: 768px){
+  #hero .hero-subtext{ font-size: .98rem; margin-top: 12px; }
+}
 
 
 /* === Social Proof(사용자 후기) 섹션 스타일 (이 부분을 추가하세요) === */
@@ -1194,6 +1212,9 @@ font-size: 1.1rem;
             <p id="story-text" class="story-text"></p>
             <span id="story-cursor" class="cursor"></span>
         </div>
+        <div id="hero-subtext" class="hero-subtext" aria-live="polite">
+  <p>AI 집사, 반려식물 관리의 모든것. <br>나만의 식물 맞춤 진단부터 성장 관리까지, 이제 '오후의 식물'과 함께 스마트하게 관리하세요.</p>
+</div>
 <div class="hero-ctas" role="group" aria-label="히어로 액션">
     <a href="findPlant.html" class="cta-button cta-primary">식물 상담소</a>
     <a href="myPlant.html" class="cta-button cta-ghost">나의 식물 관리</a>
