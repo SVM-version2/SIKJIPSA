@@ -566,15 +566,20 @@ const firebaseConfig = {
     <ul class="plan-features">
         <li>
             <div>
-                <span class="feature-title">제한된 식물 등록</span>
-                <span class="feature-description">기본적인 식물 관리를 시작해보세요.</span>
-                <span class="feature-detail">(최대 3개)</span>
+                <span class="feature-title">키우는 식물 등록 (최대 3개)</span>
+                <span class="feature-description">자동화된 식물 관리를 기능을 시작해보세요.</span>
             </div>
         </li>
         <li>
             <div>
-                <span class="feature-title">제한된 기능 이용</span>
-                <span class="feature-description">핵심적인 식물 관리 기능을 체험할 수 있습니다.</span>
+                <span class="feature-title">식물 찾기/진단 기능 (최대 3번)</span>
+                <span class="feature-description">궁금한 식물의 이름을 찾고 반려식물의 건강을 체크해보세요.</span>
+            </div>
+        </li>
+        <li>
+            <div>
+                <span class="feature-title">커뮤니티 기능 이용</span>
+                <span class="feature-description">여러분들의 노하우와 자신의 반려식물을 자랑해보세요.</span>
             </div>
         </li>
     </ul>
@@ -651,7 +656,7 @@ const firebaseConfig = {
     </div>
 </div>
 
-         <div id="modal-wrapper" class="modal-wrapper">
+     <div id="modal-wrapper" class="modal-wrapper">
         <div class="modal">
             <div class="modal-left"></div>
             <div class="modal-right">
@@ -679,45 +684,44 @@ const firebaseConfig = {
                 </div>
 
                 <!-- Signup Form -->
-                <div id="signup-form" class="form-container" style="display: none;">
-                    <div class="form-header">
-                        <a href="index.html" class="logo">오후의 식물</a>
-                        <h2>Create Account</h2>
-                    </div>
-                    <form>
-                        <div class="input-group">
-                            <label for="signup-name">Name</label>
-                            <input type="text" id="signup-name" required>
-                        </div>
-                        <div class="input-group">
-                            <label for="signup-email">Email</label>
-                            <input type="email" id="signup-email" required>
-                        </div>
-                        <div class="input-group">
-                            <label for="signup-password">Password</label>
-                            <input type="password" id="signup-password" required>
-                        </div>
-                        <div class="agreement-group">
-    <div class="checkbox-group">
-        <input type="checkbox" id="signup-terms" name="terms" required>
-        <label for="signup-terms">
-            [필수] <a href="terms.html" target="_blank">이용약관</a>에 동의합니다.
-        </label>
+<div id="signup-form" class="form-container" style="display: none;">
+    <div class="form-header">
+        <a href="index.html" class="logo">오후의 식물</a>
+        <h2>Create Account</h2>
     </div>
-    <div class="checkbox-group">
-        <input type="checkbox" id="signup-privacy" name="privacy" required>
-        <label for="signup-privacy">
-            [필수] <a href="privacy.html" target="_blank">개인정보처리방침</a>에 동의합니다.
-        </label>
-    </div>
+    <form>
+        <div class="input-group">
+            <label for="signup-name">Name</label>
+            <input type="text" id="signup-name" placeholder="식물사랑꾼" required>
+        </div>
+        <div class="input-group">
+            <label for="signup-email">Email</label>
+            <input type="email" id="signup-email" placeholder="abc@naver.com" required>
+        </div>
+        <div class="input-group">
+            <label for="signup-password">Password</label>
+            <input type="password" id="signup-password" placeholder="비밀번호 (6자 이상)" required>
+        </div>
+        <div class="agreement-group">
+            <div class="checkbox-group">
+                <input type="checkbox" id="signup-terms" name="terms" required>
+                <label for="signup-terms">
+                    [필수] <a href="terms.html" target="_blank">이용약관</a>에 동의합니다.
+                </label>
+            </div>
+            <div class="checkbox-group">
+                <input type="checkbox" id="signup-privacy" name="privacy" required>
+                <label for="signup-privacy">
+                    [필수] <a href="privacy.html" target="_blank">개인정보처리방침</a>에 동의합니다.
+                </label>
+            </div>
+        </div>
+        <button type="submit" class="cta-button">Create Account</button>
+    </form>
+    <p class="form-switcher">
+        Already have an account? <a href="#" id="show-login">Login</a>
+    </p>
 </div>
-
-<button type="submit" class="cta-button">Create Account</button>
-                    </form>
-                    <p class="form-switcher">
-                        Already have an account? <a href="#" id="show-login">Login</a>
-                    </p>
-                </div>
             </div>
         </div>
     </div>

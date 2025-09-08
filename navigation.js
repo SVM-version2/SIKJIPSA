@@ -9,7 +9,6 @@ import {
     signInWithEmailAndPassword, 
     onAuthStateChanged,
     signOut,
-    sendEmailVerification // [추가] 이메일 인증 함수 import
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import { 
     getFirestore, 
@@ -121,9 +120,6 @@ signupFormElement.addEventListener('submit', async (event) => {
         const userCredential = await createUserWithEmailAndPassword(auth, email, password);
         const user = userCredential.user;
 
-        // [추가] 인증 이메일 발송
-        await sendEmailVerification(auth.currentUser);
-
         // Firestore에 사용자 정보 저장
         await setDoc(doc(db, "users", user.uid), {
             name: name,
@@ -131,11 +127,8 @@ signupFormElement.addEventListener('submit', async (event) => {
             createdAt: serverTimestamp()
         });
 
-        // [추가] 인증 메일 발송 후 바로 로그아웃 처리
-        await signOut(auth);
-        
-        // [수정] 사용자에게 안내 후 모달 닫기
-        alert('가입 신청이 완료되었습니다.\n입력하신 이메일로 인증 링크를 보냈으니, 확인 후 로그인해주세요.\n(받은편지함 또는 스팸함을 확인하세요)');
+        // 회원가입 성공 후 모달 닫기
+        alert('회원가입이 완료되었습니다.');
         closeModal();
 
     } catch (error) {
@@ -158,18 +151,9 @@ loginFormElement.addEventListener('submit', async (event) => {
     }
 
     try {
-        const userCredential = await signInWithEmailAndPassword(auth, email, password);
-        const user = userCredential.user;
-
-        // [추가] 이메일 인증 여부 확인
-        if (user.emailVerified) {
-            // 인증 완료 사용자: 로그인 성공 처리
-            closeModal();
-        } else {
-            // 인증 미완료 사용자: 로그인 차단 및 안내
-            await signOut(auth); // 다시 로그아웃 처리
-            alert('이메일 인증이 완료되지 않았습니다.\n발송된 인증 메일을 확인해주세요.');
-        }
+        await signInWithEmailAndPassword(auth, email, password);
+        // 로그인 성공 시 모달 닫기
+        closeModal();
     } catch (error) {
         console.error("❌ 로그인 에러:", error);
         // 로그인 실패 시 일관된 메시지 제공
@@ -202,21 +186,21 @@ onAuthStateChanged(auth, async (user) => {
     
     loginNavButton.removeEventListener('click', openLoginModal);
 
-    if (user && user.emailVerified) { // [수정] user.emailVerified 조건 추가
-        // --- 👤 사용자가 로그인한 경우 (그리고 이메일 인증이 완료된 경우) ---
+    if (user) { // user.emailVerified 조건 삭제
+        // --- 👤 사용자가 로그인한 경우 ---
         const userDocRef = doc(db, "users", user.uid);
         const userDoc = await getDoc(userDocRef);
 
         if (userDoc.exists()) {
             const userName = userDoc.data().name;
             loginNavButton.textContent = `${userName} 집사님`;
-            // loginNavButton.addEventListener('click', handleLogout);
+            // loginNavButton.addEventListener('click', handleLogout); // 로그아웃 기능 필요시 주석 해제
             // isLogoutListenerAttached = true;
         } else {
             loginNavButton.textContent = '정보 없음';
         }
     } else {
-        // --- 🚪 사용자가 로그아웃했거나 이메일 인증이 안 된 경우 ---
+        // --- 🚪 사용자가 로그아웃한 경우 ---
         loginNavButton.textContent = 'Login';
         loginNavButton.addEventListener('click', openLoginModal);
     }

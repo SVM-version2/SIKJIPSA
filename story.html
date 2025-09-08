@@ -810,48 +810,48 @@ const firebaseConfig = {
                 </div>
 
                 <!-- Signup Form -->
-                <div id="signup-form" class="form-container" style="display: none;">
-                    <div class="form-header">
-                        <a href="index.html" class="logo">오후의 식물</a>
-                        <h2>Create Account</h2>
-                    </div>
-                    <form>
-                        <div class="input-group">
-                            <label for="signup-name">Name</label>
-                            <input type="text" id="signup-name" required>
-                        </div>
-                        <div class="input-group">
-                            <label for="signup-email">Email</label>
-                            <input type="email" id="signup-email" required>
-                        </div>
-                        <div class="input-group">
-                            <label for="signup-password">Password</label>
-                            <input type="password" id="signup-password" required>
-                        </div>
-                        <div class="agreement-group">
-    <div class="checkbox-group">
-        <input type="checkbox" id="signup-terms" name="terms" required>
-        <label for="signup-terms">
-            [필수] <a href="terms.html" target="_blank">이용약관</a>에 동의합니다.
-        </label>
+<div id="signup-form" class="form-container" style="display: none;">
+    <div class="form-header">
+        <a href="index.html" class="logo">오후의 식물</a>
+        <h2>Create Account</h2>
     </div>
-    <div class="checkbox-group">
-        <input type="checkbox" id="signup-privacy" name="privacy" required>
-        <label for="signup-privacy">
-            [필수] <a href="privacy.html" target="_blank">개인정보처리방침</a>에 동의합니다.
-        </label>
-    </div>
+    <form>
+        <div class="input-group">
+            <label for="signup-name">Name</label>
+            <input type="text" id="signup-name" placeholder="식물사랑꾼" required>
+        </div>
+        <div class="input-group">
+            <label for="signup-email">Email</label>
+            <input type="email" id="signup-email" placeholder="abc@naver.com" required>
+        </div>
+        <div class="input-group">
+            <label for="signup-password">Password</label>
+            <input type="password" id="signup-password" placeholder="비밀번호 (6자 이상)" required>
+        </div>
+        <div class="agreement-group">
+            <div class="checkbox-group">
+                <input type="checkbox" id="signup-terms" name="terms" required>
+                <label for="signup-terms">
+                    [필수] <a href="terms.html" target="_blank">이용약관</a>에 동의합니다.
+                </label>
+            </div>
+            <div class="checkbox-group">
+                <input type="checkbox" id="signup-privacy" name="privacy" required>
+                <label for="signup-privacy">
+                    [필수] <a href="privacy.html" target="_blank">개인정보처리방침</a>에 동의합니다.
+                </label>
+            </div>
+        </div>
+        <button type="submit" class="cta-button">Create Account</button>
+    </form>
+    <p class="form-switcher">
+        Already have an account? <a href="#" id="show-login">Login</a>
+    </p>
 </div>
-
-<button type="submit" class="cta-button">Create Account</button>
-                    </form>
-                    <p class="form-switcher">
-                        Already have an account? <a href="#" id="show-login">Login</a>
-                    </p>
-                </div>
             </div>
         </div>
     </div>
+    
     
 <footer class="main-footer">
     <div class="footer-container">
@@ -875,6 +875,8 @@ const firebaseConfig = {
             </div>
         </div>
     </div>
+
+
     <div class="footer-bottom">
         <div class="business-info">
             <p>
