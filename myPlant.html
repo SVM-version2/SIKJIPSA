@@ -1469,6 +1469,7 @@
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
     import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
     import { getFirestore, doc, getDoc, setDoc, updateDoc, collection, addDoc, query, where, getDocs, deleteDoc, orderBy } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+    import { getStorage, ref as storageRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
     const firebaseConfig = {
         apiKey: "AIzaSyC7mA9xLOFb98i5hKNWjKW_fORWNHvPx2s",
         authDomain: "sik-jip-sa.firebaseapp.com",
@@ -1481,6 +1482,7 @@
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const db = getFirestore(app);
+    const storage = getStorage(app);
     
     // 네비게이션 로그인/로그아웃 UI
     const loginNavButton = document.querySelector('header nav .cta-button');
@@ -3087,21 +3089,22 @@ window.addDiaryEntry = async function(plantName) {
           return;
         }
         
-        // 파일을 Base64로 변환하는 Promise 반환 함수
-        const convertFileToBase64 = (file) => {
-          return new Promise((resolve, reject) => {
-            const reader = new FileReader();
-            reader.onload = (e) => resolve(e.target.result);
-            reader.onerror = reject;
-            reader.readAsDataURL(file);
-          });
-        };
-        
+        // 로그인 확인 (Storage 경로에 uid를 사용하므로 필수)
+        if (!currentUser) {
+          alert('로그인이 필요합니다.');
+          return;
+        }
+
+        // Firebase Storage에 업로드하고 다운로드 URL만 문서에 저장한다.
+        // (Base64를 Firestore 문서에 넣던 방식 -> 문서 경량화, 읽기 페이로드 감소)
         try {
-          imageData = await convertFileToBase64(file);
+          const ext = (file.name.split('.').pop() || 'jpg').toLowerCase();
+          const objectPath = `plants/${currentUser.uid}/${Date.now()}_${Math.random().toString(36).slice(2)}.${ext}`;
+          const snapshot = await uploadBytes(storageRef(storage, objectPath), file);
+          imageData = await getDownloadURL(snapshot.ref);
         } catch (error) {
-          console.error('파일 변환 실패:', error);
-          alert('이미지 파일 처리에 실패했습니다.');
+          console.error('이미지 업로드 실패:', error);
+          alert('이미지 업로드에 실패했습니다.');
           return;
         }
       }
@@ -3144,7 +3147,7 @@ window.addDiaryEntry = async function(plantName) {
       
       const plantData = {
         name: fd.get('name'),
-        img: imageData, // 기본 이미지 경로 또는 Base64 이미지 데이터
+        img: imageData, // 'logo.png'(기본 이미지) 또는 Storage 다운로드 URL
         desc: fd.get('desc'),
         detail: fd.get('detail'),
         careGuide: fd.get('careGuide'),

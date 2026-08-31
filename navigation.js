@@ -9,6 +9,7 @@ import {
     signInWithEmailAndPassword, 
     onAuthStateChanged,
     signOut,
+    sendEmailVerification,
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import { 
     getFirestore, 
@@ -120,6 +121,9 @@ signupFormElement.addEventListener('submit', async (event) => {
         const userCredential = await createUserWithEmailAndPassword(auth, email, password);
         const user = userCredential.user;
 
+        // 가짜 이메일을 거르기 위해 인증 메일 발송
+        await sendEmailVerification(user);
+
         // Firestore에 사용자 정보 저장
         await setDoc(doc(db, "users", user.uid), {
             name: name,
@@ -127,8 +131,10 @@ signupFormElement.addEventListener('submit', async (event) => {
             createdAt: serverTimestamp()
         });
 
-        // 회원가입 성공 후 모달 닫기
-        alert('회원가입이 완료되었습니다.');
+        // 인증 완료 전에는 로그인시키지 않도록 바로 로그아웃 처리
+        await signOut(auth);
+
+        alert('가입 신청이 완료되었습니다.\n입력하신 이메일로 인증 링크를 보냈으니, 확인 후 로그인해주세요.\n(받은편지함 또는 스팸함을 확인하세요)');
         closeModal();
 
     } catch (error) {
@@ -151,9 +157,16 @@ loginFormElement.addEventListener('submit', async (event) => {
     }
 
     try {
-        await signInWithEmailAndPassword(auth, email, password);
-        // 로그인 성공 시 모달 닫기
-        closeModal();
+        const userCredential = await signInWithEmailAndPassword(auth, email, password);
+        const user = userCredential.user;
+
+        // 이메일 인증을 마친 사용자만 로그인 허용
+        if (user.emailVerified) {
+            closeModal();
+        } else {
+            await signOut(auth);
+            alert('이메일 인증이 완료되지 않았습니다.\n발송된 인증 메일을 확인해주세요.');
+        }
     } catch (error) {
         console.error("❌ 로그인 에러:", error);
         // 로그인 실패 시 일관된 메시지 제공
@@ -186,7 +199,7 @@ onAuthStateChanged(auth, async (user) => {
     
     loginNavButton.removeEventListener('click', openLoginModal);
 
-    if (user) { // user.emailVerified 조건 삭제
+    if (user && user.emailVerified) { // 이메일 인증을 마친 사용자만 로그인 상태로 취급
         // --- 👤 사용자가 로그인한 경우 ---
         const userDocRef = doc(db, "users", user.uid);
         const userDoc = await getDoc(userDocRef);
@@ -200,7 +213,7 @@ onAuthStateChanged(auth, async (user) => {
             loginNavButton.textContent = '정보 없음';
         }
     } else {
-        // --- 🚪 사용자가 로그아웃한 경우 ---
+        // --- 🚪 로그아웃했거나 이메일 인증이 안 된 경우 ---
         loginNavButton.textContent = 'Login';
         loginNavButton.addEventListener('click', openLoginModal);
     }
