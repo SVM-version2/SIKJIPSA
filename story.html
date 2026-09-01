@@ -1491,6 +1491,14 @@ document.addEventListener('DOMContentLoaded', function () {
     const logoutButton = document.getElementById('logout-button');
     const cancelSubscriptionButton = document.getElementById('cancel-subscription-button');
 
+    // 구독 만료 판정용: 서버(/api/time)의 현재 시각을 받아온다. 클라이언트 시계 조작 방지.
+    async function getServerTime() {
+        const res = await fetch('/api/time', { cache: 'no-store' });
+        if (!res.ok) throw new Error('server time fetch failed: ' + res.status);
+        const { epochMs } = await res.json();
+        return new Date(epochMs);
+    }
+
     // 인증 상태 변경 감지
     auth.onAuthStateChanged(user => {
         if (user) {
@@ -1498,10 +1506,17 @@ document.addEventListener('DOMContentLoaded', function () {
 
             // ✨ (추가) 로그인 시, 만료일이 지난 '취소 예약' 건을 찾아 실제 플랜을 강등시킵니다.
             const userDocRef = db.collection('users').doc(user.uid);
-            userDocRef.get().then(doc => {
+            userDocRef.get().then(async doc => {
                 if (doc.exists) {
                     const data = doc.data();
-                    const now = new Date();
+
+                    let now;
+                    try {
+                        now = await getServerTime();
+                    } catch (e) {
+                        console.warn("서버 시간 조회 실패로 구독 만료 판정을 건너뜁니다.", e);
+                        return;
+                    }
                     
                     // '취소 예약' 상태이고, 구독 만료일이 이미 지났는지 확인
                     if (data.cancelAtPeriodEnd === true && data.subscriptionExpiresAt.toDate() < now) {
